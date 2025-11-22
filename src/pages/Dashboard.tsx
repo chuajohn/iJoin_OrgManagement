@@ -3,9 +3,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell, Calendar, Users, LogOut } from "lucide-react";
+import { Bell, Calendar, Users, LogOut, Shield, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface Announcement {
   id: string;
@@ -30,6 +31,7 @@ interface Event {
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,6 +126,20 @@ const Dashboard = () => {
                 Explore
               </Button>
             </Link>
+            <Link to="/create-organization">
+              <Button variant="ghost" size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Org
+              </Button>
+            </Link>
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="ghost" size="sm">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Admin
+                </Button>
+              </Link>
+            )}
             <Button variant="ghost" size="icon">
               <Bell className="h-5 w-5" />
             </Button>

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Search, ArrowLeft, LogOut, Bell } from "lucide-react";
+import { Users, Search, ArrowLeft, LogOut, Bell, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -15,6 +16,7 @@ interface Organization {
   profile_picture: string | null;
   created_at: string;
   membershipStatus?: string | null;
+  membershipRole?: string | null;
 }
 
 const Explore = () => {
@@ -55,17 +57,21 @@ const Explore = () => {
       if (user) {
         const { data: membershipsData } = await supabase
           .from("memberships")
-          .select("org_id, status")
+          .select("org_id, status, role")
           .eq("user_id", user.id);
 
         const membershipMap = new Map(
-          membershipsData?.map((m) => [m.org_id, m.status])
+          membershipsData?.map((m) => [m.org_id, { status: m.status, role: m.role }])
         );
 
-        const orgsWithStatus = orgsData?.map((org) => ({
-          ...org,
-          membershipStatus: membershipMap.get(org.id) || null,
-        }));
+        const orgsWithStatus = orgsData?.map((org) => {
+          const membership = membershipMap.get(org.id);
+          return {
+            ...org,
+            membershipStatus: membership?.status || null,
+            membershipRole: membership?.role || null,
+          };
+        });
 
         setOrganizations(orgsWithStatus || []);
       } else {
@@ -201,22 +207,30 @@ const Explore = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {org.membershipStatus === "pending" ? (
-                    <Button variant="outline" className="w-full" disabled>
-                      Pending Approval
-                    </Button>
-                  ) : org.membershipStatus === "accepted" ? (
-                    <Button variant="outline" className="w-full" disabled>
-                      Already a Member
-                    </Button>
-                  ) : (
-                    <Button
-                      className="w-full"
-                      onClick={() => handleJoinOrg(org.id)}
-                    >
-                      Join Organization
-                    </Button>
-                  )}
+                  <div className="flex gap-2">
+                    {org.membershipStatus === "accepted" &&
+                      (org.membershipRole === "officer" || org.membershipRole === "leader") && (
+                        <Link to={`/org/${org.id}/manage`} className="flex-1">
+                          <Button variant="outline" className="w-full">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Manage
+                          </Button>
+                        </Link>
+                      )}
+                    {org.membershipStatus === "pending" ? (
+                      <Button variant="outline" className="flex-1" disabled>
+                        Pending Approval
+                      </Button>
+                    ) : org.membershipStatus === "accepted" ? (
+                      <Button variant="outline" className="flex-1" disabled>
+                        Member
+                      </Button>
+                    ) : (
+                      <Button className="flex-1" onClick={() => handleJoinOrg(org.id)}>
+                        Join Organization
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}

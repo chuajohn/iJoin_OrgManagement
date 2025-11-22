@@ -71,7 +71,7 @@ const OrganizationManage = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <header className="border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center gap-4 px-4">
-          <Link to={`/org/${id}`}>
+          <Link to="/explore">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
