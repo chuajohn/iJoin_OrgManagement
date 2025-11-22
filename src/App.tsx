@@ -5,10 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Explore from "./pages/Explore";
+import CreateOrganization from "./pages/CreateOrganization";
+import OrganizationManage from "./pages/OrganizationManage";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +34,30 @@ const App = () => (
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-organization"
+              element={
+                <ProtectedRoute>
+                  <CreateOrganization />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/org/:id/manage"
+              element={
+                <ProtectedRoute>
+                  <OrganizationManage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
               }
             />
             <Route path="*" element={<NotFound />} />
