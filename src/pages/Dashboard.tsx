@@ -3,6 +3,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Bell, Calendar, Users, LogOut, Shield, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -146,9 +149,73 @@ const Dashboard = () => {
                 </Button>
               </Link>
             )}
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Bell className="h-5 w-5" />
+                  {(announcements.length > 0 || events.length > 0) && (
+                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80" align="end">
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-foreground">Notifications</h3>
+                  <Separator />
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      {announcements.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-2">Recent Announcements</h4>
+                          <div className="space-y-2">
+                            {announcements.slice(0, 3).map((announcement) => (
+                              <div key={announcement.id} className="rounded-lg border bg-card p-3">
+                                <p className="text-sm font-semibold text-foreground">{announcement.title}</p>
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                  {announcement.content}
+                                </p>
+                                <div className="flex items-center justify-between mt-2">
+                                  <span className="text-xs text-primary">{announcement.organizations.name}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {format(new Date(announcement.created_at), "MMM d")}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {events.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-2">Upcoming Events</h4>
+                          <div className="space-y-2">
+                            {events.slice(0, 3).map((event) => (
+                              <div key={event.id} className="rounded-lg border bg-card p-3">
+                                <p className="text-sm font-semibold text-foreground">{event.name}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {format(new Date(event.event_date), "MMM d, h:mm a")}
+                                </p>
+                                <div className="flex items-center justify-between mt-2">
+                                  <span className="text-xs text-primary">{event.organizations.name}</span>
+                                  {event.location && (
+                                    <span className="text-xs text-muted-foreground">{event.location}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {announcements.length === 0 && events.length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-8">No recent notifications</p>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button variant="ghost" size="icon" onClick={signOut}>
               <LogOut className="h-5 w-5" />
             </Button>
