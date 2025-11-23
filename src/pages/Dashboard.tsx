@@ -126,6 +126,12 @@ const Dashboard = () => {
                 Explore
               </Button>
             </Link>
+            <Link to="/calendar">
+              <Button variant="ghost" size="sm">
+                <Calendar className="h-4 w-4 mr-2" />
+                Calendar
+              </Button>
+            </Link>
             <Link to="/create-organization">
               <Button variant="ghost" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
