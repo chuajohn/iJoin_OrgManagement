@@ -13,6 +13,7 @@ import Explore from "./pages/Explore";
 import CreateOrganization from "./pages/CreateOrganization";
 import OrganizationManage from "./pages/OrganizationManage";
 import Admin from "./pages/Admin";
+import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,14 @@ const App = () => (
                 <AdminRoute>
                   <Admin />
                 </AdminRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <Calendar />
+                </ProtectedRoute>
               }
             />
             <Route path="*" element={<NotFound />} />

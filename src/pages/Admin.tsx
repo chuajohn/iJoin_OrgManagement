@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRoleManagement } from "@/components/admin/UserRoleManagement";
 import { OrganizationManagement } from "@/components/admin/OrganizationManagement";
+import { EventManagement } from "@/components/admin/EventManagement";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
@@ -30,6 +31,7 @@ export default function Admin() {
         <div className="space-y-8">
           <UserRoleManagement />
           <OrganizationManagement />
+          <EventManagement />
         </div>
       </main>
     </div>
