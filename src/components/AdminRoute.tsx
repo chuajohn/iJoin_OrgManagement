@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, isSAO, loading: roleLoading } = useUserRole();
 
   if (authLoading || roleLoading) {
     return (
@@ -14,7 +14,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!user || (!isAdmin && !isSAO)) {
     return <Navigate to="/dashboard" replace />;
   }
 
