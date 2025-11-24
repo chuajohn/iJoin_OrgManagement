@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { Calendar, MapPin, Clock } from "lucide-react";
+import { Calendar, MapPin, Clock, FileText } from "lucide-react";
 
 type Event = {
   id: string;
@@ -15,6 +15,7 @@ type Event = {
   location: string | null;
   status: "pending" | "approved" | "rejected";
   visibility: "public" | "private";
+  document_url: string | null;
   organizations: {
     name: string;
   } | null;
@@ -41,6 +42,7 @@ export function EventManagement() {
           location,
           status,
           visibility,
+          document_url,
           organizations (name)
         `)
         .order("event_date", { ascending: true });
@@ -137,6 +139,20 @@ export function EventManagement() {
                       </div>
                     )}
                   </div>
+
+                  {event.document_url && (
+                    <div className="pt-2 border-t">
+                      <a
+                        href={event.document_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-sm text-primary hover:underline"
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        View Event Document (PDF)
+                      </a>
+                    </div>
+                  )}
 
                   <div className="flex gap-2">
                     <Button

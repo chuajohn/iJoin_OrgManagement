@@ -20,6 +20,7 @@ export function EventForm({ orgId }: EventFormProps) {
   const [eventDate, setEventDate] = useState("");
   const [location, setLocation] = useState("");
   const [visibility, setVisibility] = useState<"public" | "private">("public");
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,6 +29,26 @@ export function EventForm({ orgId }: EventFormProps) {
 
     setSubmitting(true);
     try {
+      let documentUrl = null;
+
+      // Upload PDF if provided
+      if (pdfFile) {
+        const fileExt = pdfFile.name.split('.').pop();
+        const fileName = `${orgId}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('event-documents')
+          .upload(fileName, pdfFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from('event-documents')
+          .getPublicUrl(fileName);
+        
+        documentUrl = urlData.publicUrl;
+      }
+
       const { error } = await supabase.from("events").insert({
         org_id: orgId,
         created_by: user.id,
@@ -37,6 +58,7 @@ export function EventForm({ orgId }: EventFormProps) {
         location,
         visibility,
         status: "pending",
+        document_url: documentUrl,
       });
 
       if (error) throw error;
@@ -47,6 +69,7 @@ export function EventForm({ orgId }: EventFormProps) {
       setEventDate("");
       setLocation("");
       setVisibility("public");
+      setPdfFile(null);
     } catch (error: any) {
       toast.error(error.message || "Failed to create event");
     } finally {
@@ -126,6 +149,21 @@ export function EventForm({ orgId }: EventFormProps) {
                 </Label>
               </div>
             </RadioGroup>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pdf-upload">Event Document (PDF)</Label>
+            <Input
+              id="pdf-upload"
+              type="file"
+              accept=".pdf"
+              onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+            />
+            {pdfFile && (
+              <p className="text-sm text-muted-foreground">
+                Selected: {pdfFile.name}
+              </p>
+            )}
           </div>
 
           <Button type="submit" disabled={submitting} className="w-full">
