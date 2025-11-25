@@ -17,7 +17,7 @@ const OrganizationManage = () => {
   const { user } = useAuth();
   const { isOfficer, isLeader, loading: roleLoading } = useUserRole(id);
   const [organization, setOrganization] = useState<any>(null);
-  const [events, setEvents] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,25 +38,24 @@ const OrganizationManage = () => {
       setLoading(false);
     };
 
-    const fetchEvents = async () => {
+    const fetchDocuments = async () => {
       if (!id) return;
 
       const { data, error } = await supabase
-        .from("events")
+        .from("organization_documents")
         .select("*")
         .eq("org_id", id)
-        .not("document_url", "is", null)
-        .order("created_at", { ascending: false });
+        .order("uploaded_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching documents:", error);
       } else {
-        setEvents(data || []);
+        setDocuments(data || []);
       }
     };
 
     fetchOrganization();
-    fetchEvents();
+    fetchDocuments();
   }, [id]);
 
   if (loading || roleLoading) {
@@ -135,31 +134,31 @@ const OrganizationManage = () => {
           <TabsContent value="documents" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Event Documents</CardTitle>
+                <CardTitle>Organization Documents</CardTitle>
                 <CardDescription>
-                  PDFs and documents uploaded for events
+                  Documents and resources for this organization
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {events.length === 0 ? (
+                {documents.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">
                     No documents uploaded yet
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {events.map((event) => (
+                    {documents.map((doc) => (
                       <div
-                        key={event.id}
+                        key={doc.id}
                         className="flex items-center justify-between p-3 border rounded-lg"
                       >
                         <div className="flex-1">
-                          <h4 className="font-medium text-foreground">{event.name}</h4>
+                          <h4 className="font-medium text-foreground">{doc.title}</h4>
                           <p className="text-sm text-muted-foreground">
-                            {format(new Date(event.event_date), "PPP")}
+                            {format(new Date(doc.uploaded_at), "PPP")}
                           </p>
                         </div>
                         <a
-                          href={event.document_url}
+                          href={doc.document_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center text-sm text-primary hover:underline"
