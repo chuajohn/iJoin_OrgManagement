@@ -34,7 +34,7 @@ interface Event {
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isSAO } = useUserRole();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,7 +141,7 @@ const Dashboard = () => {
                 Create Org
               </Button>
             </Link>
-            {isAdmin && (
+            {(isAdmin || isSAO) && (
               <Link to="/admin">
                 <Button variant="ghost" size="sm">
                   <Shield className="h-4 w-4 mr-2" />
