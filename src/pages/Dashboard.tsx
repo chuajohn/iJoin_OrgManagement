@@ -15,6 +15,7 @@ interface Announcement {
   id: string;
   title: string;
   content: string;
+  image_url: string | null;
   created_at: string;
   organizations: {
     name: string;
@@ -269,6 +270,13 @@ const Dashboard = () => {
                           {format(new Date(announcement.created_at), "MMM d")}
                         </span>
                       </div>
+                      {announcement.image_url && (
+                        <img
+                          src={announcement.image_url}
+                          alt={announcement.title}
+                          className="mb-2 w-full rounded-lg object-cover max-h-48"
+                        />
+                      )}
                       <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
                         {announcement.content}
                       </p>

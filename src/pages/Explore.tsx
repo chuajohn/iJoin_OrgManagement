@@ -207,29 +207,36 @@ const Explore = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-2">
-                    {org.membershipStatus === "accepted" &&
-                      (org.membershipRole === "officer" || org.membershipRole === "leader") && (
-                        <Link to={`/org/${org.id}/manage`} className="flex-1">
-                          <Button variant="outline" className="w-full">
-                            <Settings className="mr-2 h-4 w-4" />
-                            Manage
-                          </Button>
-                        </Link>
+                  <div className="flex flex-col gap-2">
+                    <Link to={`/org/${org.id}`}>
+                      <Button variant="outline" className="w-full">
+                        View Organization
+                      </Button>
+                    </Link>
+                    <div className="flex gap-2">
+                      {org.membershipStatus === "accepted" &&
+                        (org.membershipRole === "officer" || org.membershipRole === "leader") && (
+                          <Link to={`/org/${org.id}/manage`} className="flex-1">
+                            <Button variant="secondary" className="w-full">
+                              <Settings className="mr-2 h-4 w-4" />
+                              Manage
+                            </Button>
+                          </Link>
+                        )}
+                      {org.membershipStatus === "pending" ? (
+                        <Button variant="outline" className="flex-1" disabled>
+                          Pending Approval
+                        </Button>
+                      ) : org.membershipStatus === "accepted" ? (
+                        <Button variant="outline" className="flex-1" disabled>
+                          Member
+                        </Button>
+                      ) : (
+                        <Button className="flex-1" onClick={() => handleJoinOrg(org.id)}>
+                          Join Organization
+                        </Button>
                       )}
-                    {org.membershipStatus === "pending" ? (
-                      <Button variant="outline" className="flex-1" disabled>
-                        Pending Approval
-                      </Button>
-                    ) : org.membershipStatus === "accepted" ? (
-                      <Button variant="outline" className="flex-1" disabled>
-                        Member
-                      </Button>
-                    ) : (
-                      <Button className="flex-1" onClick={() => handleJoinOrg(org.id)}>
-                        Join Organization
-                      </Button>
-                    )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
