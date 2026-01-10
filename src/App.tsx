@@ -13,6 +13,7 @@ import Explore from "./pages/Explore";
 import CreateOrganization from "./pages/CreateOrganization";
 import OrganizationManage from "./pages/OrganizationManage";
 import Organization from "./pages/Organization";
+import OrganizationDocuments from "./pages/OrganizationDocuments";
 import Admin from "./pages/Admin";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
@@ -59,6 +60,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Organization />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/org/:id/documents"
+              element={
+                <ProtectedRoute>
+                  <OrganizationDocuments />
                 </ProtectedRoute>
               }
             />
