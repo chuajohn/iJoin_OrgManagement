@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calendar, MapPin, Trash2, Pencil } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Trash2, Pencil, FileText } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -271,6 +272,12 @@ const Organization = () => {
               {organization.description && (
                 <p className="text-muted-foreground">{organization.description}</p>
               )}
+              <Link to={`/org/${id}/documents`} className="mt-4 inline-flex">
+                <Button variant="outline" size="sm">
+                  <FileText className="mr-2 h-4 w-4" />
+                  View Documents
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
