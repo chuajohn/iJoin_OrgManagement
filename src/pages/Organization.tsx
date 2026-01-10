@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calendar, MapPin, Trash2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Trash2, Pencil } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -49,12 +60,24 @@ const Organization = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isOfficer, isLeader } = useUserRole(id);
+  const { isOfficer, isLeader, isSAO, isAdmin } = useUserRole(id);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'announcement' | 'event'; id: string } | null>(null);
+  
+  // Edit state
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editForm, setEditForm] = useState({ title: '', content: '', name: '', description: '', location: '', event_date: '' });
+  const [saving, setSaving] = useState(false);
+
+  // Permission checks
+  const canEditAnnouncements = isOfficer || isLeader || isSAO || isAdmin;
+  const canDeleteAnnouncements = isOfficer || isLeader || isSAO || isAdmin;
+  const canEditEvents = isOfficer || isLeader || isSAO || isAdmin;
+  const canDeleteEvents = isLeader || isSAO || isAdmin;
 
   useEffect(() => {
     if (id) {
@@ -128,6 +151,71 @@ const Organization = () => {
       toast.error(error.message || "Failed to delete");
     } finally {
       setDeleteTarget(null);
+    }
+  };
+
+  const openEditAnnouncement = (announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
+    setEditForm({ ...editForm, title: announcement.title, content: announcement.content });
+  };
+
+  const openEditEvent = (event: Event) => {
+    setEditingEvent(event);
+    setEditForm({
+      ...editForm,
+      name: event.name,
+      description: event.description || '',
+      location: event.location || '',
+      event_date: event.event_date.slice(0, 16),
+    });
+  };
+
+  const handleSaveAnnouncement = async () => {
+    if (!editingAnnouncement) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("announcements")
+        .update({ title: editForm.title, content: editForm.content })
+        .eq("id", editingAnnouncement.id);
+
+      if (error) throw error;
+      toast.success("Announcement updated");
+      setAnnouncements(announcements.map(a =>
+        a.id === editingAnnouncement.id ? { ...a, title: editForm.title, content: editForm.content } : a
+      ));
+      setEditingAnnouncement(null);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveEvent = async () => {
+    if (!editingEvent) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("events")
+        .update({
+          name: editForm.name,
+          description: editForm.description,
+          location: editForm.location,
+          event_date: editForm.event_date,
+        })
+        .eq("id", editingEvent.id);
+
+      if (error) throw error;
+      toast.success("Event updated");
+      setEvents(events.map(e =>
+        e.id === editingEvent.id ? { ...e, name: editForm.name, description: editForm.description, location: editForm.location, event_date: editForm.event_date } : e
+      ));
+      setEditingEvent(null);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -214,7 +302,17 @@ const Organization = () => {
                           <span className="text-xs text-muted-foreground">
                             {format(new Date(announcement.created_at), "MMM d")}
                           </span>
-                          {isOfficer && (
+                          {canEditAnnouncements && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openEditAnnouncement(announcement)}
+                            >
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          )}
+                          {canDeleteAnnouncements && (
                             <Button
                               variant="ghost"
                               size="icon"
@@ -263,16 +361,28 @@ const Organization = () => {
                     >
                       <div className="mb-2 flex items-start justify-between">
                         <h3 className="font-semibold text-foreground">{event.name}</h3>
-                        {isLeader && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setDeleteTarget({ type: 'event', id: event.id })}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {canEditEvents && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openEditEvent(event)}
+                            >
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          )}
+                          {canDeleteEvents && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => setDeleteTarget({ type: 'event', id: event.id })}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3" />
@@ -315,6 +425,95 @@ const Organization = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Announcement Dialog */}
+      <Dialog open={!!editingAnnouncement} onOpenChange={() => setEditingAnnouncement(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Announcement</DialogTitle>
+            <DialogDescription>Update the announcement details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-content">Content</Label>
+              <Textarea
+                id="edit-content"
+                value={editForm.content}
+                onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingAnnouncement(null)}>Cancel</Button>
+            <Button onClick={handleSaveAnnouncement} disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Event Dialog */}
+      <Dialog open={!!editingEvent} onOpenChange={() => setEditingEvent(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Event</DialogTitle>
+            <DialogDescription>Update the event details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Event Name</Label>
+              <Input
+                id="edit-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="edit-date">Date & Time</Label>
+                <Input
+                  id="edit-date"
+                  type="datetime-local"
+                  value={editForm.event_date}
+                  onChange={(e) => setEditForm({ ...editForm, event_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-location">Location</Label>
+                <Input
+                  id="edit-location"
+                  value={editForm.location}
+                  onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingEvent(null)}>Cancel</Button>
+            <Button onClick={handleSaveEvent} disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
