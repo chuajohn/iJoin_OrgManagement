@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, Search, ArrowLeft, LogOut, Bell, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import OrgLogo from "@/components/OrgLogo";
 
 interface Organization {
   id: string;
@@ -198,9 +199,7 @@ const Explore = () => {
             {filteredOrgs.map((org) => (
               <Card key={org.id} className="group transition-all hover:shadow-lg">
                 <CardHeader>
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-light">
-                    <Users className="h-8 w-8 text-white" />
-                  </div>
+                  <OrgLogo src={org.profile_picture} alt={org.name} size="md" className="mb-4" />
                   <CardTitle className="line-clamp-1">{org.name}</CardTitle>
                   <CardDescription className="line-clamp-2">
                     {org.description || "No description available"}

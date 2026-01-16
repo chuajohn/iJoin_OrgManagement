@@ -6,6 +6,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Calendar, MapPin, Trash2, Pencil, FileText } from "lucide-react";
+import OrgLogo from "@/components/OrgLogo";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -258,13 +259,7 @@ const Organization = () => {
         {/* Organization Header */}
         <div className="mb-8 rounded-lg border bg-card p-6">
           <div className="flex items-start gap-6">
-            {organization.profile_picture && (
-              <img
-                src={organization.profile_picture}
-                alt={organization.name}
-                className="h-24 w-24 rounded-lg object-cover"
-              />
-            )}
+            <OrgLogo src={organization.profile_picture} alt={organization.name} size="lg" />
             <div className="flex-1">
               <h1 className="mb-2 text-3xl font-bold text-foreground">
                 {organization.name}
