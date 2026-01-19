@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Calendar, Users, LogOut, Shield, Plus } from "lucide-react";
+import { Bell, Calendar, Users, LogOut, Shield, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -150,6 +150,11 @@ const Dashboard = () => {
                 </Button>
               </Link>
             )}
+            <Link to="/profile">
+              <Button variant="ghost" size="icon" title="Profile">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon">

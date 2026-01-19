@@ -16,6 +16,7 @@ import Organization from "./pages/Organization";
 import OrganizationDocuments from "./pages/OrganizationDocuments";
 import Admin from "./pages/Admin";
 import Calendar from "./pages/Calendar";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Calendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />
