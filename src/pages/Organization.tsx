@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calendar, MapPin, Trash2, Pencil, FileText } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Trash2, Pencil, FileText, UserPlus, UserMinus, Clock } from "lucide-react";
 import OrgLogo from "@/components/OrgLogo";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -69,6 +69,10 @@ const Organization = () => {
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'announcement' | 'event'; id: string } | null>(null);
   
+  // Membership state
+  const [membershipStatus, setMembershipStatus] = useState<'none' | 'pending' | 'accepted'>('none');
+  const [membershipLoading, setMembershipLoading] = useState(false);
+  
   // Edit state
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
@@ -84,8 +88,82 @@ const Organization = () => {
   useEffect(() => {
     if (id) {
       fetchOrganizationData();
+      if (user) {
+        fetchMembershipStatus();
+      }
     }
   }, [id, user]);
+
+  const fetchMembershipStatus = async () => {
+    if (!user || !id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("memberships")
+        .select("status")
+        .eq("org_id", id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        setMembershipStatus(data.status === 'accepted' ? 'accepted' : 'pending');
+      } else {
+        setMembershipStatus('none');
+      }
+    } catch (error: any) {
+      console.error("Error fetching membership status:", error);
+    }
+  };
+
+  const handleJoinOrganization = async () => {
+    if (!user || !id) {
+      toast.error("Please sign in to join organizations");
+      return;
+    }
+
+    setMembershipLoading(true);
+    try {
+      const { error } = await supabase
+        .from("memberships")
+        .insert({
+          org_id: id,
+          user_id: user.id,
+          status: 'pending',
+          role: 'member'
+        });
+
+      if (error) throw error;
+      toast.success("Join request sent! Waiting for approval.");
+      setMembershipStatus('pending');
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send join request");
+    } finally {
+      setMembershipLoading(false);
+    }
+  };
+
+  const handleLeaveOrganization = async () => {
+    if (!user || !id) return;
+
+    setMembershipLoading(true);
+    try {
+      const { error } = await supabase
+        .from("memberships")
+        .delete()
+        .eq("org_id", id)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      toast.success("You have left the organization");
+      setMembershipStatus('none');
+    } catch (error: any) {
+      toast.error(error.message || "Failed to leave organization");
+    } finally {
+      setMembershipLoading(false);
+    }
+  };
 
   const fetchOrganizationData = async () => {
     try {
@@ -267,12 +345,46 @@ const Organization = () => {
               {organization.description && (
                 <p className="text-muted-foreground">{organization.description}</p>
               )}
-              <Link to={`/org/${id}/documents`} className="mt-4 inline-flex">
-                <Button variant="outline" size="sm">
-                  <FileText className="mr-2 h-4 w-4" />
-                  View Documents
-                </Button>
-              </Link>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link to={`/org/${id}/documents`}>
+                  <Button variant="outline" size="sm">
+                    <FileText className="mr-2 h-4 w-4" />
+                    View Documents
+                  </Button>
+                </Link>
+                
+                {user && !isOfficer && !isLeader && (
+                  <>
+                    {membershipStatus === 'none' && (
+                      <Button 
+                        size="sm" 
+                        onClick={handleJoinOrganization}
+                        disabled={membershipLoading}
+                      >
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        {membershipLoading ? "Joining..." : "Join Organization"}
+                      </Button>
+                    )}
+                    {membershipStatus === 'pending' && (
+                      <Button size="sm" variant="secondary" disabled>
+                        <Clock className="mr-2 h-4 w-4" />
+                        Request Pending
+                      </Button>
+                    )}
+                    {membershipStatus === 'accepted' && (
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        onClick={handleLeaveOrganization}
+                        disabled={membershipLoading}
+                      >
+                        <UserMinus className="mr-2 h-4 w-4" />
+                        {membershipLoading ? "Leaving..." : "Leave Organization"}
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
