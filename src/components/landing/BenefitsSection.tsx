@@ -1,26 +1,20 @@
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, ClipboardCheck, Megaphone, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { CalendarDays, Megaphone, ShieldCheck, Sparkles } from "lucide-react";
 
 const benefits = [
   {
     title: "One place for campus updates",
-    description: "Announcements, events, and recruitment—organized and easy to follow.",
+    description: "Announcements, events, and recruitment—organized.",
     Icon: Megaphone,
   },
   {
     title: "Join with confidence",
-    description: "Clear org profiles and roles help you know what you’re signing up for.",
+    description: "Clear org pages and roles at a glance.",
     Icon: ShieldCheck,
   },
   {
     title: "Plan your week",
-    description: "See what’s next and keep your org commitments in sync.",
+    description: "Know what’s happening, when, and where.",
     Icon: CalendarDays,
-  },
-  {
-    title: "From curious to member",
-    description: "A simple flow makes it easy to request membership and get approved.",
-    Icon: ClipboardCheck,
   },
 ];
 
@@ -34,28 +28,15 @@ export default function BenefitsSection() {
             Why students use iJoin
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            Built for busy students.
-            <span className="text-primary"> Designed for campus life.</span>
+            Everything you need for org life.
           </h2>
           <p className="mt-3 text-lg text-muted-foreground">
-            Discover organizations, stay informed, and manage membership—without juggling multiple group chats.
+            Discover clubs, keep up with updates, and stay in the loop.
           </p>
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Badge variant="secondary" className="bg-secondary/70 text-secondary-foreground">
-              Students first
-            </Badge>
-            <Badge variant="secondary" className="bg-secondary/70 text-secondary-foreground">
-              Clear updates
-            </Badge>
-            <Badge variant="secondary" className="bg-secondary/70 text-secondary-foreground">
-              Better organization
-            </Badge>
-          </div>
         </div>
 
         <div className="lg:col-span-7">
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-3">
             {benefits.map(({ title, description, Icon }) => (
               <div
                 key={title}
@@ -69,11 +50,6 @@ export default function BenefitsSection() {
                     <h3 className="text-base font-semibold text-foreground">{title}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">{description}</p>
                   </div>
-                </div>
-
-                <div className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
-                  <Users className="h-4 w-4" />
-                  <span>Student-friendly workflow</span>
                 </div>
               </div>
             ))}
