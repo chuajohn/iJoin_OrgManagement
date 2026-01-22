@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,10 @@ import {
   MapPin,
 } from "lucide-react";
 
+import FeaturedClubsSection from "@/components/landing/FeaturedClubsSection";
+import BenefitsSection from "@/components/landing/BenefitsSection";
+import QuickSignupSection from "@/components/landing/QuickSignupSection";
+
 const Landing = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
@@ -18,8 +23,8 @@ const Landing = () => {
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light">
-              <Users className="h-6 w-6 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent shadow-sm">
+              <Users className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold text-foreground">iJoin</span>
           </div>
@@ -211,9 +216,14 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* New: Storytelling Sections (visual only) */}
+      <FeaturedClubsSection />
+      <BenefitsSection />
+      <QuickSignupSection />
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20">
-        <div className="rounded-2xl bg-gradient-to-r from-primary to-primary-light p-12 text-center text-white">
+        <div className="rounded-2xl bg-gradient-to-r from-primary to-accent p-12 text-center text-primary-foreground shadow-sm">
           <h2 className="mb-4 text-3xl font-bold">Ready to join your community?</h2>
           <p className="mb-8 text-lg opacity-90">
             Create your account and start connecting with student organizations today.
@@ -223,6 +233,27 @@ const Landing = () => {
               Sign Up Now
             </Button>
           </Link>
+
+          {/* extra CTAs (same routes; visual only) */}
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link to="/explore">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 sm:w-auto"
+              >
+                Explore Clubs
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button
+                size="lg"
+                className="w-full bg-primary-foreground text-primary hover:bg-primary-foreground/90 sm:w-auto"
+              >
+                Join Now
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>
@@ -234,7 +265,7 @@ function FeatureCard({
   title,
   description,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
 }) {
