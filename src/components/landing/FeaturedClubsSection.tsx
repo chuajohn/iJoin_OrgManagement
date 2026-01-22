@@ -1,7 +1,5 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Award, Music, Rocket, Palette, Volleyball } from "lucide-react";
+import { Award, Rocket, Palette, Volleyball } from "lucide-react";
 
 const featured = [
   {
@@ -22,12 +20,6 @@ const featured = [
     Icon: Volleyball,
     tags: ["Teams", "Fitness"],
   },
-  {
-    name: "Music Collective",
-    blurb: "Jam sessions, gigs, and performance nights.",
-    Icon: Music,
-    tags: ["Auditions", "Events"],
-  },
 ];
 
 export default function FeaturedClubsSection() {
@@ -39,8 +31,7 @@ export default function FeaturedClubsSection() {
       </div>
 
       <div className="container mx-auto px-4 py-20">
-        <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
+        <div className="max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
               <Award className="h-4 w-4" />
               Featured clubs
@@ -48,22 +39,9 @@ export default function FeaturedClubsSection() {
             <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
               Find your people. Join what excites you.
             </h2>
-            <p className="mt-3 text-lg text-muted-foreground">
-              A quick peek at the kinds of organizations you can discover inside iJoin.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link to="/explore">
-              <Button className="group transition-transform hover:-translate-y-0.5" size="lg">
-                Explore Organizations
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-          </div>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
           {featured.map(({ name, blurb, Icon, tags }) => (
             <div
               key={name}
@@ -96,10 +74,6 @@ export default function FeaturedClubsSection() {
             </div>
           ))}
         </div>
-
-        <p className="mt-6 text-xs text-muted-foreground">
-          Note: Featured clubs are visual placeholders (no interactions).
-        </p>
       </div>
     </section>
   );

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +13,6 @@ import {
 
 import FeaturedClubsSection from "@/components/landing/FeaturedClubsSection";
 import BenefitsSection from "@/components/landing/BenefitsSection";
-import QuickSignupSection from "@/components/landing/QuickSignupSection";
 
 const Landing = () => {
   return (
@@ -195,89 +193,24 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid gap-8 md:grid-cols-3">
-          <FeatureCard
-            icon={<Users className="h-8 w-8" />}
-            title="Discover Organizations"
-            description="Browse and join student organizations that match your interests and goals."
-          />
-          <FeatureCard
-            icon={<Calendar className="h-8 w-8" />}
-            title="Stay Updated"
-            description="Never miss important announcements and upcoming events from your organizations."
-          />
-          <FeatureCard
-            icon={<Bell className="h-8 w-8" />}
-            title="Get Notifications"
-            description="Receive real-time updates about activities that matter to you."
-          />
-        </div>
-      </section>
-
       {/* New: Storytelling Sections (visual only) */}
       <FeaturedClubsSection />
       <BenefitsSection />
-      <QuickSignupSection />
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="rounded-2xl bg-gradient-to-r from-primary to-accent p-12 text-center text-primary-foreground shadow-sm">
           <h2 className="mb-4 text-3xl font-bold">Ready to join your community?</h2>
-          <p className="mb-8 text-lg opacity-90">
-            Create your account and start connecting with student organizations today.
-          </p>
+          <p className="mb-8 text-lg opacity-90">Create your account and get started.</p>
           <Link to="/auth">
             <Button size="lg" variant="secondary">
               Sign Up Now
             </Button>
           </Link>
-
-          {/* extra CTAs (same routes; visual only) */}
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link to="/explore">
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 sm:w-auto"
-              >
-                Explore Clubs
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button
-                size="lg"
-                className="w-full bg-primary-foreground text-primary hover:bg-primary-foreground/90 sm:w-auto"
-              >
-                Join Now
-              </Button>
-            </Link>
-          </div>
         </div>
       </section>
     </div>
   );
 };
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="group rounded-2xl border bg-card p-8 transition-all hover:border-primary hover:shadow-lg">
-      <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
-        {icon}
-      </div>
-      <h3 className="mb-3 text-xl font-semibold text-foreground">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
-    </div>
-  );
-}
 
 export default Landing;
