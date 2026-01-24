@@ -118,7 +118,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 bg-blue-500">
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light">
               <Users className="h-6 w-6 text-white" />
