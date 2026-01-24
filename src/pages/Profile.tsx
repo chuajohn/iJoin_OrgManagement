@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,6 @@ import { ArrowLeft, User, Mail, Camera, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { format } from "date-fns";
-
-interface Profile {
-  id: string;
-  name: string;
-  email: string;
-  profile_picture: string | null;
-  created_at: string;
-}
 
 interface Membership {
   id: string;
@@ -31,8 +23,7 @@ interface Membership {
 }
 
 const Profile = () => {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, profile, updateProfile, refreshProfile } = useAuth(); // Get from context
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -40,33 +31,13 @@ const Profile = () => {
   const [editName, setEditName] = useState("");
   const [editPictureUrl, setEditPictureUrl] = useState("");
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-      fetchMemberships();
+  // Initialize edit fields when profile loads
+  useState(() => {
+    if (profile) {
+      setEditName(profile.name);
+      setEditPictureUrl(profile.profile_picture || "");
     }
-  }, [user]);
-
-  const fetchProfile = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (error) throw error;
-      setProfile(data);
-      setEditName(data.name);
-      setEditPictureUrl(data.profile_picture || "");
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  });
 
   const fetchMemberships = async () => {
     if (!user) return;
@@ -82,34 +53,40 @@ const Profile = () => {
       setMemberships(data || []);
     } catch (error) {
       console.error("Error fetching memberships:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Use useEffect only for memberships since profile comes from context
+  useState(() => {
+    if (user) {
+      fetchMemberships();
+    }
+  });
+
   const handleSaveProfile = async () => {
-    if (!user || !editName.trim()) return;
+    if (!editName.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          name: editName.trim(),
-          profile_picture: editPictureUrl.trim() || null,
-        })
-        .eq("id", user.id);
+      // Use the updateProfile function from AuthContext
+      await updateProfile({
+        name: editName.trim(),
+        profile_picture: editPictureUrl.trim() || null,
+      });
 
-      if (error) throw error;
-
-      setProfile((prev) =>
-        prev
-          ? { ...prev, name: editName.trim(), profile_picture: editPictureUrl.trim() || null }
-          : null
-      );
+      // Refresh profile to get latest data
+      await refreshProfile();
+      
       setEditing(false);
-      toast.success("Profile updated successfully!");
+      // No need for separate toast - updateProfile already shows one
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
+      // Error toast is already shown in updateProfile function
     } finally {
       setSaving(false);
     }
@@ -132,10 +109,17 @@ const Profile = () => {
     );
   }
 
-  if (!profile) {
+  if (!profile || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Profile not found</p>
+        <Card className="w-96">
+          <CardContent className="pt-6 text-center">
+            <p className="text-muted-foreground">Please sign in to view your profile</p>
+            <Link to="/" className="mt-4 inline-block">
+              <Button>Go to Sign In</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -216,14 +200,25 @@ const Profile = () => {
                       <Save className="mr-2 h-4 w-4" />
                       {saving ? "Saving..." : "Save Changes"}
                     </Button>
-                    <Button variant="outline" onClick={() => setEditing(false)} disabled={saving}>
+                    <Button variant="outline" onClick={() => {
+                      setEditing(false);
+                      // Reset to current profile values
+                      setEditName(profile.name);
+                      setEditPictureUrl(profile.profile_picture || "");
+                    }} disabled={saving}>
                       Cancel
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="pt-4 border-t">
-                  <Button onClick={() => setEditing(true)}>Edit Profile</Button>
+                  <Button onClick={() => {
+                    setEditName(profile.name);
+                    setEditPictureUrl(profile.profile_picture || "");
+                    setEditing(true);
+                  }}>
+                    Edit Profile
+                  </Button>
                 </div>
               )}
             </CardContent>

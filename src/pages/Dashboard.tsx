@@ -35,7 +35,7 @@ interface Event {
 }
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { isAdmin, isSAO } = useUserRole();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -234,7 +234,7 @@ const Dashboard = () => {
         {/* Welcome Section */}
         <div className="mb-6">
           <h1 className="mb-1 text-2xl font-bold text-foreground">
-            Welcome back, {user?.user_metadata?.full_name || 'User'}! 👋
+            Welcome back, {profile?.name || user?.email?.split('@')[0] || 'User'}! 👋
           </h1>
           <p className="text-muted-foreground">
             Latest updates from your organizations
@@ -343,7 +343,7 @@ const Dashboard = () => {
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback>
-                            {(user?.user_metadata?.full_name?.charAt(0) || 'U')}
+                            {(profile?.name?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'U')}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -370,17 +370,17 @@ const Dashboard = () => {
             <div className="mb-6 rounded-xl border bg-white p-4 shadow-sm">
               <div className="flex items-center gap-3">
                 <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
-                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarImage src={profile?.profile_picture} />
                   <AvatarFallback className="bg-gradient-to-br from-primary to-primary-light text-white">
-                    {user?.user_metadata?.full_name?.charAt(0) || 'U'}
+                    {profile?.name?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <h3 className="font-semibold text-foreground">
-                    {user?.user_metadata?.full_name || 'User'}
+                    {profile?.name || user?.email?.split('@')[0] || 'User'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {user?.email}
+                    {profile?.email || user?.email || ''}
                   </p>
                 </div>
               </div>
