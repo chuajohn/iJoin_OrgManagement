@@ -85,6 +85,12 @@ const Organization = () => {
   const canEditEvents = isOfficer || isLeader || isSAO || isAdmin;
   const canDeleteEvents = isLeader || isSAO || isAdmin;
 
+  //leave Confirmation
+  // Add near the other state declarations
+  const [leaveConfirmationOpen, setLeaveConfirmationOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [isLeaving, setIsLeaving] = useState(false);
+
   useEffect(() => {
     if (id) {
       fetchOrganizationData();
@@ -147,7 +153,7 @@ const Organization = () => {
   const handleLeaveOrganization = async () => {
     if (!user || !id) return;
 
-    setMembershipLoading(true);
+    setIsLeaving(true);
     try {
       const { error } = await supabase
         .from("memberships")
@@ -158,10 +164,12 @@ const Organization = () => {
       if (error) throw error;
       toast.success("You have left the organization");
       setMembershipStatus('none');
+      setLeaveConfirmationOpen(false);
+      setConfirmText("");
     } catch (error: any) {
       toast.error(error.message || "Failed to leave organization");
     } finally {
-      setMembershipLoading(false);
+      setIsLeaving(false);
     }
   };
 
@@ -375,11 +383,10 @@ const Organization = () => {
                       <Button 
                         size="sm" 
                         variant="destructive"
-                        onClick={handleLeaveOrganization}
-                        disabled={membershipLoading}
+                        onClick={() => setLeaveConfirmationOpen(true)}
                       >
                         <UserMinus className="mr-2 h-4 w-4" />
-                        {membershipLoading ? "Leaving..." : "Leave Organization"}
+                        Leave Organization
                       </Button>
                     )}
                   </>
@@ -521,6 +528,76 @@ const Organization = () => {
           </Card>
         </div>
       </div>
+
+      
+      <AlertDialog open={leaveConfirmationOpen} onOpenChange={setLeaveConfirmationOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">
+              Leave Organization
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-4">
+                <p>
+                  Are you sure you want to leave <strong>{organization?.name}</strong>?
+                </p>
+                
+                <div className="rounded-lg bg-destructive/10 p-4">
+                  <p className="text-sm font-medium text-destructive">
+                    ⚠️ This action cannot be undone. You will:
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-destructive/80">
+                    <li>• Lose access to all organization content</li>
+                    <li>• Be removed from all organization events</li>
+                    <li>• Need to re-apply if you want to join again</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <p className="text-sm">
+                    Type <span className="font-mono font-bold">DELETE</span> to confirm:
+                  </p>
+                  <Input
+                    placeholder="Type DELETE here"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    className="font-mono"
+                  />
+                  {confirmText && confirmText !== "DELETE" && (
+                    <p className="text-sm text-destructive">
+                      ❌ Text doesn't match. Please type "DELETE" exactly.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setConfirmText("");
+                setLeaveConfirmationOpen(false);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLeaveOrganization}
+              disabled={confirmText !== "DELETE" || isLeaving}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isLeaving ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Leaving...
+                </>
+              ) : (
+                "Leave Organization"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>

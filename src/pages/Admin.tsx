@@ -5,6 +5,7 @@ import { OrganizationManagement } from "@/components/admin/OrganizationManagemen
 import { EventManagement } from "@/components/admin/EventManagement";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export default function Admin() {
   const { signOut } = useAuth();
@@ -21,9 +22,7 @@ export default function Admin() {
             </Button>
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           </div>
-          <Button variant="outline" onClick={signOut}>
-            Sign Out
-          </Button>
+          <SignOutButton variant="ghost" size="icon" />
         </div>
       </header>
 

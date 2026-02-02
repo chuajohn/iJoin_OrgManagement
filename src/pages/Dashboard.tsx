@@ -11,6 +11,7 @@ import { Bell, Calendar, Users, LogOut, Shield, Plus, User, ExternalLink, Heart,
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/useUserRole";
+import { SignOutButton } from "@/components/SignOutButton";
 
 interface Announcement {
   id: string;
@@ -223,9 +224,7 @@ const Dashboard = () => {
                 </div>
               </PopoverContent>
             </Popover>
-            <Button variant="ghost" size="icon" onClick={signOut}>
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <SignOutButton variant="ghost" size="icon" />
           </div>
         </div>
       </header>
@@ -384,14 +383,14 @@ const Dashboard = () => {
                   </p>
                 </div>
               </div>
-              <Button 
-                variant="outline" 
+              <SignOutButton 
+                variant="outline"
                 className="mt-4 w-full"
-                onClick={signOut}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Log Out
-              </Button>
+                showIcon
+                showText
+                text="Log Out"
+                iconPosition="left"
+              />
             </div>
 
             {/* Upcoming Events Card */}
