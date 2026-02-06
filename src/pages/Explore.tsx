@@ -9,6 +9,7 @@ import { Users, Search, ArrowLeft, LogOut, Bell, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import OrgLogo from "@/components/OrgLogo";
+import { SignOutButton } from "@/components/SignOutButton";
 
 interface Organization {
   id: string;
@@ -147,9 +148,7 @@ const Explore = () => {
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={signOut}>
-                <LogOut className="h-5 w-5" />
-              </Button>
+              <SignOutButton variant="ghost" size="icon" />
             </div>
           )}
           {!user && (
