@@ -22,7 +22,7 @@ interface Announcement {
   organizations: {
     name: string;
     profile_picture: string | null;
-  };
+  } | null; // 👈 Make nullable
 }
 
 interface Event {
@@ -34,7 +34,7 @@ interface Event {
   organizations: {
     name: string;
     profile_picture: string | null;
-  };
+  } | null; // 👈 Make nullable
 }
 
 const Dashboard = () => {
@@ -62,6 +62,14 @@ const Dashboard = () => {
 
       const orgIds = memberships?.map((m) => m.org_id) || [];
 
+      // If no orgs, set empty arrays and return early
+      if (orgIds.length === 0) {
+        setAnnouncements([]);
+        setEvents([]);
+        setLoading(false);
+        return;
+      }
+
       // Fetch announcements from joined orgs WITH organization profile_picture
       const { data: announcementsData } = await supabase
         .from("announcements")
@@ -75,8 +83,6 @@ const Dashboard = () => {
         .in("org_id", orgIds)
         .order("created_at", { ascending: false })
         .limit(5);
-
-      console.log("Announcements data:", announcementsData); // DEBUG LOG
 
       // Fetch upcoming events from joined orgs WITH organization profile_picture
       const { data: eventsData } = await supabase
@@ -94,8 +100,10 @@ const Dashboard = () => {
         .order("event_date", { ascending: true })
         .limit(5);
 
-      setAnnouncements(announcementsData || []);
-      setEvents(eventsData || []);
+      // ✅ Filter out items with null organizations
+      setAnnouncements(announcementsData?.filter(a => a.organizations !== null) || []);
+      setEvents(eventsData?.filter(e => e.organizations !== null) || []);
+      
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
@@ -210,22 +218,26 @@ const Dashboard = () => {
                         <div>
                           <h4 className="text-sm font-medium text-gray-500 mb-2">Recent Announcements</h4>
                           <div className="space-y-2">
-                            {announcements.slice(0, 3).map((announcement) => (
-                              <div key={announcement.id} className="rounded-lg border border-gray-200 bg-white p-3">
-                                <p className="text-sm font-semibold text-gray-900">{announcement.title}</p>
-                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                                  {announcement.content}
-                                </p>
-                                <div className="flex items-center justify-between mt-2">
-                                  <span className="text-xs text-blue-600 font-medium">
-                                    {announcement.organizations.name}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    {format(new Date(announcement.created_at), "MMM d")}
-                                  </span>
+                            {announcements.slice(0, 3).map((announcement) => {
+                              // ✅ Safe access with fallbacks
+                              const orgName = announcement.organizations?.name || 'Unknown Organization';
+                              return (
+                                <div key={announcement.id} className="rounded-lg border border-gray-200 bg-white p-3">
+                                  <p className="text-sm font-semibold text-gray-900">{announcement.title}</p>
+                                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                    {announcement.content}
+                                  </p>
+                                  <div className="flex items-center justify-between mt-2">
+                                    <span className="text-xs text-blue-600 font-medium">
+                                      {orgName}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      {format(new Date(announcement.created_at), "MMM d")}
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -234,22 +246,26 @@ const Dashboard = () => {
                         <div>
                           <h4 className="text-sm font-medium text-gray-500 mb-2">Upcoming Events</h4>
                           <div className="space-y-2">
-                            {events.slice(0, 3).map((event) => (
-                              <div key={event.id} className="rounded-lg border border-gray-200 bg-white p-3">
-                                <p className="text-sm font-semibold text-gray-900">{event.name}</p>
-                                <p className="text-xs text-gray-600 mt-1">
-                                  {format(new Date(event.event_date), "MMM d, h:mm a")}
-                                </p>
-                                <div className="flex items-center justify-between mt-2">
-                                  <span className="text-xs text-blue-600 font-medium">
-                                    {event.organizations.name}
-                                  </span>
-                                  {event.location && (
-                                    <span className="text-xs text-gray-500">{event.location}</span>
-                                  )}
+                            {events.slice(0, 3).map((event) => {
+                              // ✅ Safe access with fallbacks
+                              const orgName = event.organizations?.name || 'Unknown Organization';
+                              return (
+                                <div key={event.id} className="rounded-lg border border-gray-200 bg-white p-3">
+                                  <p className="text-sm font-semibold text-gray-900">{event.name}</p>
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    {format(new Date(event.event_date), "MMM d, h:mm a")}
+                                  </p>
+                                  <div className="flex items-center justify-between mt-2">
+                                    <span className="text-xs text-blue-600 font-medium">
+                                      {orgName}
+                                    </span>
+                                    {event.location && (
+                                      <span className="text-xs text-gray-500">{event.location}</span>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -324,7 +340,11 @@ const Dashboard = () => {
             ) : (
               <div className="space-y-6">
                 {announcements.map((announcement) => {
-                  console.log("Rendering announcement:", announcement.organizations.name, "with profile picture:", announcement.organizations.profile_picture); // DEBUG
+                  // ✅ SAFE - Extract with null checks
+                  const org = announcement.organizations;
+                  const orgName = org?.name || 'Unknown Organization';
+                  const orgProfilePic = org?.profile_picture || null;
+                  
                   return (
                     <div key={announcement.id} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                       {/* Post Header */}
@@ -332,20 +352,20 @@ const Dashboard = () => {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10 border">
                             <AvatarImage 
-                              src={announcement.organizations.profile_picture || undefined}
-                              alt={announcement.organizations.name}
+                              src={orgProfilePic || undefined}
+                              alt={orgName}
                               onError={(e) => {
-                                console.log(`Failed to load profile picture for ${announcement.organizations.name}:`, announcement.organizations.profile_picture);
+                                console.log(`Failed to load profile picture for ${orgName}:`, orgProfilePic);
                                 e.currentTarget.style.display = 'none';
                               }}
                             />
                             <AvatarFallback className="bg-gray-100 text-gray-700">
-                              {announcement.organizations.name.charAt(0)}
+                              {orgName.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <h3 className="font-semibold text-gray-900">
-                              {announcement.organizations.name}
+                              {orgName}
                             </h3>
                             <p className="text-xs text-gray-500">
                               {format(new Date(announcement.created_at), "MMM d 'at' h:mm a")}
@@ -401,7 +421,7 @@ const Dashboard = () => {
                       <div className="px-4 pb-4">
                         <div className="mb-3">
                           <span className="font-semibold text-gray-900 mr-2">
-                            {announcement.organizations.name}
+                            {orgName}
                           </span>
                           <span className="text-gray-700">{announcement.content}</span>
                         </div>
@@ -496,64 +516,71 @@ const Dashboard = () => {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {events.map((event) => (
-                        <Link 
-                          key={event.id} 
-                          to={`/event/${event.id}`}
-                          className="block"
-                        >
-                          <div className="group rounded-lg border border-gray-200 p-3 transition-all hover:border-blue-200 hover:bg-blue-50/30">
-                            <div className="flex items-start gap-3">
-                              <div className="min-w-12 rounded-lg bg-blue-50 p-2 text-center border border-blue-100">
-                                <div className="text-sm font-bold text-blue-600">
-                                  {format(new Date(event.event_date), "d")}
-                                </div>
-                                <div className="text-xs text-gray-600">
-                                  {format(new Date(event.event_date), "MMM")}
-                                </div>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-gray-900 truncate">
-                                  {event.name}
-                                </h4>
-                                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {format(new Date(event.event_date), "h:mm a")}
+                      {events.map((event) => {
+                        // ✅ SAFE - Extract with null checks
+                        const org = event.organizations;
+                        const orgName = org?.name || 'Unknown Organization';
+                        const orgProfilePic = org?.profile_picture || null;
+                        
+                        return (
+                          <Link 
+                            key={event.id} 
+                            to={`/event/${event.id}`}
+                            className="block"
+                          >
+                            <div className="group rounded-lg border border-gray-200 p-3 transition-all hover:border-blue-200 hover:bg-blue-50/30">
+                              <div className="flex items-start gap-3">
+                                <div className="min-w-12 rounded-lg bg-blue-50 p-2 text-center border border-blue-100">
+                                  <div className="text-sm font-bold text-blue-600">
+                                    {format(new Date(event.event_date), "d")}
                                   </div>
-                                  {event.location && (
-                                    <>
-                                      <div className="h-1 w-1 rounded-full bg-gray-300" />
-                                      <div className="flex items-center gap-1">
-                                        <MapPin className="h-3 w-3" />
-                                        <span className="truncate">{event.location}</span>
-                                      </div>
-                                    </>
-                                  )}
+                                  <div className="text-xs text-gray-600">
+                                    {format(new Date(event.event_date), "MMM")}
+                                  </div>
                                 </div>
-                                <p className="mt-2 text-xs text-blue-600 font-medium truncate">
-                                  {event.organizations.profile_picture ? (
-                                    <span className="flex items-center gap-1">
-                                      <img 
-                                        src={event.organizations.profile_picture} 
-                                        alt={event.organizations.name}
-                                        className="h-3 w-3 rounded-full mr-1"
-                                        onError={(e) => {
-                                          console.log(`Failed to load org picture for event: ${event.organizations.name}`);
-                                          e.currentTarget.style.display = 'none';
-                                        }}
-                                      />
-                                      {event.organizations.name}
-                                    </span>
-                                  ) : (
-                                    event.organizations.name
-                                  )}
-                                </p>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-gray-900 truncate">
+                                    {event.name}
+                                  </h4>
+                                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {format(new Date(event.event_date), "h:mm a")}
+                                    </div>
+                                    {event.location && (
+                                      <>
+                                        <div className="h-1 w-1 rounded-full bg-gray-300" />
+                                        <div className="flex items-center gap-1">
+                                          <MapPin className="h-3 w-3" />
+                                          <span className="truncate">{event.location}</span>
+                                        </div>
+                                      </>
+                                    )}
+                                  </div>
+                                  <p className="mt-2 text-xs text-blue-600 font-medium truncate">
+                                    {orgProfilePic ? (
+                                      <span className="flex items-center gap-1">
+                                        <img 
+                                          src={orgProfilePic} 
+                                          alt={orgName}
+                                          className="h-3 w-3 rounded-full mr-1"
+                                          onError={(e) => {
+                                            console.log(`Failed to load org picture for event: ${orgName}`);
+                                            e.currentTarget.style.display = 'none';
+                                          }}
+                                        />
+                                        {orgName}
+                                      </span>
+                                    ) : (
+                                      orgName
+                                    )}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      ))}
+                          </Link>
+                        );
+                      })}
                       
                       {events.length > 0 && (
                         <Link to="/calendar">

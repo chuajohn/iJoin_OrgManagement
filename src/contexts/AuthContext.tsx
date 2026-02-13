@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-// CORRECTED: Match your exact database schema
+type UserRole = 'senior_highschool_student' | 'undergraduate_student' | 'sao' | 'admin';
+
 interface UserProfile {
   id: string;
   email: string;
-  name: string;  // ← Your database uses 'name' (not full_name)
-  profile_picture: string | null;  // ← Your database uses 'profile_picture' (not avatar_url)
+  name: string;
+  profile_picture: string | null;
   created_at: string;
 }
 
@@ -17,7 +18,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: UserProfile | null;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
+  userRole: UserRole | null;
+  signUp: (email: string, password: string, name: string, userType: 'senior_highschool_student' | 'undergraduate_student') => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
@@ -31,14 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Function to fetch user profile from database
+  // Fetch user profile from database
   const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
-      console.log("Fetching profile for user:", userId);
-      
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -47,17 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error("Error fetching profile:", error);
-        
-        // If profile doesn't exist, create one
-        if (error.code === "PGRST116") {
-          console.log("Profile doesn't exist, creating one...");
-          return await createUserProfile(userId);
-        }
-        
-        throw error;
+        return null;
       }
 
-      console.log("Fetched profile:", data);
       return data;
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
@@ -65,45 +58,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Function to create a new user profile
-  const createUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  // Fetch user role from database
+  const fetchUserRole = async (userId: string): Promise<UserRole | null> => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const email = userData.user?.email || "";
-      
-      const newProfile = {
-        id: userId,
-        email: email,
-        name: "",  // ← CORRECT: your database uses 'name'
-        profile_picture: null,  // ← CORRECT: your database uses 'profile_picture'
-        created_at: new Date().toISOString(),
-      };
-
       const { data, error } = await supabase
-        .from("profiles")
-        .insert([newProfile])
-        .select()
-        .single();
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (error) throw error;
-      
-      console.log("Created new profile:", data);
-      return data;
+      if (error) {
+        console.error("Error fetching user role:", error);
+        return null;
+      }
+
+      return data?.role as UserRole || null;
     } catch (error) {
-      console.error("Error creating profile:", error);
+      console.error("Error in fetchUserRole:", error);
       return null;
     }
   };
 
-  // Function to update profile in database
+  // Update profile in database
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) {
       throw new Error("No user logged in");
     }
 
     try {
-      console.log("Updating profile with:", updates);
-      
       const { error } = await supabase
         .from("profiles")
         .update(updates)
@@ -111,9 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error;
 
-      // Update local state
       setProfile(prev => prev ? { ...prev, ...updates } : null);
-      
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -122,90 +102,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Function to refresh profile data
+  // Refresh profile and role data
   const refreshProfile = async () => {
     if (user) {
-      const newProfile = await fetchUserProfile(user.id);
-      if (newProfile) {
-        setProfile(newProfile);
-      }
+      const [newProfile, newRole] = await Promise.all([
+        fetchUserProfile(user.id),
+        fetchUserRole(user.id)
+      ]);
+      
+      if (newProfile) setProfile(newProfile);
+      if (newRole) setUserRole(newRole);
     }
   };
 
+  // Handle session changes
   useEffect(() => {
-  console.log("AuthContext: Starting auth setup");
-  
-  let isMounted = true;
-  
-  const handleSession = async (session: Session | null) => {
-    if (!isMounted) return;
+    let isMounted = true;
     
-    console.log("AuthContext: Handling session", { hasSession: !!session });
-    
-    // Set immediate states FIRST (like original)
-    setSession(session);
-    setUser(session?.user ?? null);
-    
-    // Set loading false IMMEDIATELY (like original)
-    setLoading(false);
-    console.log("AuthContext: Loading set to false");
-    
-    // Then fetch profile in background
-    if (session?.user) {
-      try {
-        console.log("AuthContext: Starting profile fetch");
-        const userProfile = await fetchUserProfile(session.user.id);
-        if (isMounted && userProfile) {
-          console.log("AuthContext: Profile fetched successfully");
+    const handleSession = async (session: Session | null) => {
+      if (!isMounted) return;
+      
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        const [userProfile, userRoleData] = await Promise.all([
+          fetchUserProfile(session.user.id),
+          fetchUserRole(session.user.id)
+        ]);
+        
+        if (isMounted) {
           setProfile(userProfile);
+          setUserRole(userRoleData);
         }
-      } catch (error) {
-        console.error("AuthContext: Profile fetch error:", error);
+      } else {
+        setProfile(null);
+        setUserRole(null);
       }
-    } else if (isMounted) {
-      setProfile(null);
-    }
-  };
+      
+      setLoading(false);
+    };
 
-  // Set up listener
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       handleSession(session);
-    }
-  );
+    });
 
-  // Get initial session
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    handleSession(session);
-  });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        handleSession(session);
+      }
+    );
 
-  return () => {
-    console.log("AuthContext: Cleanup");
-    isMounted = false;
-    subscription.unsubscribe();
-  };
-}, []);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
-  const signUp = async (email: string, password: string, name: string) => {
+  // ✅ SIMPLIFIED: Just call supabase.auth.signUp - TRIGGER HANDLES THE REST
+  const signUp = async (
+    email: string, 
+    password: string, 
+    name: string, 
+    userType: 'senior_highschool_student' | 'undergraduate_student'
+  ) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      console.log("Signing up with:", { email, name, userType });
       
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
           data: {
             name,
-          },
-        },
+            user_type: userType  // Trigger uses this
+          }
+        }
       });
 
       if (error) throw error;
-
-      toast.success("Account created successfully!");
-      navigate("/dashboard");
+      
+      // No need to create profile or role - TRIGGER DOES IT!
+      toast.success("Account created! Please check your email to verify.");
+      
     } catch (error: any) {
+      console.error("Sign up error:", error);
       toast.error(error.message || "Failed to create account");
       throw error;
     }
@@ -219,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) throw error;
-
+      
       toast.success("Welcome back!");
       navigate("/dashboard");
     } catch (error: any) {
@@ -232,8 +213,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-
-      setProfile(null); // Clear profile on sign out
+      
+      setProfile(null);
+      setUserRole(null);
       toast.success("Signed out successfully");
       navigate("/");
     } catch (error: any) {
@@ -248,6 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         session,
         profile,
+        userRole,
         signUp,
         signIn,
         signOut,
