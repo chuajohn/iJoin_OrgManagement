@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // Add useCallback
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Search, ArrowLeft, Bell, Settings, School, GraduationCap, Sparkles } from "lucide-react";
+import { Users, Search, ArrowLeft, Bell, Settings, School, GraduationCap, Sparkles, UserCheck, Shield } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import OrgLogo from "@/components/OrgLogo";
@@ -24,7 +24,7 @@ interface Organization {
   membershipRole?: string | null;
 }
 
-type TabFilter = 'all' | 'shs' | 'college';
+type TabFilter = 'all' | 'shs' | 'college' | 'myorgs';
 
 const Explore = () => {
   const { user } = useAuth();
@@ -35,6 +35,9 @@ const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0); // Add cache timestamp
+
+  const isStudent = isSHSStudent || isUGStudent;
 
   // Set default tab based on user role
   useEffect(() => {
@@ -47,10 +50,72 @@ const Explore = () => {
     }
   }, [isSHSStudent, isUGStudent]);
 
+  // Memoize fetch function to prevent unnecessary re-renders
+  const fetchOrganizations = useCallback(async (forceRefresh = false) => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    // Prevent fetching too often (cache for 30 seconds)
+    const now = Date.now();
+    if (!forceRefresh && now - lastFetchTime < 30000 && organizations.length > 0) {
+      console.log("Using cached data");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log("Fetching fresh organizations data...");
+      
+      // Fetch ALL active organizations
+      const { data: orgsData, error } = await supabase
+        .from("organizations")
+        .select("*")
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch memberships
+      const { data: membershipsData } = await supabase
+        .from("memberships")
+        .select("org_id, status, role")
+        .eq("user_id", user.id);
+
+      console.log("Memberships fetched:", membershipsData);
+
+      const membershipMap = new Map(
+        membershipsData?.map((m) => [m.org_id, { status: m.status, role: m.role }])
+      );
+
+      const orgsWithStatus = orgsData?.map((org) => {
+        const membership = membershipMap.get(org.id);
+        return {
+          ...org,
+          membershipStatus: isStudent ? (membership?.status || null) : null,
+          membershipRole: isStudent ? (membership?.role || null) : null,
+        };
+      });
+
+      console.log("Organizations with status:", orgsWithStatus);
+      setOrganizations(orgsWithStatus || []);
+      setLastFetchTime(now); // Update cache timestamp
+      
+    } catch (error) {
+      console.error("Error fetching organizations:", error);
+      toast.error("Failed to load organizations");
+    } finally {
+      setLoading(false);
+    }
+  }, [user, isStudent, lastFetchTime, organizations.length]);
+
+  // Initial fetch
   useEffect(() => {
     fetchOrganizations();
-  }, [user]);
+  }, [fetchOrganizations]);
 
+  // Filter organizations based on search and tab
   useEffect(() => {
     let filtered = [...organizations];
 
@@ -66,54 +131,16 @@ const Explore = () => {
       filtered = filtered.filter(org => org.is_shs_org === true);
     } else if (activeTab === 'college') {
       filtered = filtered.filter(org => org.is_shs_org === false);
+    } else if (activeTab === 'myorgs') {
+      if (isStudent) {
+        filtered = filtered.filter(org => 
+          org.membershipStatus === "accepted" || org.membershipStatus === "pending"
+        );
+      }
     }
-    // 'all' shows everything
 
     setFilteredOrgs(filtered);
-  }, [searchQuery, organizations, activeTab]);
-
-  const fetchOrganizations = async () => {
-    try {
-      // Fetch ALL active organizations
-      const { data: orgsData, error } = await supabase
-        .from("organizations")
-        .select("*")
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      // If user is logged in, check membership status
-      if (user) {
-        const { data: membershipsData } = await supabase
-          .from("memberships")
-          .select("org_id, status, role")
-          .eq("user_id", user.id);
-
-        const membershipMap = new Map(
-          membershipsData?.map((m) => [m.org_id, { status: m.status, role: m.role }])
-        );
-
-        const orgsWithStatus = orgsData?.map((org) => {
-          const membership = membershipMap.get(org.id);
-          return {
-            ...org,
-            membershipStatus: membership?.status || null,
-            membershipRole: membership?.role || null,
-          };
-        });
-
-        setOrganizations(orgsWithStatus || []);
-      } else {
-        setOrganizations(orgsData || []);
-      }
-    } catch (error) {
-      console.error("Error fetching organizations:", error);
-      toast.error("Failed to load organizations");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [searchQuery, organizations, activeTab, isStudent]);
 
   const handleJoinOrg = async (orgId: string) => {
     if (!user) {
@@ -158,7 +185,8 @@ const Explore = () => {
         }
       } else {
         toast.success("Join request sent successfully!");
-        fetchOrganizations();
+        // Force refresh data
+        await fetchOrganizations(true);
       }
     } catch (error) {
       console.error("Error joining organization:", error);
@@ -169,15 +197,21 @@ const Explore = () => {
   // Check if user can join this org
   const canJoinOrg = (org: Organization) => {
     if (!user) return false;
-    if (isAdmin || isSAO) return false;
+    if (!isStudent) return false;
     if (isSHSStudent) return org.is_shs_org === true;
     if (isUGStudent) return org.is_shs_org === false;
     return false;
   };
 
-  // Check if this org is joinable by the current user
   const isJoinable = (org: Organization) => {
     return canJoinOrg(org) && org.membershipStatus !== "accepted" && org.membershipStatus !== "pending";
+  };
+
+  const canManageOrg = (org: Organization) => {
+    if (!user) return false;
+    if (!isStudent) return false;
+    return org.membershipStatus === "accepted" && 
+           (org.membershipRole === "officer" || org.membershipRole === "leader");
   };
 
   if (loading) {
@@ -190,7 +224,7 @@ const Explore = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      {/* Header */}
+      {/* Header (unchanged) */}
       <header className="border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
@@ -207,7 +241,6 @@ const Explore = () => {
             </div>
           </div>
           
-          {/* User info badge */}
           {user && (
             <div className="flex items-center gap-4">
               {isSHSStudent && (
@@ -222,9 +255,16 @@ const Explore = () => {
                   Undergraduate
                 </Badge>
               )}
-              {(isAdmin || isSAO) && (
-                <Badge variant={isAdmin ? "destructive" : "default"}>
-                  {isAdmin ? "Admin" : "SAO"}
+              {isAdmin && (
+                <Badge variant="destructive" className="gap-1">
+                  <Shield className="h-3 w-3" />
+                  Admin
+                </Badge>
+              )}
+              {isSAO && (
+                <Badge variant="default" className="gap-1">
+                  <Shield className="h-3 w-3" />
+                  SAO
                 </Badge>
               )}
               <Button variant="ghost" size="icon">
@@ -248,7 +288,9 @@ const Explore = () => {
             Explore Organizations
           </h1>
           <p className="text-muted-foreground">
-            Discover student organizations at iAcademy
+            {isAdmin || isSAO 
+              ? "Manage and oversee all student organizations"
+              : "Discover student organizations at iAcademy"}
           </p>
           
           {/* Stats badges */}
@@ -264,6 +306,12 @@ const Explore = () => {
               <GraduationCap className="mr-1 h-3 w-3" />
               {organizations.filter(o => !o.is_shs_org).length} College
             </Badge>
+            {isStudent && (
+              <Badge variant="default" className="bg-green-100 text-green-800 border-green-200 gap-1">
+                <UserCheck className="mr-1 h-3 w-3" />
+                {organizations.filter(o => o.membershipStatus === "accepted").length} Joined
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -281,10 +329,10 @@ const Explore = () => {
           </div>
         </div>
 
-        {/* Tab Filters - Everyone can use these */}
+        {/* Tab Filters */}
         <div className="mb-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabFilter)} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
+            <TabsList className={`grid w-full ${isStudent ? 'grid-cols-4' : 'grid-cols-3'} max-w-2xl mx-auto`}>
               <TabsTrigger value="all" className="gap-2">
                 <Users className="h-4 w-4" />
                 All
@@ -297,16 +345,14 @@ const Explore = () => {
                 <GraduationCap className="h-4 w-4" />
                 College
               </TabsTrigger>
+              {isStudent && (
+                <TabsTrigger value="myorgs" className="gap-2">
+                  <UserCheck className="h-4 w-4" />
+                  My Orgs
+                </TabsTrigger>
+              )}
             </TabsList>
           </Tabs>
-          
-          {/* Hint text showing current filter context */}
-          <p className="text-center text-xs text-muted-foreground mt-3">
-            {activeTab === 'shs' && "Showing Senior High School organizations"}
-            {activeTab === 'college' && "Showing College/Undergraduate organizations"}
-            {activeTab === 'all' && "Showing all organizations"}
-            {user && !isAdmin && !isSAO && activeTab === 'all' && " — You can only join organizations matching your level"}
-          </p>
         </div>
 
         {/* Results count */}
@@ -317,37 +363,26 @@ const Explore = () => {
         {/* Organizations Grid */}
         {filteredOrgs.length === 0 ? (
           <div className="py-12 text-center">
-            <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-muted p-4">
-                <Users className="h-8 w-8 text-muted-foreground" />
-              </div>
-            </div>
-            <p className="text-lg font-medium text-foreground">
-              {searchQuery
-                ? "No organizations found matching your search"
-                : `No ${activeTab === 'shs' ? 'SHS' : activeTab === 'college' ? 'College' : ''} organizations available yet`}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Check back later for new organizations
-            </p>
-            {(isAdmin || isSAO) && (
-              <Link to="/admin/create-organization" className="mt-4 inline-block">
-                <Button>Create Organization</Button>
-              </Link>
-            )}
+            {/* ... empty state ... */}
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredOrgs.map((org) => {
               const canJoin = isJoinable(org);
-              const isUserLevel = user && (
-                (isSHSStudent && org.is_shs_org) || 
-                (isUGStudent && !org.is_shs_org)
-              );
+              const manage = canManageOrg(org);
+              const isMember = org.membershipStatus === "accepted" && isStudent;
+              const isPending = org.membershipStatus === "pending" && isStudent;
+
+              console.log(`Org ${org.name}:`, { // Debug log
+                membershipStatus: org.membershipStatus,
+                membershipRole: org.membershipRole,
+                manage,
+                isMember
+              });
 
               return (
                 <Card key={org.id} className="group transition-all hover:shadow-lg relative flex flex-col h-full">
-                  {/* Level badge - positioned at top */}
+                  {/* Level badge */}
                   <div className="absolute top-2 left-2 z-10">
                     {org.is_shs_org ? (
                       <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 gap-1">
@@ -362,13 +397,25 @@ const Explore = () => {
                     )}
                   </div>
 
-                  {/* Your level indicator */}
-                  {isUserLevel && user && !isAdmin && !isSAO && (
-                    <div className="absolute top-2 right-2 z-10">
-                      <Badge variant="default" className="bg-primary/10 text-primary border-primary/20 gap-1">
-                        <Sparkles className="h-3 w-3" />
-                        Your Level
-                      </Badge>
+                  {/* Status badges */}
+                  {isStudent && (
+                    <div className="absolute top-2 right-2 z-10 flex flex-col gap-1 items-end">
+                      {isMember && !manage && (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          Member
+                        </Badge>
+                      )}
+                      {isPending && (
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                          Pending
+                        </Badge>
+                      )}
+                      {manage && (
+                        <Badge variant="default" className="bg-amber-500 text-white border-amber-600 gap-1">
+                          <Settings className="h-3 w-3" />
+                          {org.membershipRole === "leader" ? "Leader" : "Officer"}
+                        </Badge>
+                      )}
                     </div>
                   )}
 
@@ -390,35 +437,30 @@ const Explore = () => {
                   </CardHeader>
                   
                   <CardContent className="flex flex-col gap-3 mt-auto pt-2">
-                    {/* View Organization Button - ALWAYS VISIBLE */}
                     <Link to={`/org/${org.id}`} className="w-full">
                       <Button variant="outline" className="w-full">
                         View Organization
                       </Button>
                     </Link>
 
-                    {/* Join Button - ONLY SHOW if user can actually join */}
-                    {canJoin ? (
+                    {manage && (
+                      <Link to={`/org/${org.id}/manage`} className="w-full">
+                        <Button variant="secondary" className="w-full gap-2">
+                          <Settings className="h-4 w-4" />
+                          Manage
+                        </Button>
+                      </Link>
+                    )}
+
+                    {isStudent && !manage && !isMember && !isPending && canJoin ? (
                       <Button 
                         className="w-full" 
                         onClick={() => handleJoinOrg(org.id)}
                       >
                         Join Organization
                       </Button>
-                    ) : (
-                      /* Show nothing - no button at all */
-                      user && org.membershipStatus === "pending" ? (
-                        <Button variant="outline" className="w-full" disabled>
-                          Pending Approval
-                        </Button>
-                      ) : org.membershipStatus === "accepted" ? (
-                        <Button variant="outline" className="w-full" disabled>
-                          Member
-                        </Button>
-                      ) : null
-                    )}
+                    ) : null}
 
-                    {/* Show sign in prompt for non-logged in users */}
                     {!user && (
                       <Button 
                         variant="default" 

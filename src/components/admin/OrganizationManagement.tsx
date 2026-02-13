@@ -101,32 +101,95 @@ export function OrganizationManagement() {
   };
 
   const approveOrganization = async (org: Organization) => {
+    console.log("🚀 Starting approval for org:", org.id, org.name);
+    console.log("👤 Creator ID:", org.created_by);
+    
     try {
-      // Update organization status to active
-      const { error: orgError } = await supabase
+      // STEP 1: Update organization status to active
+      console.log("📝 Step 1: Updating organization status to active...");
+      const { error: orgError, data: orgData } = await supabase
         .from("organizations")
         .update({ status: "active" })
-        .eq("id", org.id);
+        .eq("id", org.id)
+        .select();
 
-      if (orgError) throw orgError;
+      if (orgError) {
+        console.error("❌ Organization update error:", orgError);
+        throw new Error(`Organization update failed: ${orgError.message}`);
+      }
+      
+      console.log("✅ Organization updated successfully:", orgData);
 
-      // Create leader membership for the creator
-      const { error: memberError } = await supabase
+      // STEP 2: Check if creator already has a membership (shouldn't, but just in case)
+      console.log("📝 Step 2: Checking for existing membership...");
+      const { data: existingMember, error: checkError } = await supabase
         .from("memberships")
-        .insert({
-          user_id: org.created_by,
-          org_id: org.id,
-          role: "leader",
-          status: "accepted"
-        });
+        .select("id")
+        .eq("user_id", org.created_by)
+        .eq("org_id", org.id)
+        .maybeSingle();
 
-      if (memberError) throw memberError;
+      if (checkError) {
+        console.error("❌ Membership check error:", checkError);
+      }
 
-      toast.success(`Organization "${org.name}" approved successfully`);
+      if (existingMember) {
+        console.log("⚠️ Creator already has membership, updating to leader...");
+        // Update existing membership to leader
+        const { error: updateError } = await supabase
+          .from("memberships")
+          .update({ role: "leader", status: "accepted" })
+          .eq("id", existingMember.id);
+
+        if (updateError) throw updateError;
+        console.log("✅ Existing membership updated to leader");
+      } else {
+        // STEP 3: Add creator as leader
+        console.log("📝 Step 3: Adding creator as leader...");
+        const { error: memberError, data: memberData } = await supabase
+          .from("memberships")
+          .insert({
+            user_id: org.created_by,
+            org_id: org.id,
+            role: "leader",
+            status: "accepted"
+          })
+          .select();
+
+        if (memberError) {
+          console.error("❌ Membership insert error:", memberError);
+          console.error("Error details:", {
+            code: memberError.code,
+            message: memberError.message,
+            details: memberError.details
+          });
+          throw new Error(`Failed to add leader: ${memberError.message}`);
+        }
+        
+        console.log("✅ Leader added successfully:", memberData);
+      }
+
+      // STEP 4: Verify the membership was created
+      console.log("📝 Step 4: Verifying membership...");
+      const { data: verifyData, error: verifyError } = await supabase
+        .from("memberships")
+        .select("*, profiles:user_id(name, email)")
+        .eq("org_id", org.id)
+        .eq("user_id", org.created_by);
+
+      if (verifyError) {
+        console.error("❌ Verification error:", verifyError);
+      } else {
+        console.log("✅ Verification result:", verifyData);
+      }
+
+      toast.success(`Organization "${org.name}" approved successfully. Creator is now the leader.`);
       fetchOrganizations();
-    } catch (error) {
-      console.error("Error approving organization:", error);
-      toast.error("Failed to approve organization");
+      
+    } catch (error: any) {
+      console.error("❌ Error in approveOrganization:", error);
+      console.error("Error stack:", error.stack);
+      toast.error(`Failed to approve organization: ${error.message}`);
     }
   };
 

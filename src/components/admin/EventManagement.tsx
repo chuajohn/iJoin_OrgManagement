@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { Calendar, MapPin, Clock, FileText } from "lucide-react";
+import { Calendar, MapPin, Clock, FileText, School, GraduationCap } from "lucide-react";
 
 type Event = {
   id: string;
@@ -18,6 +18,7 @@ type Event = {
   document_url: string | null;
   organizations: {
     name: string;
+    is_shs_org: boolean;
   } | null;
 };
 
@@ -43,12 +44,18 @@ export function EventManagement() {
           status,
           visibility,
           document_url,
-          organizations (name)
+          organizations (
+            name,
+            is_shs_org
+          )
         `)
         .order("event_date", { ascending: true });
 
       if (error) throw error;
-      setEvents(data || []);
+      
+      // Filter out events with null organizations
+      const validEvents = data?.filter(event => event.organizations !== null) || [];
+      setEvents(validEvents as Event[]);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast({
@@ -86,8 +93,39 @@ export function EventManagement() {
     }
   };
 
+  const getOrgTypeBadge = (is_shs_org: boolean) => {
+    if (is_shs_org) {
+      return (
+        <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 gap-1 ml-2">
+          <School className="h-3 w-3" />
+          SHS
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="outline" className="gap-1 ml-2">
+          <GraduationCap className="h-3 w-3" />
+          College
+        </Badge>
+      );
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pending</Badge>;
+      case "approved":
+        return <Badge variant="default" className="bg-green-600">Approved</Badge>;
+      case "rejected":
+        return <Badge variant="destructive">Rejected</Badge>;
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
-    return <div>Loading events...</div>;
+    return <div className="flex justify-center p-8">Loading events...</div>;
   }
 
   const pendingEvents = events.filter((e) => e.status === "pending");
@@ -103,30 +141,42 @@ export function EventManagement() {
       <CardContent className="space-y-6">
         {/* Pending Events */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Pending Requests ({pendingEvents.length})</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold">Pending Requests</h3>
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+              {pendingEvents.length} pending
+            </Badge>
+          </div>
+          
           {pendingEvents.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No pending events</p>
+            <p className="text-muted-foreground text-sm py-4">No pending events</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {pendingEvents.map((event) => (
-                <div key={event.id} className="border rounded-lg p-4 space-y-3">
+                <div key={event.id} className="border-2 border-yellow-200 bg-yellow-50/30 rounded-lg p-4 space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1 flex-1">
-                      <h4 className="font-semibold">{event.name}</h4>
-                      <p className="text-sm text-muted-foreground">{event.organizations?.name}</p>
+                      <div className="flex items-center flex-wrap gap-2">
+                        <h4 className="font-semibold text-lg">{event.name}</h4>
+                        {getOrgTypeBadge(event.organizations?.is_shs_org || false)}
+                        {getStatusBadge(event.status)}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">Hosted by:</span>
+                        <span className="font-medium">{event.organizations?.name}</span>
+                      </div>
                       {event.description && (
-                        <p className="text-sm mt-2">{event.description}</p>
+                        <p className="text-sm mt-2 bg-white/50 p-3 rounded-md border">
+                          {event.description}
+                        </p>
                       )}
                     </div>
-                    <Badge variant="outline" className="ml-4">
-                      {event.visibility === "public" ? "Public" : "Private"}
-                    </Badge>
                   </div>
                   
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground bg-white/50 p-3 rounded-md border">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      {format(new Date(event.event_date), "MMM dd, yyyy")}
+                      {format(new Date(event.event_date), "EEEE, MMMM dd, yyyy")}
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
@@ -138,10 +188,15 @@ export function EventManagement() {
                         {event.location}
                       </div>
                     )}
+                    <div className="flex items-center gap-1 ml-auto">
+                      <Badge variant="outline">
+                        {event.visibility === "public" ? "Public Event" : "Private Event"}
+                      </Badge>
+                    </div>
                   </div>
 
                   {event.document_url && (
-                    <div className="pt-2 border-t">
+                    <div className="bg-white/50 p-3 rounded-md border">
                       <a
                         href={event.document_url}
                         target="_blank"
@@ -154,19 +209,20 @@ export function EventManagement() {
                     </div>
                   )}
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-2">
                     <Button
                       size="sm"
                       onClick={() => updateEventStatus(event.id, "approved")}
+                      className="bg-green-600 hover:bg-green-700"
                     >
-                      Approve
+                      Approve Event
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
                       onClick={() => updateEventStatus(event.id, "rejected")}
                     >
-                      Reject
+                      Reject Event
                     </Button>
                   </div>
                 </div>
@@ -176,21 +232,50 @@ export function EventManagement() {
         </div>
 
         {/* Approved Events */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Approved Events ({approvedEvents.length})</h3>
+        <div className="pt-4 border-t">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold">Approved Events</h3>
+            <Badge variant="default" className="bg-green-600">
+              {approvedEvents.length} approved
+            </Badge>
+          </div>
+          
           {approvedEvents.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No approved events</p>
+            <p className="text-muted-foreground text-sm py-4">No approved events</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {approvedEvents.map((event) => (
-                <div key={event.id} className="border rounded-lg p-3 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{event.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {event.organizations?.name} • {format(new Date(event.event_date), "MMM dd, yyyy")}
-                    </p>
+                <div key={event.id} className="border rounded-lg p-4 hover:bg-accent/5 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold">{event.name}</h4>
+                        {getOrgTypeBadge(event.organizations?.is_shs_org || false)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {event.organizations?.name}
+                      </p>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(event.event_date), "MMM dd, yyyy")}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {format(new Date(event.event_date), "h:mm a")}
+                        </div>
+                        {event.location && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {event.location}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Badge variant="default" className="bg-green-600">
+                      Approved
+                    </Badge>
                   </div>
-                  <Badge>Approved</Badge>
                 </div>
               ))}
             </div>
@@ -199,18 +284,28 @@ export function EventManagement() {
 
         {/* Rejected Events */}
         {rejectedEvents.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Rejected Events ({rejectedEvents.length})</h3>
+          <div className="pt-4 border-t">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Rejected Events</h3>
+              <Badge variant="destructive">
+                {rejectedEvents.length} rejected
+              </Badge>
+            </div>
             <div className="space-y-2">
               {rejectedEvents.map((event) => (
-                <div key={event.id} className="border rounded-lg p-3 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{event.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {event.organizations?.name} • {format(new Date(event.event_date), "MMM dd, yyyy")}
-                    </p>
+                <div key={event.id} className="border border-destructive/20 bg-destructive/5 rounded-lg p-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{event.name}</p>
+                        {getOrgTypeBadge(event.organizations?.is_shs_org || false)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {event.organizations?.name} • {format(new Date(event.event_date), "MMM dd, yyyy")}
+                      </p>
+                    </div>
+                    <Badge variant="destructive">Rejected</Badge>
                   </div>
-                  <Badge variant="destructive">Rejected</Badge>
                 </div>
               ))}
             </div>
