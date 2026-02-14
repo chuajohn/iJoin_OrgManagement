@@ -7,11 +7,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Calendar, Users, LogOut, Shield, Plus, User, ExternalLink, Heart, MessageCircle, Bookmark, MoreHorizontal, MapPin, Clock, Share2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, Bookmark, MoreHorizontal, MapPin, Clock, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/useUserRole";
 import { SignOutButton } from "@/components/SignOutButton";
+import { CommentSection } from "@/components/CommentSection";
+import { toast } from "sonner";
 
 interface Announcement {
   id: string;
@@ -19,10 +22,11 @@ interface Announcement {
   content: string;
   image_url: string | null;
   created_at: string;
+  org_id: string;
   organizations: {
     name: string;
     profile_picture: string | null;
-  } | null; // 👈 Make nullable
+  } | null;
 }
 
 interface Event {
@@ -34,15 +38,17 @@ interface Event {
   organizations: {
     name: string;
     profile_picture: string | null;
-  } | null; // 👈 Make nullable
+  } | null;
 }
 
 const Dashboard = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile } = useAuth();
   const { isAdmin, isSAO } = useUserRole();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchDashboardData();
@@ -62,7 +68,6 @@ const Dashboard = () => {
 
       const orgIds = memberships?.map((m) => m.org_id) || [];
 
-      // If no orgs, set empty arrays and return early
       if (orgIds.length === 0) {
         setAnnouncements([]);
         setEvents([]);
@@ -70,7 +75,7 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch announcements from joined orgs WITH organization profile_picture
+      // Fetch announcements from joined orgs
       const { data: announcementsData } = await supabase
         .from("announcements")
         .select(`
@@ -82,9 +87,26 @@ const Dashboard = () => {
         `)
         .in("org_id", orgIds)
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(10);
 
-      // Fetch upcoming events from joined orgs WITH organization profile_picture
+      // Filter out null organizations and set announcements
+      const validAnnouncements = announcementsData?.filter(a => a.organizations !== null) || [];
+      setAnnouncements(validAnnouncements);
+
+      // Fetch comment counts for each announcement
+      const counts: Record<string, number> = {};
+      await Promise.all(
+        validAnnouncements.map(async (a) => {
+          const { count } = await supabase
+            .from("comments")
+            .select("*", { count: "exact", head: true })
+            .eq("announcement_id", a.id);
+          counts[a.id] = count || 0;
+        })
+      );
+      setCommentCounts(counts);
+
+      // Fetch upcoming events
       const { data: eventsData } = await supabase
         .from("events")
         .select(`
@@ -100,8 +122,6 @@ const Dashboard = () => {
         .order("event_date", { ascending: true })
         .limit(5);
 
-      // ✅ Filter out items with null organizations
-      setAnnouncements(announcementsData?.filter(a => a.organizations !== null) || []);
       setEvents(eventsData?.filter(e => e.organizations !== null) || []);
       
     } catch (error) {
@@ -124,11 +144,40 @@ const Dashboard = () => {
         { event: "*", schema: "public", table: "events" },
         () => fetchDashboardData()
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "comments" },
+        (payload) => {
+          if (payload.new && 'announcement_id' in payload.new) {
+            const announcementId = payload.new.announcement_id as string;
+            fetchCommentCount(announcementId);
+          }
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
+  };
+
+  const fetchCommentCount = async (announcementId: string) => {
+    const { count } = await supabase
+      .from("comments")
+      .select("*", { count: "exact", head: true })
+      .eq("announcement_id", announcementId);
+    
+    setCommentCounts(prev => ({
+      ...prev,
+      [announcementId]: count || 0
+    }));
+  };
+
+  const toggleComments = (announcementId: string) => {
+    setOpenComments(prev => ({
+      ...prev,
+      [announcementId]: !prev[announcementId]
+    }));
   };
 
   if (loading) {
@@ -141,7 +190,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with simple color accents */}
+      {/* Header - RESTORED from old working version */}
       <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-50 to-white border-b shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-3">
@@ -180,7 +229,7 @@ const Dashboard = () => {
                 className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Create Org
+                Request Org
               </Button>
             </Link>
             {(isAdmin || isSAO) && (
@@ -219,7 +268,6 @@ const Dashboard = () => {
                           <h4 className="text-sm font-medium text-gray-500 mb-2">Recent Announcements</h4>
                           <div className="space-y-2">
                             {announcements.slice(0, 3).map((announcement) => {
-                              // ✅ Safe access with fallbacks
                               const orgName = announcement.organizations?.name || 'Unknown Organization';
                               return (
                                 <div key={announcement.id} className="rounded-lg border border-gray-200 bg-white p-3">
@@ -247,7 +295,6 @@ const Dashboard = () => {
                           <h4 className="text-sm font-medium text-gray-500 mb-2">Upcoming Events</h4>
                           <div className="space-y-2">
                             {events.slice(0, 3).map((event) => {
-                              // ✅ Safe access with fallbacks
                               const orgName = event.organizations?.name || 'Unknown Organization';
                               return (
                                 <div key={event.id} className="rounded-lg border border-gray-200 bg-white p-3">
@@ -298,7 +345,7 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-6xl">
-        {/* Clean Welcome Section */}
+        {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
             Welcome back, {profile?.name || user?.email?.split('@')[0] || 'User'}! 👋
@@ -306,7 +353,6 @@ const Dashboard = () => {
           <p className="text-gray-600">
             Latest updates from your organizations
           </p>
-          {/* Simple stats */}
           <div className="flex gap-4 mt-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{announcements.length}</div>
@@ -320,7 +366,7 @@ const Dashboard = () => {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Main Content - Instagram-like feed (2/3 width) */}
+          {/* Main Content - Feed */}
           <div className="lg:col-span-2">
             {announcements.length === 0 ? (
               <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
@@ -340,11 +386,10 @@ const Dashboard = () => {
             ) : (
               <div className="space-y-6">
                 {announcements.map((announcement) => {
-                  // ✅ SAFE - Extract with null checks
                   const org = announcement.organizations;
                   const orgName = org?.name || 'Unknown Organization';
                   const orgProfilePic = org?.profile_picture || null;
-                  
+
                   return (
                     <div key={announcement.id} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                       {/* Post Header */}
@@ -354,19 +399,13 @@ const Dashboard = () => {
                             <AvatarImage 
                               src={orgProfilePic || undefined}
                               alt={orgName}
-                              onError={(e) => {
-                                console.log(`Failed to load profile picture for ${orgName}:`, orgProfilePic);
-                                e.currentTarget.style.display = 'none';
-                              }}
                             />
                             <AvatarFallback className="bg-gray-100 text-gray-700">
                               {orgName.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <h3 className="font-semibold text-gray-900">
-                              {orgName}
-                            </h3>
+                            <h3 className="font-semibold text-gray-900">{orgName}</h3>
                             <p className="text-xs text-gray-500">
                               {format(new Date(announcement.created_at), "MMM d 'at' h:mm a")}
                             </p>
@@ -379,9 +418,7 @@ const Dashboard = () => {
 
                       {/* Announcement Title */}
                       <div className="px-4 pb-3">
-                        <h2 className="text-lg font-bold text-gray-900">
-                          {announcement.title}
-                        </h2>
+                        <h2 className="text-lg font-bold text-gray-900">{announcement.title}</h2>
                       </div>
 
                       {/* Announcement Image */}
@@ -391,67 +428,53 @@ const Dashboard = () => {
                             src={announcement.image_url}
                             alt={announcement.title}
                             className="w-full max-h-[500px] object-contain"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                            }}
                           />
                         </div>
                       )}
 
-                      {/* Post Actions */}
-                      <div className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-4">
-                          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500">
-                            <Heart className="h-6 w-6" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-blue-500">
-                            <MessageCircle className="h-6 w-6" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-green-500">
-                            <Share2 className="h-6 w-6" />
-                          </Button>
-                        </div>
-                        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-yellow-500">
-                          <Bookmark className="h-6 w-6" />
-                        </Button>
-                      </div>
-
                       {/* Announcement Content */}
                       <div className="px-4 pb-4">
                         <div className="mb-3">
-                          <span className="font-semibold text-gray-900 mr-2">
-                            {orgName}
-                          </span>
-                          <span className="text-gray-700">{announcement.content}</span>
-                        </div>
-                        
-                        {/* View Comments/Likes */}
-                        <div className="mb-3 text-sm text-gray-500">
-                          <button className="hover:text-gray-700">View all comments</button>
-                          <span className="mx-2">•</span>
-                          <span>42 likes</span>
-                        </div>
-                        
-                        {/* Add Comment */}
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-gray-100 text-gray-700">
-                              {(profile?.name?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'U')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <input
-                              type="text"
-                              placeholder="Add a comment..."
-                              className="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-0 placeholder-gray-400"
-                            />
-                          </div>
-                          <Button variant="link" className="h-auto p-0 text-sm text-blue-600 font-medium">
-                            Post
-                          </Button>
+                          <span className="font-semibold text-gray-900 mr-2">{orgName}</span>
+                          <span className="text-gray-700 whitespace-pre-wrap">{announcement.content}</span>
                         </div>
                       </div>
+
+                      {/* Post Actions */}
+                      <div className="flex items-center justify-between px-4 py-2 border-t border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-red-500 gap-1">
+                            <Heart className="h-5 w-5" />
+                            <span className="text-sm">42</span>
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-500 hover:text-blue-500 gap-1"
+                            onClick={() => toggleComments(announcement.id)}
+                          >
+                            <MessageCircle className="h-5 w-5" />
+                            <span className="text-sm">{commentCounts[announcement.id] || 0}</span>
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-green-500">
+                            <Share2 className="h-5 w-5" />
+                          </Button>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-yellow-500">
+                          <Bookmark className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      {/* Comments Section */}
+                      {openComments[announcement.id] && (
+                        <div className="border-t border-gray-100 bg-gray-50">
+                          <CommentSection 
+                            announcementId={announcement.id} 
+                            orgId={announcement.org_id}
+                            onCommentAdded={() => fetchCommentCount(announcement.id)}
+                          />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -459,7 +482,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Sidebar - Fixed column */}
+          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
               {/* User Profile Card */}
@@ -517,7 +540,6 @@ const Dashboard = () => {
                   ) : (
                     <div className="space-y-3">
                       {events.map((event) => {
-                        // ✅ SAFE - Extract with null checks
                         const org = event.organizations;
                         const orgName = org?.name || 'Unknown Organization';
                         const orgProfilePic = org?.profile_picture || null;
@@ -558,22 +580,7 @@ const Dashboard = () => {
                                     )}
                                   </div>
                                   <p className="mt-2 text-xs text-blue-600 font-medium truncate">
-                                    {orgProfilePic ? (
-                                      <span className="flex items-center gap-1">
-                                        <img 
-                                          src={orgProfilePic} 
-                                          alt={orgName}
-                                          className="h-3 w-3 rounded-full mr-1"
-                                          onError={(e) => {
-                                            console.log(`Failed to load org picture for event: ${orgName}`);
-                                            e.currentTarget.style.display = 'none';
-                                          }}
-                                        />
-                                        {orgName}
-                                      </span>
-                                    ) : (
-                                      orgName
-                                    )}
+                                    {orgName}
                                   </p>
                                 </div>
                               </div>
