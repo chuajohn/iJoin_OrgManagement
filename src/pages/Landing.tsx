@@ -36,11 +36,11 @@ const Landing = () => {
           <div className="flex items-center gap-3">
             <div className="relative">
               {/* Logo Image */}
-            <img 
-              src="/logo.svg" 
-              alt="logo" 
-              className="h-8 w-auto md:h-10"
-            />
+              <img 
+                src="/logo.svg" 
+                alt="logo" 
+                className="h-8 w-auto md:h-10"
+              />
               <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 border-2 border-gray-900"></div>
             </div>
             <div className="flex flex-col">
