@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, Bookmark, MoreHorizontal, MapPin, Clock, Share2 } from "lucide-react";
+import { Bell, Calendar, Users, LogOut, Shield, Plus, User, ExternalLink, Heart, MessageCircle, Bookmark, MoreHorizontal, MapPin, Clock, Share2, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -87,7 +87,7 @@ const Dashboard = () => {
         `)
         .in("org_id", orgIds)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(50);
 
       // Filter out null organizations and set announcements
       const validAnnouncements = announcementsData?.filter(a => a.organizations !== null) || [];
@@ -120,7 +120,7 @@ const Dashboard = () => {
         .gte("event_date", new Date().toISOString())
         .eq("status", "approved")
         .order("event_date", { ascending: true })
-        .limit(5);
+        .limit(3);
 
       setEvents(eventsData?.filter(e => e.organizations !== null) || []);
       
@@ -193,15 +193,19 @@ const Dashboard = () => {
       {/* Header - RESTORED from old working version */}
       <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-50 to-white border-b shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-400">
-              <Users className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <span className="text-xl font-bold text-gray-900">iJoin</span>
-              <span className="ml-2 text-sm text-blue-600 font-medium">Dashboard</span>
-            </div>
-          </div>
+          {/* Icon + Image Logo */}
+        <div className="flex items-center gap-3">
+          <Link to="/dashboard" className="flex items-center gap-3">
+            {/* Logo Image */}
+            <img 
+              src="/logo.svg" 
+              alt="logo" 
+              className="h-8 w-auto md:h-10"
+            />
+            {/* Brand Name */}
+            <span className="text-xl font-bold text-gray-900 hidden sm:inline">iJoin</span>
+          </Link>
+        </div>
           <div className="flex items-center gap-2">
             <Link to="/explore">
               <Button 
@@ -209,6 +213,7 @@ const Dashboard = () => {
                 size="sm"
                 className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
               >
+                <Search className="h-4 w-4 mr-1"/>
                 Explore
               </Button>
             </Link>
@@ -218,7 +223,7 @@ const Dashboard = () => {
                 size="sm"
                 className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
               >
-                <Calendar className="h-4 w-4 mr-2" />
+                <Calendar className="h-4 w-4 mr-1" />
                 Calendar
               </Button>
             </Link>
@@ -228,8 +233,8 @@ const Dashboard = () => {
                 size="sm"
                 className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Request Org
+                <Plus className="h-4 w-4 mr-1" />
+                Propose org
               </Button>
             </Link>
             {(isAdmin || isSAO) && (

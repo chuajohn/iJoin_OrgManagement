@@ -233,8 +233,8 @@ export function UserRoleManagement() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="w-[250px]">User</TableHead>
-                <TableHead className="w-[200px]">System Role</TableHead>
+                <TableHead className="w-[350px]">User</TableHead>
+                <TableHead className="w-[350px]">System Role</TableHead>
                 <TableHead>Organizations</TableHead>
               </TableRow>
             </TableHeader>

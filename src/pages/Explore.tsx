@@ -227,18 +227,18 @@ const Explore = () => {
       {/* Header (unchanged) */}
       <header className="border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <Link to={user ? "/dashboard" : "/"}>
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
+          {/* Icon + Image Logo */}
+          <div className="flex items-center gap-3">
+            <Link to="/dashboard" className="flex items-center gap-3">
+              {/* Logo Image */}
+              <img 
+                src="/logo.svg" 
+                alt="logo" 
+                className="h-8 w-auto md:h-10"
+              />
+              {/* Brand Name */}
+              <span className="text-xl font-bold text-gray-900 hidden sm:inline">iJoin</span>
             </Link>
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-foreground">iJoin</span>
-            </div>
           </div>
           
           {user && (

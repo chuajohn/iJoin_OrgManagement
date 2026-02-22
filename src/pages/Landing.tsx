@@ -35,9 +35,12 @@ const Landing = () => {
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 shadow-lg">
-                <Users className="h-6 w-6 text-white" />
-              </div>
+              {/* Logo Image */}
+            <img 
+              src="/logo.svg" 
+              alt="logo" 
+              className="h-8 w-auto md:h-10"
+            />
               <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 border-2 border-gray-900"></div>
             </div>
             <div className="flex flex-col">
