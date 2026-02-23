@@ -3,12 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTitle 
+} from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import { ArrowLeft, Calendar as CalendarIcon, MapPin, Clock, School, GraduationCap, Users } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek } from "date-fns";
+import { ArrowLeft, Calendar as CalendarIcon, MapPin, Clock, School, GraduationCap, Users, ExternalLink } from "lucide-react";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, isAfter, isBefore } from "date-fns";
 
 type Event = {
   id: string;
@@ -16,9 +22,11 @@ type Event = {
   description: string | null;
   event_date: string;
   location: string | null;
+  org_id: string;
   organizations: {
     name: string;
-    is_shs_org: boolean; // Add this field
+    is_shs_org: boolean;
+    profile_picture: string | null;
   } | null;
 };
 
@@ -30,9 +38,14 @@ export default function Calendar() {
   const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
+  
+  // Event modal state
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   // Set default tab based on user role
   useEffect(() => {
@@ -50,7 +63,7 @@ export default function Calendar() {
   }, []);
 
   useEffect(() => {
-    // Filter events based on active tab
+    // Filter events based on active tab for calendar display
     let filtered = [...events];
 
     if (activeTab === 'shs') {
@@ -61,6 +74,12 @@ export default function Calendar() {
     // 'all' shows everything
 
     setFilteredEvents(filtered);
+
+    // Separate upcoming events (future dates) for the list
+    const now = new Date();
+    const upcoming = filtered.filter(event => isAfter(new Date(event.event_date), now));
+    setUpcomingEvents(upcoming);
+    
   }, [events, activeTab]);
 
   const fetchEvents = async () => {
@@ -73,9 +92,11 @@ export default function Calendar() {
           description,
           event_date,
           location,
+          org_id,
           organizations (
             name,
-            is_shs_org
+            is_shs_org,
+            profile_picture
           )
         `)
         .eq("status", "approved")
@@ -104,6 +125,25 @@ export default function Calendar() {
 
   const selectedDateEvents = selectedDate ? getEventsForDate(selectedDate) : [];
 
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsEventModalOpen(true);
+  };
+
+  const handleOrgClick = (orgId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event modal from opening
+    navigate(`/org/${orgId}`);
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   const getOrgTypeBadge = (is_shs_org: boolean) => {
     if (is_shs_org) {
       return (
@@ -120,6 +160,10 @@ export default function Calendar() {
         </Badge>
       );
     }
+  };
+
+  const isPastEvent = (eventDate: string) => {
+    return isBefore(new Date(eventDate), new Date());
   };
 
   return (
@@ -160,7 +204,7 @@ export default function Calendar() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Filter Tabs - Everyone can use these */}
+        {/* Filter Tabs */}
         <div className="mb-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabFilter)} className="w-full">
             <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
@@ -179,7 +223,6 @@ export default function Calendar() {
             </TabsList>
           </Tabs>
           
-          {/* Context hint */}
           <p className="text-center text-xs text-muted-foreground mt-3">
             {activeTab === 'shs' && "Showing Senior High School events"}
             {activeTab === 'college' && "Showing College/Undergraduate events"}
@@ -225,7 +268,7 @@ export default function Calendar() {
                 </div>
               </div>
               <CardDescription>
-                {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} found
+                {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} on calendar
                 {activeTab !== 'all' && ` in ${activeTab === 'shs' ? 'SHS' : 'College'} view`}
               </CardDescription>
             </CardHeader>
@@ -281,7 +324,7 @@ export default function Calendar() {
             </CardContent>
           </Card>
 
-          {/* Event Details */}
+          {/* Event Details - Clickable cards that open modal */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -297,34 +340,51 @@ export default function Calendar() {
             <CardContent>
               {selectedDateEvents.length > 0 ? (
                 <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                  {selectedDateEvents.map((event) => (
-                    <div key={event.id} className="border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-semibold">{event.name}</h4>
-                        {getOrgTypeBadge(event.organizations?.is_shs_org || false)}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span className="font-medium text-foreground">
-                          {event.organizations?.name}
-                        </span>
-                      </div>
-                      {event.description && (
-                        <p className="text-sm border-t pt-2 mt-1">{event.description}</p>
-                      )}
-                      <div className="space-y-1 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {format(new Date(event.event_date), "h:mm a")}
+                  {selectedDateEvents.map((event) => {
+                    const isPast = isPastEvent(event.event_date);
+                    
+                    return (
+                      <button
+                        key={event.id}
+                        onClick={() => handleEventClick(event)}
+                        className={`
+                          w-full text-left border rounded-lg p-4 space-y-3 
+                          hover:shadow-md hover:border-primary transition-all
+                          ${isPast ? 'opacity-75' : ''}
+                        `}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-semibold">{event.name}</h4>
+                          {getOrgTypeBadge(event.organizations?.is_shs_org || false)}
                         </div>
-                        {event.location && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {event.location}
-                          </div>
+                        {isPast && (
+                          <Badge variant="outline" className="text-[10px]">Past Event</Badge>
                         )}
-                      </div>
-                    </div>
-                  ))}
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-medium text-foreground">
+                            {event.organizations?.name}
+                          </span>
+                        </div>
+                        <div className="space-y-1 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {format(new Date(event.event_date), "h:mm a")}
+                          </div>
+                          {event.location && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {event.location}
+                            </div>
+                          )}
+                        </div>
+                        {event.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2 border-t pt-2">
+                            {event.description}
+                          </p>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground text-center py-12">
@@ -348,16 +408,16 @@ export default function Calendar() {
           </Card>
         </div>
 
-        {/* Upcoming Events List */}
+        {/* Upcoming Events List - Only shows future events */}
         <Card className="mt-6">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Upcoming Events</CardTitle>
                 <CardDescription>
-                  {activeTab === 'all' && "All approved public events from organizations"}
-                  {activeTab === 'shs' && "SHS organization events"}
-                  {activeTab === 'college' && "College organization events"}
+                  {activeTab === 'all' && "Future events from organizations"}
+                  {activeTab === 'shs' && "Future SHS organization events"}
+                  {activeTab === 'college' && "Future College organization events"}
                 </CardDescription>
               </div>
               {activeTab !== 'all' && (
@@ -369,10 +429,14 @@ export default function Calendar() {
             </div>
           </CardHeader>
           <CardContent>
-            {filteredEvents.length > 0 ? (
+            {upcomingEvents.length > 0 ? (
               <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                {filteredEvents.map((event) => (
-                  <div key={event.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                {upcomingEvents.map((event) => (
+                  <button
+                    key={event.id}
+                    onClick={() => handleEventClick(event)}
+                    className="w-full text-left border rounded-lg p-4 hover:shadow-md hover:border-primary transition-all"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center gap-2">
@@ -380,9 +444,6 @@ export default function Calendar() {
                           {getOrgTypeBadge(event.organizations?.is_shs_org || false)}
                         </div>
                         <p className="text-sm text-muted-foreground">{event.organizations?.name}</p>
-                        {event.description && (
-                          <p className="text-sm mt-2">{event.description}</p>
-                        )}
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-3">
@@ -401,7 +462,12 @@ export default function Calendar() {
                         </div>
                       )}
                     </div>
-                  </div>
+                    {event.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2 border-t pt-2 mt-2">
+                        {event.description}
+                      </p>
+                    )}
+                  </button>
                 ))}
               </div>
             ) : (
@@ -424,6 +490,97 @@ export default function Calendar() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Event Details Modal */}
+      <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
+        <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden bg-background/95 backdrop-blur-sm">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 pb-2">
+            <DialogTitle className="text-xl font-bold">Event Details</DialogTitle>
+          </div>
+
+          {selectedEvent && selectedEvent.organizations && (
+            <>
+              {/* Organization Header - Clickable */}
+              <div 
+                onClick={(e) => handleOrgClick(selectedEvent.org_id, e)}
+                className="px-6 py-3 bg-muted/20 border-y hover:bg-muted/30 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 border-2 border-background">
+                    <AvatarImage src={selectedEvent.organizations.profile_picture || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {getInitials(selectedEvent.organizations.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">{selectedEvent.organizations.name}</p>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Click to view organization</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Event Content */}
+              <div className="p-6 space-y-6">
+                {/* Event Name */}
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground">{selectedEvent.name}</h3>
+                  {isPastEvent(selectedEvent.event_date) && (
+                    <Badge variant="outline" className="mt-2">Past Event</Badge>
+                  )}
+                </div>
+
+                {/* Date, Time, Location Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CalendarIcon className="h-4 w-4 text-primary" />
+                      <span>{format(new Date(selectedEvent.event_date), "EEEE, MMMM d, yyyy")}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span>{format(new Date(selectedEvent.event_date), "h:mm a")}</span>
+                    </div>
+                  </div>
+                  {selectedEvent.location && (
+                    <div className="col-span-2 space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span>{selectedEvent.location}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description */}
+                {selectedEvent.description && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</p>
+                    <div className="bg-muted/20 rounded-lg p-4">
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                        {selectedEvent.description}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Type Badge */}
+                <div className="pt-4 border-t flex justify-center">
+                  {getOrgTypeBadge(selectedEvent.organizations.is_shs_org)}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -30,9 +30,16 @@ interface CommentSectionProps {
   announcementId: string;
   orgId: string;
   onCommentAdded?: () => void;
+  userAvatar?: string | null;
+  userInitials?: string;
 }
 
-export function CommentSection({ announcementId, orgId, onCommentAdded }: CommentSectionProps) {
+export function CommentSection({ 
+  announcementId, 
+  onCommentAdded,
+  userAvatar,
+  userInitials 
+}: CommentSectionProps) {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -151,6 +158,15 @@ export function CommentSection({ announcementId, orgId, onCommentAdded }: Commen
     return comment.user_id === user?.id;
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-4">
@@ -167,8 +183,8 @@ export function CommentSection({ announcementId, orgId, onCommentAdded }: Commen
           <div key={comment.id} className="flex gap-3">
             <Avatar className="h-8 w-8 flex-shrink-0">
               <AvatarImage src={comment.profiles?.profile_picture || undefined} />
-              <AvatarFallback>
-                {comment.profiles?.name?.[0]?.toUpperCase() || "U"}
+              <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+                {comment.profiles?.name ? getInitials(comment.profiles.name) : 'U'}
               </AvatarFallback>
             </Avatar>
             
@@ -256,12 +272,13 @@ export function CommentSection({ announcementId, orgId, onCommentAdded }: Commen
         )}
       </div>
 
-      {/* Comment Input */}
+      {/* Comment Input - Fixed avatar display */}
       {user && (
         <div className="flex gap-3 pt-4 border-t">
           <Avatar className="h-8 w-8 flex-shrink-0">
-            <AvatarFallback>
-              {user.email?.[0]?.toUpperCase() || "U"}
+            <AvatarImage src={userAvatar || undefined} />
+            <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+              {userInitials || user?.email?.[0]?.toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 flex gap-2">

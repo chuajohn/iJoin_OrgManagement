@@ -7,14 +7,20 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
-import { Bell, Calendar, Users, LogOut, Shield, Plus, User, ExternalLink, Heart, MessageCircle, Bookmark, MoreHorizontal, MapPin, Clock, Share2, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTitle 
+} from "@/components/ui/dialog";
+import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, MapPin, Clock, Search, X, ChevronDown, ChevronUp, CheckCheck } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/useUserRole";
 import { SignOutButton } from "@/components/SignOutButton";
 import { CommentSection } from "@/components/CommentSection";
+import { NotificationItem } from "@/components/NotificationItem";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 interface Announcement {
   id: string;
@@ -35,24 +41,59 @@ interface Event {
   description: string;
   event_date: string;
   location: string;
+  org_id: string;
   organizations: {
     name: string;
     profile_picture: string | null;
   } | null;
 }
 
+interface LikeState {
+  count: number;
+  userLiked: boolean;
+}
+
+interface Notification {
+  id: string;
+  type: 'membership_accepted' | 'new_announcement' | 'new_event' | 'org_approved';
+  title: string;
+  message: string;
+  data: {
+    org_id?: string;
+    announcement_id?: string;
+    event_id?: string;
+    membership_id?: string;
+  };
+  read: boolean;
+  created_at: string;
+  user_id: string;
+}
+
 const Dashboard = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const { isAdmin, isSAO } = useUserRole();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
+  const [likes, setLikes] = useState<Record<string, LikeState>>({});
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
+  
+  // Event modal state
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchDashboardData();
-    setupRealtimeSubscription();
+    if (user) {
+      fetchDashboardData();
+      fetchNotifications();
+      setupRealtimeSubscription();
+      setupNotificationsSubscription();
+    }
   }, [user]);
 
   const fetchDashboardData = async () => {
@@ -89,24 +130,45 @@ const Dashboard = () => {
         .order("created_at", { ascending: false })
         .limit(50);
 
-      // Filter out null organizations and set announcements
       const validAnnouncements = announcementsData?.filter(a => a.organizations !== null) || [];
       setAnnouncements(validAnnouncements);
 
-      // Fetch comment counts for each announcement
+      // Fetch comment counts and likes for each announcement
       const counts: Record<string, number> = {};
+      const likesData: Record<string, LikeState> = {};
+      
       await Promise.all(
         validAnnouncements.map(async (a) => {
-          const { count } = await supabase
+          const { count: commentCount } = await supabase
             .from("comments")
             .select("*", { count: "exact", head: true })
             .eq("announcement_id", a.id);
-          counts[a.id] = count || 0;
+          counts[a.id] = commentCount || 0;
+
+          const { count: likeCount } = await supabase
+            .from("likes")
+            .select("*", { count: "exact", head: true })
+            .eq("announcement_id", a.id);
+
+          const { data: userLike } = await supabase
+            .from("likes")
+            .select("id")
+            .eq("announcement_id", a.id)
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          likesData[a.id] = {
+            count: likeCount || 0,
+            userLiked: !!userLike
+          };
         })
       );
+      
       setCommentCounts(counts);
+      setLikes(likesData);
 
-      // Fetch upcoming events
+      // Fetch upcoming events (future dates only)
+      const now = new Date().toISOString();
       const { data: eventsData } = await supabase
         .from("events")
         .select(`
@@ -117,10 +179,10 @@ const Dashboard = () => {
           )
         `)
         .in("org_id", orgIds)
-        .gte("event_date", new Date().toISOString())
+        .gte("event_date", now)
         .eq("status", "approved")
         .order("event_date", { ascending: true })
-        .limit(3);
+        .limit(5);
 
       setEvents(eventsData?.filter(e => e.organizations !== null) || []);
       
@@ -128,6 +190,80 @@ const Dashboard = () => {
       console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      
+      // Transform the data with proper type casting
+      const transformedNotifications: Notification[] = (data || []).map(item => ({
+        id: item.id,
+        type: item.type as Notification['type'], // Cast to the correct type
+        title: item.title,
+        message: item.message,
+        data: item.data as Notification['data'], // Cast data
+        read: item.read,
+        created_at: item.created_at,
+        user_id: item.user_id
+      }));
+      
+      setNotifications(transformedNotifications);
+      setUnreadCount(transformedNotifications.filter(n => !n.read).length || 0);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("id", notificationId);
+
+      if (error) throw error;
+      
+      setNotifications(prev =>
+        prev.map(n =>
+          n.id === notificationId ? { ...n, read: true } : n
+        )
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
+    if (unreadIds.length === 0) return;
+
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .in("id", unreadIds);
+
+      if (error) throw error;
+      
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, read: true }))
+      );
+      setUnreadCount(0);
+      toast.success("All notifications marked as read");
+    } catch (error) {
+      console.error("Error marking all as read:", error);
     }
   };
 
@@ -154,6 +290,58 @@ const Dashboard = () => {
           }
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "likes" },
+        (payload) => {
+          if (payload.new && 'announcement_id' in payload.new) {
+            const announcementId = payload.new.announcement_id as string;
+            fetchLikeData(announcementId);
+          } else if (payload.old && 'announcement_id' in payload.old) {
+            const announcementId = payload.old.announcement_id as string;
+            fetchLikeData(announcementId);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const setupNotificationsSubscription = () => {
+    const channel = supabase
+      .channel("notifications")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user?.id}`,
+        },
+        (payload) => {
+          const newItem = payload.new as any;
+          const newNotification: Notification = {
+            id: newItem.id,
+            type: newItem.type as Notification['type'], // Cast to the correct type
+            title: newItem.title,
+            message: newItem.message,
+            data: newItem.data as Notification['data'], // Cast data
+            read: newItem.read,
+            created_at: newItem.created_at,
+            user_id: newItem.user_id
+          };
+          
+          setNotifications(prev => [newNotification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+          toast.info(newNotification.title, {
+            description: newNotification.message,
+            duration: 5000,
+          });
+        }
+      )
       .subscribe();
 
     return () => {
@@ -173,11 +361,123 @@ const Dashboard = () => {
     }));
   };
 
+  const fetchLikeData = async (announcementId: string) => {
+    if (!user) return;
+
+    try {
+      const { count } = await supabase
+        .from("likes")
+        .select("*", { count: "exact", head: true })
+        .eq("announcement_id", announcementId);
+
+      const { data: userLike } = await supabase
+        .from("likes")
+        .select("id")
+        .eq("announcement_id", announcementId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      setLikes(prev => ({
+        ...prev,
+        [announcementId]: {
+          count: count || 0,
+          userLiked: !!userLike
+        }
+      }));
+    } catch (error) {
+      console.error("Error fetching like data:", error);
+    }
+  };
+
+  const toggleLike = async (announcementId: string) => {
+    if (!user) {
+      toast.error("Please sign in to like posts");
+      return;
+    }
+
+    const currentLike = likes[announcementId];
+    
+    try {
+      if (currentLike?.userLiked) {
+        const { error } = await supabase
+          .from("likes")
+          .delete()
+          .eq("announcement_id", announcementId)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+
+        setLikes(prev => ({
+          ...prev,
+          [announcementId]: {
+            count: (prev[announcementId]?.count || 1) - 1,
+            userLiked: false
+          }
+        }));
+      } else {
+        const { error } = await supabase
+          .from("likes")
+          .insert({
+            announcement_id: announcementId,
+            user_id: user.id
+          });
+
+        if (error) throw error;
+
+        setLikes(prev => ({
+          ...prev,
+          [announcementId]: {
+            count: (prev[announcementId]?.count || 0) + 1,
+            userLiked: true
+          }
+        }));
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      toast.error("Failed to update like");
+    }
+  };
+
   const toggleComments = (announcementId: string) => {
     setOpenComments(prev => ({
       ...prev,
       [announcementId]: !prev[announcementId]
     }));
+  };
+
+  const toggleDescription = (announcementId: string) => {
+    setExpandedDescriptions(prev => ({
+      ...prev,
+      [announcementId]: !prev[announcementId]
+    }));
+  };
+
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsEventModalOpen(true);
+  };
+
+  const handleOrgClick = (orgId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/org/${orgId}`);
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const truncateText = (text: string, maxLength: number = 300) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + "...";
+  };
+
+  const isPastEvent = (eventDate: string) => {
+    return new Date(eventDate) < new Date();
   };
 
   if (loading) {
@@ -190,60 +490,41 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - RESTORED from old working version */}
+      {/* Header */}
       <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-50 to-white border-b shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          {/* Icon + Image Logo */}
-        <div className="flex items-center gap-3">
-          <Link to="/dashboard" className="flex items-center gap-3">
-            {/* Logo Image */}
-            <img 
-              src="/logo.svg" 
-              alt="logo" 
-              className="h-8 w-auto md:h-10"
-            />
-            {/* Brand Name */}
-            <span className="text-xl font-bold text-gray-900 hidden sm:inline">iJoin</span>
-          </Link>
-        </div>
+          <div className="flex items-center gap-3">
+            <Link to="/dashboard" className="flex items-center gap-3">
+              <img 
+                src="/logo.svg" 
+                alt="logo" 
+                className="h-8 w-auto md:h-10"
+              />
+              <span className="text-xl font-bold text-gray-900 hidden sm:inline">iJoin</span>
+            </Link>
+          </div>
           <div className="flex items-center gap-2">
             <Link to="/explore">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-              >
+              <Button variant="ghost" size="sm">
                 <Search className="h-4 w-4 mr-1"/>
                 Explore
               </Button>
             </Link>
             <Link to="/calendar">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-              >
+              <Button variant="ghost" size="sm">
                 <Calendar className="h-4 w-4 mr-1" />
                 Calendar
               </Button>
             </Link>
             <Link to="/create-organization">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-              >
+              <Button variant="ghost" size="sm">
                 <Plus className="h-4 w-4 mr-1" />
-                Propose org
+                Request org
               </Button>
             </Link>
             {(isAdmin || isSAO) && (
               <Link to="/admin">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-                >
+                <Button variant="ghost" size="sm">
                   <Shield className="h-4 w-4 mr-2" />
                   Admin
                 </Button>
@@ -251,100 +532,56 @@ const Dashboard = () => {
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 relative"
-                >
+                <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
-                  {(announcements.length > 0 || events.length > 0) && (
-                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-500" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 border-gray-200 shadow-lg" align="end">
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-gray-900">Notifications</h3>
-                  <Separator />
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-4">
-                      {announcements.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-2">Recent Announcements</h4>
-                          <div className="space-y-2">
-                            {announcements.slice(0, 3).map((announcement) => {
-                              const orgName = announcement.organizations?.name || 'Unknown Organization';
-                              return (
-                                <div key={announcement.id} className="rounded-lg border border-gray-200 bg-white p-3">
-                                  <p className="text-sm font-semibold text-gray-900">{announcement.title}</p>
-                                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                                    {announcement.content}
-                                  </p>
-                                  <div className="flex items-center justify-between mt-2">
-                                    <span className="text-xs text-blue-600 font-medium">
-                                      {orgName}
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                      {format(new Date(announcement.created_at), "MMM d")}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {events.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-2">Upcoming Events</h4>
-                          <div className="space-y-2">
-                            {events.slice(0, 3).map((event) => {
-                              const orgName = event.organizations?.name || 'Unknown Organization';
-                              return (
-                                <div key={event.id} className="rounded-lg border border-gray-200 bg-white p-3">
-                                  <p className="text-sm font-semibold text-gray-900">{event.name}</p>
-                                  <p className="text-xs text-gray-600 mt-1">
-                                    {format(new Date(event.event_date), "MMM d, h:mm a")}
-                                  </p>
-                                  <div className="flex items-center justify-between mt-2">
-                                    <span className="text-xs text-blue-600 font-medium">
-                                      {orgName}
-                                    </span>
-                                    {event.location && (
-                                      <span className="text-xs text-gray-500">{event.location}</span>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {announcements.length === 0 && events.length === 0 && (
-                        <p className="text-sm text-gray-500 text-center py-8">No recent notifications</p>
-                      )}
-                    </div>
-                  </ScrollArea>
+              <PopoverContent className="w-96 p-0" align="end">
+                <div className="flex items-center justify-between p-4 border-b">
+                  <h3 className="font-semibold">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs gap-1"
+                      onClick={markAllAsRead}
+                    >
+                      <CheckCheck className="h-3 w-3" />
+                      Mark all as read
+                    </Button>
+                  )}
                 </div>
+                <ScrollArea className="h-[500px]">
+                  {notifications.length === 0 ? (
+                    <div className="py-12 text-center text-muted-foreground">
+                      <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No notifications yet</p>
+                    </div>
+                  ) : (
+                    <div className="p-2">
+                      {notifications.map((notification) => (
+                        <NotificationItem
+                          key={notification.id}
+                          notification={notification}
+                          onMarkAsRead={markAsRead}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
               </PopoverContent>
             </Popover>
             <Link to="/profile">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                title="Profile"
-                className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-              >
+              <Button variant="ghost" size="icon" title="Profile">
                 <User className="h-5 w-5" />
               </Button>
             </Link>
-            <SignOutButton 
-              variant="ghost" 
-              size="icon" 
-              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-            />
+            <SignOutButton variant="ghost" size="icon" />
           </div>
         </div>
       </header>
@@ -372,276 +609,329 @@ const Dashboard = () => {
 
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main Content - Feed */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             {announcements.length === 0 ? (
-              <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                  <Bell className="h-8 w-8 text-gray-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900">No announcements yet</h3>
-                <p className="mb-4 text-gray-600">
-                  Join organizations or check back later for updates
-                </p>
-                <Link to="/explore">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Explore Organizations
-                  </Button>
-                </Link>
-              </div>
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No announcements yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Join organizations or check back later for updates
+                  </p>
+                  <Link to="/explore">
+                    <Button>Explore Organizations</Button>
+                  </Link>
+                </CardContent>
+              </Card>
             ) : (
-              <div className="space-y-6">
-                {announcements.map((announcement) => {
-                  const org = announcement.organizations;
-                  const orgName = org?.name || 'Unknown Organization';
-                  const orgProfilePic = org?.profile_picture || null;
+              announcements.map((announcement) => {
+                const org = announcement.organizations;
+                const orgName = org?.name || 'Unknown Organization';
+                const orgProfilePic = org?.profile_picture || null;
+                const likeData = likes[announcement.id] || { count: 0, userLiked: false };
+                const isExpanded = expandedDescriptions[announcement.id] || false;
+                const displayContent = isExpanded 
+                  ? announcement.content 
+                  : truncateText(announcement.content, 300);
 
-                  return (
-                    <div key={announcement.id} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                      {/* Post Header */}
-                      <div className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10 border">
-                            <AvatarImage 
-                              src={orgProfilePic || undefined}
-                              alt={orgName}
-                            />
-                            <AvatarFallback className="bg-gray-100 text-gray-700">
-                              {orgName.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{orgName}</h3>
-                            <p className="text-xs text-gray-500">
-                              {format(new Date(announcement.created_at), "MMM d 'at' h:mm a")}
-                            </p>
-                          </div>
+                return (
+                  <Card key={announcement.id} className="overflow-hidden">
+                    {/* Post Header */}
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={orgProfilePic || undefined} />
+                          <AvatarFallback>{orgName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-base">{orgName}</CardTitle>
+                          <CardDescription>
+                            {format(new Date(announcement.created_at), "MMM d 'at' h:mm a")}
+                          </CardDescription>
                         </div>
-                        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-700">
-                          <MoreHorizontal className="h-5 w-5" />
-                        </Button>
                       </div>
+                    </CardHeader>
 
-                      {/* Announcement Title */}
-                      <div className="px-4 pb-3">
-                        <h2 className="text-lg font-bold text-gray-900">{announcement.title}</h2>
-                      </div>
-
-                      {/* Announcement Image */}
+                    <CardContent className="space-y-4">
+                      {/* Title */}
+                      <h3 className="font-semibold text-lg">{announcement.title}</h3>
+                      
+                      {/* Image */}
                       {announcement.image_url && (
-                        <div className="bg-gray-50">
+                        <div className="rounded-lg overflow-hidden bg-muted/20">
                           <img
                             src={announcement.image_url}
                             alt={announcement.title}
-                            className="w-full max-h-[500px] object-contain"
+                            className="w-full h-auto object-cover"
                           />
                         </div>
                       )}
-
-                      {/* Announcement Content */}
-                      <div className="px-4 pb-4">
-                        <div className="mb-3">
-                          <span className="font-semibold text-gray-900 mr-2">{orgName}</span>
-                          <span className="text-gray-700 whitespace-pre-wrap">{announcement.content}</span>
-                        </div>
+                      
+                      {/* Description */}
+                      <div className="space-y-2">
+                        <p className="text-muted-foreground whitespace-pre-wrap">
+                          {displayContent}
+                        </p>
+                        {announcement.content.length > 300 && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-primary"
+                            onClick={() => toggleDescription(announcement.id)}
+                          >
+                            {isExpanded ? (
+                              <>Show less <ChevronUp className="ml-1 h-4 w-4" /></>
+                            ) : (
+                              <>Read more <ChevronDown className="ml-1 h-4 w-4" /></>
+                            )}
+                          </Button>
+                        )}
                       </div>
 
                       {/* Post Actions */}
-                      <div className="flex items-center justify-between px-4 py-2 border-t border-gray-100">
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-red-500 gap-1">
-                            <Heart className="h-5 w-5" />
-                            <span className="text-sm">42</span>
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-500 hover:text-blue-500 gap-1"
-                            onClick={() => toggleComments(announcement.id)}
-                          >
-                            <MessageCircle className="h-5 w-5" />
-                            <span className="text-sm">{commentCounts[announcement.id] || 0}</span>
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-green-500">
-                            <Share2 className="h-5 w-5" />
-                          </Button>
-                        </div>
-                        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-yellow-500">
-                          <Bookmark className="h-5 w-5" />
+                      <div className="flex items-center gap-4 pt-4 border-t">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`gap-2 ${likeData.userLiked ? 'text-red-500' : 'text-muted-foreground'}`}
+                          onClick={() => toggleLike(announcement.id)}
+                        >
+                          <Heart className={`h-4 w-4 ${likeData.userLiked ? 'fill-current' : ''}`} />
+                          <span>{likeData.count}</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="gap-2 text-muted-foreground"
+                          onClick={() => toggleComments(announcement.id)}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          <span>{commentCounts[announcement.id] || 0}</span>
                         </Button>
                       </div>
 
                       {/* Comments Section */}
                       {openComments[announcement.id] && (
-                        <div className="border-t border-gray-100 bg-gray-50">
+                        <div className="border-t pt-4">
                           <CommentSection 
                             announcementId={announcement.id} 
                             orgId={announcement.org_id}
                             onCommentAdded={() => fetchCommentCount(announcement.id)}
+                            userAvatar={profile?.profile_picture}
+                            userInitials={profile?.name ? getInitials(profile.name) : user?.email?.charAt(0).toUpperCase()}
                           />
                         </div>
                       )}
-                    </div>
-                  );
-                })}
-              </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
             )}
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
-              {/* User Profile Card */}
-              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
+          <div className="lg:col-span-1 space-y-6">
+            {/* User Profile Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 mb-4">
+                  <Avatar className="h-12 w-12">
                     <AvatarImage src={profile?.profile_picture || undefined} />
-                    <AvatarFallback className="bg-blue-100 text-blue-600">
-                      {profile?.name?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'U'}
+                    <AvatarFallback>
+                      {profile?.name ? getInitials(profile.name) : user?.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">
-                      {profile?.name || user?.email?.split('@')[0] || 'User'}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {profile?.email || user?.email || ''}
-                    </p>
+                  <div>
+                    <p className="font-semibold">{profile?.name || user?.email?.split('@')[0]}</p>
+                    <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
                   </div>
                 </div>
-                <SignOutButton 
-                  variant="outline"
-                  className="mt-4 w-full border-gray-300 hover:border-blue-400 hover:bg-blue-50"
-                  showIcon
-                  showText
-                  text="Log Out"
-                  iconPosition="left"
-                />
-              </div>
+                <SignOutButton variant="outline" className="w-full" />
+              </CardContent>
+            </Card>
 
-              {/* Upcoming Events Card */}
-              <Card className="shadow-sm border-gray-200">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Calendar className="h-4 w-4 text-blue-600" />
-                    <span className="text-gray-900">Upcoming Events</span>
-                  </CardTitle>
-                  <CardDescription className="text-gray-600">Events from your organizations</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {events.length === 0 ? (
-                    <div className="py-6 text-center">
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                        <Calendar className="h-6 w-6 text-gray-400" />
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">
-                        No upcoming events
-                      </p>
-                      <Link to="/explore">
-                        <Button variant="outline" size="sm" className="border-gray-300">
-                          Find Events
-                        </Button>
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {events.map((event) => {
-                        const org = event.organizations;
-                        const orgName = org?.name || 'Unknown Organization';
-                        const orgProfilePic = org?.profile_picture || null;
-                        
-                        return (
-                          <Link 
-                            key={event.id} 
-                            to={`/event/${event.id}`}
-                            className="block"
-                          >
-                            <div className="group rounded-lg border border-gray-200 p-3 transition-all hover:border-blue-200 hover:bg-blue-50/30">
-                              <div className="flex items-start gap-3">
-                                <div className="min-w-12 rounded-lg bg-blue-50 p-2 text-center border border-blue-100">
-                                  <div className="text-sm font-bold text-blue-600">
-                                    {format(new Date(event.event_date), "d")}
-                                  </div>
-                                  <div className="text-xs text-gray-600">
-                                    {format(new Date(event.event_date), "MMM")}
-                                  </div>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-gray-900 truncate">
-                                    {event.name}
-                                  </h4>
-                                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600">
-                                    <div className="flex items-center gap-1">
-                                      <Clock className="h-3 w-3" />
-                                      {format(new Date(event.event_date), "h:mm a")}
-                                    </div>
-                                    {event.location && (
-                                      <>
-                                        <div className="h-1 w-1 rounded-full bg-gray-300" />
-                                        <div className="flex items-center gap-1">
-                                          <MapPin className="h-3 w-3" />
-                                          <span className="truncate">{event.location}</span>
-                                        </div>
-                                      </>
-                                    )}
-                                  </div>
-                                  <p className="mt-2 text-xs text-blue-600 font-medium truncate">
-                                    {orgName}
-                                  </p>
-                                </div>
+            {/* Upcoming Events Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  Upcoming Events
+                </CardTitle>
+                <CardDescription>Events from your organizations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {events.length === 0 ? (
+                  <div className="py-6 text-center">
+                    <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">No upcoming events</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {events.map((event) => {
+                      const org = event.organizations;
+                      const orgName = org?.name || 'Unknown Organization';
+                      const eventDate = new Date(event.event_date);
+                      
+                      return (
+                        <button
+                          key={event.id}
+                          onClick={() => handleEventClick(event)}
+                          className="w-full text-left group rounded-lg border p-3 hover:border-primary hover:shadow-md transition-all"
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Date Box */}
+                            <div className="min-w-12 rounded-lg bg-primary/10 p-2 text-center border border-primary/20">
+                              <div className="text-sm font-bold text-primary">
+                                {format(eventDate, "d")}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {format(eventDate, "MMM")}
                               </div>
                             </div>
-                          </Link>
-                        );
-                      })}
-                      
-                      {events.length > 0 && (
-                        <Link to="/calendar">
-                          <Button variant="ghost" className="w-full mt-2" size="sm">
-                            <span className="text-blue-600 font-medium">
-                              View All Events
-                            </span>
-                            <ExternalLink className="ml-2 h-3 w-3 text-blue-600" />
-                          </Button>
-                        </Link>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                            
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                                {event.name}
+                              </h4>
+                              
+                              {/* Date & Time */}
+                              <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {format(eventDate, "h:mm a")}
+                              </div>
+                              
+                              {/* Organization Name */}
+                              <p className="mt-2 text-xs text-primary font-medium truncate">
+                                {orgName}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-              {/* Quick Links */}
-              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h4 className="mb-3 font-semibold text-sm text-gray-900">Quick Links</h4>
-                <div className="space-y-2">
-                  <Link to="/explore">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-gray-50" size="sm">
-                      <Users className="mr-2 h-4 w-4 text-gray-500" />
-                      <span className="text-gray-700">Explore Organizations</span>
-                    </Button>
-                  </Link>
-                  <Link to="/calendar">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-gray-50" size="sm">
-                      <Calendar className="mr-2 h-4 w-4 text-gray-500" />
-                      <span className="text-gray-700">Calendar View</span>
-                    </Button>
-                  </Link>
-                  <Link to="/profile">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-gray-50" size="sm">
-                      <User className="mr-2 h-4 w-4 text-gray-500" />
-                      <span className="text-gray-700">Your Profile</span>
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="text-center text-xs text-gray-500 pt-4 border-t border-gray-200">
-                <p>© 2024 iJoin - iACADEMY Student Platform</p>
-              </div>
-            </div>
+            {/* Quick Links */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Links</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Link to="/explore">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <Users className="mr-2 h-4 w-4" />
+                    Explore Organizations
+                  </Button>
+                </Link>
+                <Link to="/calendar">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Calendar View
+                  </Button>
+                </Link>
+                <Link to="/profile">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <User className="mr-2 h-4 w-4" />
+                    Your Profile
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
+
+      {/* Event Details Modal */}
+      <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
+        <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden bg-background/95 backdrop-blur-sm">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 pb-2">
+            <DialogTitle className="text-xl font-bold">Event Details</DialogTitle>
+          </div>
+
+          {selectedEvent && selectedEvent.organizations && (
+            <>
+              {/* Organization Header - Clickable */}
+              <div 
+                onClick={(e) => handleOrgClick(selectedEvent.org_id, e)}
+                className="px-6 py-3 bg-muted/20 border-y hover:bg-muted/30 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 border-2 border-background">
+                    <AvatarImage src={selectedEvent.organizations.profile_picture || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {getInitials(selectedEvent.organizations.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">{selectedEvent.organizations.name}</p>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Click to view organization</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Event Content */}
+              <div className="p-6 space-y-6">
+                {/* Event Name */}
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground">{selectedEvent.name}</h3>
+                  {isPastEvent(selectedEvent.event_date) && (
+                    <Badge variant="outline" className="mt-2">Past Event</Badge>
+                  )}
+                </div>
+
+                {/* Date, Time, Location Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span>{format(new Date(selectedEvent.event_date), "EEEE, MMMM d, yyyy")}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span>{format(new Date(selectedEvent.event_date), "h:mm a")}</span>
+                    </div>
+                  </div>
+                  {selectedEvent.location && (
+                    <div className="col-span-2 space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span>{selectedEvent.location}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description */}
+                {selectedEvent.description && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</p>
+                    <div className="bg-muted/20 rounded-lg p-4">
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                        {selectedEvent.description}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"; // Add useCallback
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,12 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Search, ArrowLeft, Bell, Settings, School, GraduationCap, Sparkles, UserCheck, Shield } from "lucide-react";
+import { Users, Search, ArrowLeft, Bell, Settings, School, GraduationCap, Sparkles, UserCheck, Shield, CheckCheck, PlusCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import OrgLogo from "@/components/OrgLogo";
 import { SignOutButton } from "@/components/SignOutButton";
+import { NotificationItem } from "@/components/NotificationItem";
+import { format } from "date-fns";
 
 interface Organization {
   id: string;
@@ -24,6 +29,22 @@ interface Organization {
   membershipRole?: string | null;
 }
 
+interface Notification {
+  id: string;
+  type: 'membership_accepted' | 'new_announcement' | 'new_event' | 'org_approved';
+  title: string;
+  message: string;
+  data: {
+    org_id?: string;
+    announcement_id?: string;
+    event_id?: string;
+    membership_id?: string;
+  };
+  read: boolean;
+  created_at: string;
+  user_id: string;
+}
+
 type TabFilter = 'all' | 'shs' | 'college' | 'myorgs';
 
 const Explore = () => {
@@ -32,10 +53,12 @@ const Explore = () => {
   const navigate = useNavigate();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [filteredOrgs, setFilteredOrgs] = useState<Organization[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
-  const [lastFetchTime, setLastFetchTime] = useState<number>(0); // Add cache timestamp
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
   const isStudent = isSHSStudent || isUGStudent;
 
@@ -50,14 +73,138 @@ const Explore = () => {
     }
   }, [isSHSStudent, isUGStudent]);
 
-  // Memoize fetch function to prevent unnecessary re-renders
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      
+      const transformedNotifications: Notification[] = (data || []).map(item => ({
+        id: item.id,
+        type: item.type as Notification['type'],
+        title: item.title,
+        message: item.message,
+        data: item.data as Notification['data'],
+        read: item.read,
+        created_at: item.created_at,
+        user_id: item.user_id
+      }));
+      
+      setNotifications(transformedNotifications);
+      setUnreadCount(transformedNotifications.filter(n => !n.read).length || 0);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  // Setup notifications subscription
+  const setupNotificationsSubscription = () => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("explore-notifications")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newItem = payload.new as any;
+          const newNotification: Notification = {
+            id: newItem.id,
+            type: newItem.type as Notification['type'],
+            title: newItem.title,
+            message: newItem.message,
+            data: newItem.data as Notification['data'],
+            read: newItem.read,
+            created_at: newItem.created_at,
+            user_id: newItem.user_id
+          };
+          
+          setNotifications(prev => [newNotification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+          toast.info(newNotification.title, {
+            description: newNotification.message,
+            duration: 5000,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  // Mark notification as read
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("id", notificationId);
+
+      if (error) throw error;
+      
+      setNotifications(prev =>
+        prev.map(n =>
+          n.id === notificationId ? { ...n, read: true } : n
+        )
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  // Mark all as read
+  const markAllAsRead = async () => {
+    const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
+    if (unreadIds.length === 0) return;
+
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .in("id", unreadIds);
+
+      if (error) throw error;
+      
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, read: true }))
+      );
+      setUnreadCount(0);
+      toast.success("All notifications marked as read");
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      const cleanup = setupNotificationsSubscription();
+      return cleanup;
+    }
+  }, [user]);
+
   const fetchOrganizations = useCallback(async (forceRefresh = false) => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    // Prevent fetching too often (cache for 30 seconds)
     const now = Date.now();
     if (!forceRefresh && now - lastFetchTime < 30000 && organizations.length > 0) {
       console.log("Using cached data");
@@ -68,7 +215,6 @@ const Explore = () => {
     try {
       console.log("Fetching fresh organizations data...");
       
-      // Fetch ALL active organizations
       const { data: orgsData, error } = await supabase
         .from("organizations")
         .select("*")
@@ -77,13 +223,10 @@ const Explore = () => {
 
       if (error) throw error;
 
-      // Fetch memberships
       const { data: membershipsData } = await supabase
         .from("memberships")
         .select("org_id, status, role")
         .eq("user_id", user.id);
-
-      console.log("Memberships fetched:", membershipsData);
 
       const membershipMap = new Map(
         membershipsData?.map((m) => [m.org_id, { status: m.status, role: m.role }])
@@ -98,9 +241,8 @@ const Explore = () => {
         };
       });
 
-      console.log("Organizations with status:", orgsWithStatus);
       setOrganizations(orgsWithStatus || []);
-      setLastFetchTime(now); // Update cache timestamp
+      setLastFetchTime(now);
       
     } catch (error) {
       console.error("Error fetching organizations:", error);
@@ -110,23 +252,19 @@ const Explore = () => {
     }
   }, [user, isStudent, lastFetchTime, organizations.length]);
 
-  // Initial fetch
   useEffect(() => {
     fetchOrganizations();
   }, [fetchOrganizations]);
 
-  // Filter organizations based on search and tab
   useEffect(() => {
     let filtered = [...organizations];
 
-    // Apply search filter
     if (searchQuery.trim() !== "") {
       filtered = filtered.filter((org) =>
         org.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // Apply tab filter
     if (activeTab === 'shs') {
       filtered = filtered.filter(org => org.is_shs_org === true);
     } else if (activeTab === 'college') {
@@ -152,7 +290,6 @@ const Explore = () => {
     const org = organizations.find(o => o.id === orgId);
     if (!org) return;
 
-    // Strict join restrictions
     if (isSHSStudent && !org.is_shs_org) {
       toast.error("SHS students can only join SHS organizations");
       return;
@@ -163,7 +300,6 @@ const Explore = () => {
       return;
     }
 
-    // Admins/SAO cannot join orgs
     if (isAdmin || isSAO) {
       toast.error("Admins and SAO cannot join organizations");
       return;
@@ -185,7 +321,6 @@ const Explore = () => {
         }
       } else {
         toast.success("Join request sent successfully!");
-        // Force refresh data
         await fetchOrganizations(true);
       }
     } catch (error) {
@@ -194,7 +329,6 @@ const Explore = () => {
     }
   };
 
-  // Check if user can join this org
   const canJoinOrg = (org: Organization) => {
     if (!user) return false;
     if (!isStudent) return false;
@@ -224,19 +358,16 @@ const Explore = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      {/* Header (unchanged) */}
       <header className="border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          {/* Icon + Image Logo */}
+          {/* Logo */}
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="flex items-center gap-3">
-              {/* Logo Image */}
               <img 
                 src="/logo.svg" 
                 alt="logo" 
                 className="h-8 w-auto md:h-10"
               />
-              {/* Brand Name */}
               <span className="text-xl font-bold text-gray-900 hidden sm:inline">iJoin</span>
             </Link>
           </div>
@@ -267,9 +398,55 @@ const Explore = () => {
                   SAO
                 </Badge>
               )}
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-              </Button>
+              
+              {/* Notifications Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-96 p-0" align="end">
+                  <div className="flex items-center justify-between p-4 border-b">
+                    <h3 className="font-semibold">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-xs gap-1"
+                        onClick={markAllAsRead}
+                      >
+                        <CheckCheck className="h-3 w-3" />
+                        Mark all as read
+                      </Button>
+                    )}
+                  </div>
+                  <ScrollArea className="h-[500px]">
+                    {notifications.length === 0 ? (
+                      <div className="py-12 text-center text-muted-foreground">
+                        <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No notifications yet</p>
+                      </div>
+                    ) : (
+                      <div className="p-2">
+                        {notifications.map((notification) => (
+                          <NotificationItem
+                            key={notification.id}
+                            notification={notification}
+                            onMarkAsRead={markAsRead}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </PopoverContent>
+              </Popover>
+
               <SignOutButton variant="ghost" size="icon" />
             </div>
           )}
@@ -282,37 +459,49 @@ const Explore = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-foreground">
-            Explore Organizations
-          </h1>
-          <p className="text-muted-foreground">
-            {isAdmin || isSAO 
-              ? "Manage and oversee all student organizations"
-              : "Discover student organizations at iAcademy"}
-          </p>
-          
-          {/* Stats badges */}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Badge variant="outline" className="bg-background">
-              {organizations.length} total organizations
-            </Badge>
-            <Badge variant="secondary" className="bg-blue-50">
-              <School className="mr-1 h-3 w-3" />
-              {organizations.filter(o => o.is_shs_org).length} SHS
-            </Badge>
-            <Badge variant="outline">
-              <GraduationCap className="mr-1 h-3 w-3" />
-              {organizations.filter(o => !o.is_shs_org).length} College
-            </Badge>
-            {isStudent && (
-              <Badge variant="default" className="bg-green-100 text-green-800 border-green-200 gap-1">
-                <UserCheck className="mr-1 h-3 w-3" />
-                {organizations.filter(o => o.membershipStatus === "accepted").length} Joined
-              </Badge>
-            )}
+        {/* Header Section with Propose Org Button */}
+        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">
+              Explore Organizations
+            </h1>
+            <p className="text-muted-foreground">
+              {isAdmin || isSAO 
+                ? "Manage and oversee all student organizations"
+                : "Discover student organizations at iAcademy"}
+            </p>
           </div>
+          
+          {/* Propose Org Button - Always visible when logged in */}
+          {user && (
+            <Link to="/create-organization">
+              <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90">
+                <PlusCircle className="h-5 w-5" />
+                Request New Organization
+              </Button>
+            </Link>
+          )}
+        </div>
+
+        {/* Stats badges */}
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <Badge variant="outline" className="bg-background">
+            {organizations.length} total organizations
+          </Badge>
+          <Badge variant="secondary" className="bg-blue-50">
+            <School className="mr-1 h-3 w-3" />
+            {organizations.filter(o => o.is_shs_org).length} SHS
+          </Badge>
+          <Badge variant="outline">
+            <GraduationCap className="mr-1 h-3 w-3" />
+            {organizations.filter(o => !o.is_shs_org).length} College
+          </Badge>
+          {isStudent && (
+            <Badge variant="default" className="bg-green-100 text-green-800 border-green-200 gap-1">
+              <UserCheck className="mr-1 h-3 w-3" />
+              {organizations.filter(o => o.membershipStatus === "accepted").length} Joined
+            </Badge>
+          )}
         </div>
 
         {/* Search Bar */}
@@ -363,7 +552,27 @@ const Explore = () => {
         {/* Organizations Grid */}
         {filteredOrgs.length === 0 ? (
           <div className="py-12 text-center">
-            {/* ... empty state ... */}
+            <div className="mb-4 flex justify-center">
+              <div className="rounded-full bg-muted p-4">
+                <Users className="h-8 w-8 text-muted-foreground" />
+              </div>
+            </div>
+            <p className="text-lg font-medium text-foreground">
+              {searchQuery
+                ? "No organizations found matching your search"
+                : `No ${activeTab === 'shs' ? 'SHS' : activeTab === 'college' ? 'College' : ''} organizations available yet`}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Check back later for new organizations
+            </p>
+            {user && (
+              <Link to="/create-organization" className="mt-4 inline-block">
+                <Button variant="outline" className="gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  Request a New Organization
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -372,13 +581,6 @@ const Explore = () => {
               const manage = canManageOrg(org);
               const isMember = org.membershipStatus === "accepted" && isStudent;
               const isPending = org.membershipStatus === "pending" && isStudent;
-
-              console.log(`Org ${org.name}:`, { // Debug log
-                membershipStatus: org.membershipStatus,
-                membershipRole: org.membershipRole,
-                manage,
-                isMember
-              });
 
               return (
                 <Card key={org.id} className="group transition-all hover:shadow-lg relative flex flex-col h-full">
