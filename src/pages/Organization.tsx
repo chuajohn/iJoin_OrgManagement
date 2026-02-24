@@ -643,8 +643,6 @@ const Organization = () => {
         {photos.length > 0 && (
           <div className="mb-12">
             <h2 className="text-2xl font-semibold text-center mb-6 flex items-center justify-center gap-2">
-              <ImageIcon className="h-6 w-6 text-primary" />
-              Organization Photos
             </h2>
             <div className="flex justify-center">
               <div 
