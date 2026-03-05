@@ -72,12 +72,10 @@ interface Event {
 interface Member {
   id: string;
   user_id: string;
+  name: string;
+  profile_picture: string | null;
   role: string;
   joined_at: string;
-  profiles: {
-    name: string;
-    profile_picture: string | null;
-  };
 }
 
 interface Photo {
@@ -199,26 +197,22 @@ const Organization = () => {
     if (!id || !isMember) return;
     
     try {
+      console.log("Fetching members for org:", id);
+      
       const { data, error } = await supabase
-        .from("memberships")
-        .select(`
-          id,
-          user_id,
-          role,
-          joined_at,
-          profiles:user_id (
-            name,
-            profile_picture
-          )
-        `)
-        .eq("org_id", id)
-        .eq("status", "accepted")
-        .order("joined_at", { ascending: true });
-
-      if (error) throw error;
+        .rpc('get_org_members', { target_org_id: id }); // Note: parameter name changed
+      
+      if (error) {
+        console.error("RPC Error:", error);
+        throw error;
+      }
+      
+      console.log("Members data received:", data);
       setMembers(data || []);
-    } catch (error) {
-      console.error("Error fetching members:", error);
+      
+    } catch (error: any) {
+      console.error("Error fetching members list:", error);
+      toast.error("Failed to load members list");
     }
   };
 
@@ -994,14 +988,14 @@ const Organization = () => {
                           className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                         >
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={member.profiles?.profile_picture || undefined} />
+                            <AvatarImage src={member.profile_picture || undefined} />
                             <AvatarFallback className="bg-primary/10 text-xs">
-                              {member.profiles?.name ? getInitials(member.profiles.name) : 'U'}
+                              {member.name ? getInitials(member.name) : 'U'}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">
-                              {member.profiles?.name}
+                              {member.name}
                             </p>
                             <Badge variant="outline" className="text-[10px] px-1 py-0 mt-0.5">
                               {member.role}
