@@ -12,7 +12,7 @@ import {
   DialogContent, 
   DialogTitle 
 } from "@/components/ui/dialog";
-import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, MapPin, Clock, Search, X, ChevronDown, ChevronUp, CheckCheck } from "lucide-react";
+import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, MapPin, Clock, Search, X, ChevronDown, ChevronUp, CheckCheck, Award, Crown, Star, Medal, Gem, Sparkles, Waves, Wind, Leaf, Fish } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -69,10 +69,19 @@ interface Notification {
   user_id: string;
 }
 
+interface Membership {
+  id: string;
+  role: string;
+  organizations: {
+    id: string;
+    name: string;
+  };
+}
+
 const Dashboard = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const { isAdmin, isSAO } = useUserRole();
+  const { isAdmin, isSAO, isSHSStudent, isUGStudent } = useUserRole();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -82,6 +91,7 @@ const Dashboard = () => {
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
   const [likes, setLikes] = useState<Record<string, LikeState>>({});
   const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
+  const [memberships, setMemberships] = useState<Membership[]>([]);
   
   // Event modal state
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -91,10 +101,108 @@ const Dashboard = () => {
     if (user) {
       fetchDashboardData();
       fetchNotifications();
+      fetchMemberships();
       setupRealtimeSubscription();
       setupNotificationsSubscription();
     }
   }, [user]);
+
+  const fetchMemberships = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("memberships")
+        .select(`
+          id,
+          role,
+          organizations (
+            id,
+            name
+          )
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "accepted");
+
+      if (error) throw error;
+      setMemberships(data || []);
+    } catch (error) {
+      console.error("Error fetching memberships:", error);
+    }
+  };
+
+  // Get user badges based on roles and memberships
+  const getUserBadges = () => {
+    const badges = [];
+
+    // Game Changer badge - everyone gets this (iACADEMY student)
+    badges.push({
+      id: 'game-changer',
+      name: 'Game Changer',
+      icon: <Sparkles className="h-3 w-3" />,
+      color: 'bg-gradient-to-r from-[#FFD966] to-[#FFC107] text-[#1A1A2E] border-[#00A3FF]/30',
+      description: 'iACADEMY Student'
+    });
+
+    // Leader/Officer badges from memberships
+    const leaderOrgs = memberships.filter(m => m.role === 'leader');
+    const officerOrgs = memberships.filter(m => m.role === 'officer');
+
+    if (leaderOrgs.length > 0) {
+      badges.push({
+        id: 'leader',
+        name: `Leader ${leaderOrgs.length > 1 ? `(×${leaderOrgs.length})` : ''}`,
+        icon: <Crown className="h-3 w-3" />,
+        color: 'bg-gradient-to-r from-[#B43B3B] to-[#B43B3B]/80 text-white border-[#B43B3B]/30',
+        description: leaderOrgs.map(o => o.organizations.name).join(', ')
+      });
+    }
+
+    if (officerOrgs.length > 0) {
+      badges.push({
+        id: 'officer',
+        name: `Officer ${officerOrgs.length > 1 ? `(×${officerOrgs.length})` : ''}`,
+        icon: <Star className="h-3 w-3" />,
+        color: 'bg-gradient-to-r from-[#00A3FF] to-[#00A3FF]/80 text-white border-[#00A3FF]/30',
+        description: officerOrgs.map(o => o.organizations.name).join(', ')
+      });
+    }
+
+    // Member badge (if they have memberships but no leadership roles)
+    const memberCount = memberships.filter(m => m.role === 'member').length;
+    if (memberCount > 0) {
+      badges.push({
+        id: 'member',
+        name: `Member ${memberCount > 1 ? `(×${memberCount})` : ''}`,
+        icon: <Users className="h-3 w-3" />,
+        color: 'bg-gradient-to-r from-[#4A5568]/10 to-[#4A5568]/5 text-[#1A1A2E] border-[#4A5568]/20',
+        description: `${memberCount} organization${memberCount > 1 ? 's' : ''}`
+      });
+    }
+
+    // Admin/SAO badges
+    if (isAdmin) {
+      badges.push({
+        id: 'admin',
+        name: 'Admin',
+        icon: <Shield className="h-3 w-3" />,
+        color: 'bg-gradient-to-r from-[#B43B3B] to-[#B43B3B]/80 text-white border-[#B43B3B]/30',
+        description: 'System Administrator'
+      });
+    }
+
+    if (isSAO) {
+      badges.push({
+        id: 'sao',
+        name: 'SAO',
+        icon: <Shield className="h-3 w-3" />,
+        color: 'bg-gradient-to-r from-[#00A3FF] to-[#00A3FF]/80 text-white border-[#00A3FF]/30',
+        description: 'Student Affairs Office'
+      });
+    }
+
+    return badges;
+  };
 
   const fetchDashboardData = async () => {
     if (!user) return;
@@ -206,13 +314,12 @@ const Dashboard = () => {
 
       if (error) throw error;
       
-      // Transform the data with proper type casting
       const transformedNotifications: Notification[] = (data || []).map(item => ({
         id: item.id,
-        type: item.type as Notification['type'], // Cast to the correct type
+        type: item.type as Notification['type'],
         title: item.title,
         message: item.message,
-        data: item.data as Notification['data'], // Cast data
+        data: item.data as Notification['data'],
         read: item.read,
         created_at: item.created_at,
         user_id: item.user_id
@@ -325,10 +432,10 @@ const Dashboard = () => {
           const newItem = payload.new as any;
           const newNotification: Notification = {
             id: newItem.id,
-            type: newItem.type as Notification['type'], // Cast to the correct type
+            type: newItem.type as Notification['type'],
             title: newItem.title,
             message: newItem.message,
-            data: newItem.data as Notification['data'], // Cast data
+            data: newItem.data as Notification['data'],
             read: newItem.read,
             created_at: newItem.created_at,
             user_id: newItem.user_id
@@ -480,51 +587,90 @@ const Dashboard = () => {
     return new Date(eventDate) < new Date();
   };
 
+  const badges = getUserBadges();
+
+  // Floating Japanese elements
+  const japaneseElements = [
+    { Icon: Waves, color: "#00A3FF", top: "15%", right: "5%", delay: "0s", size: 24, opacity: 0.1 },
+    { Icon: Wind, color: "#B43B3B", top: "40%", right: "8%", delay: "2s", size: 28, opacity: 0.1 },
+    { Icon: Leaf, color: "#FFD966", bottom: "30%", right: "3%", delay: "1s", size: 26, opacity: 0.1 },
+    { Icon: Fish, color: "#00A3FF", bottom: "60%", right: "12%", delay: "3s", size: 22, opacity: 0.1 },
+    { Icon: Gem, color: "#B43B3B", top: "70%", right: "15%", delay: "1.5s", size: 24, opacity: 0.1 },
+  ];
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+      {/* Floating Japanese Elements */}
+      {japaneseElements.map((item, index) => {
+        const IconComponent = item.Icon;
+        return (
+          <div
+            key={index}
+            className="absolute pointer-events-none animate-float-subtle"
+            style={{
+              top: item.top,
+              right: item.right,
+              bottom: item.bottom,
+              animationDelay: item.delay,
+              animationDuration: "8s",
+              opacity: item.opacity,
+            }}
+          >
+            <IconComponent 
+              size={item.size} 
+              color={item.color}
+              strokeWidth={1}
+            />
+          </div>
+        );
+      })}
+
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-50 to-white border-b shadow-sm">
+      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="flex items-center gap-3">
-              <img 
-                src="/logo.svg" 
-                alt="logo" 
-                className="h-8 w-auto md:h-10"
-              />
-              <span className="text-xl font-bold text-gray-900 hidden sm:inline">iJoin</span>
+              <div className="relative">
+                <img 
+                  src="/logo.svg" 
+                  alt="logo" 
+                  className="h-8 w-auto md:h-10"
+                />
+                <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[#FFD966] border border-[#1A1A2E]"></div>
+              </div>
+              <span className="text-xl font-bold text-[#1A1A2E] hidden sm:inline">iJoin</span>
             </Link>
           </div>
           <div className="flex items-center gap-2">
             <Link to="/explore">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                 <Search className="h-4 w-4 mr-1"/>
                 Explore
               </Button>
             </Link>
             <Link to="/calendar">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                 <Calendar className="h-4 w-4 mr-1" />
                 Calendar
               </Button>
             </Link>
             <Link to="/create-organization">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                 <Plus className="h-4 w-4 mr-1" />
                 Request org
               </Button>
             </Link>
             {(isAdmin || isSAO) && (
               <Link to="/admin">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                   <Shield className="h-4 w-4 mr-2" />
                   Admin
                 </Button>
@@ -532,23 +678,23 @@ const Dashboard = () => {
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#B43B3B] text-white text-xs rounded-full flex items-center justify-center shadow-sm">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-96 p-0" align="end">
-                <div className="flex items-center justify-between p-4 border-b">
-                  <h3 className="font-semibold">Notifications</h3>
+              <PopoverContent className="w-96 p-0 border border-[#00A3FF]/30 shadow-lg" align="end">
+                <div className="flex items-center justify-between p-4 border-b border-[#00A3FF]/20">
+                  <h3 className="font-semibold text-[#1A1A2E]">Notifications</h3>
                   {unreadCount > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 text-xs gap-1"
+                      className="h-8 text-xs gap-1 text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
                       onClick={markAllAsRead}
                     >
                       <CheckCheck className="h-3 w-3" />
@@ -558,7 +704,7 @@ const Dashboard = () => {
                 </div>
                 <ScrollArea className="h-[500px]">
                   {notifications.length === 0 ? (
-                    <div className="py-12 text-center text-muted-foreground">
+                    <div className="py-12 text-center text-[#4A5568]">
                       <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p className="text-sm">No notifications yet</p>
                     </div>
@@ -577,32 +723,40 @@ const Dashboard = () => {
               </PopoverContent>
             </Popover>
             <Link to="/profile">
-              <Button variant="ghost" size="icon" title="Profile">
+              <Button variant="ghost" size="icon" title="Profile" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                 <User className="h-5 w-5" />
               </Button>
             </Link>
-            <SignOutButton variant="ghost" size="icon" />
+            <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5" />
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Welcome back, {profile?.name || user?.email?.split('@')[0] || 'User'}! 👋
-          </h1>
-          <p className="text-gray-600">
-            Latest updates from your organizations
-          </p>
-          <div className="flex gap-4 mt-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{announcements.length}</div>
-              <div className="text-sm text-gray-500">Announcements</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{events.length}</div>
-              <div className="text-sm text-gray-500">Upcoming Events</div>
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Welcome Section with subtle depth */}
+        <div className="mb-8 relative">
+          <div className="absolute -top-4 -left-4 w-24 h-24 bg-[#00A3FF]/5 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-[#B43B3B]/5 rounded-full blur-3xl"></div>
+          <div className="relative">
+            <h1 className="mb-2 text-3xl font-bold text-[#1A1A2E]">
+              Welcome back, Game Changer!
+            </h1>
+            <p className="text-[#4A5568]">
+              Latest updates from your organizations
+            </p>
+            <div className="flex gap-6 mt-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold bg-gradient-to-b from-[#00A3FF] to-[#00A3FF]/70 bg-clip-text text-transparent">
+                  {announcements.length}
+                </div>
+                <div className="text-sm text-[#4A5568]">Announcements</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold bg-gradient-to-b from-[#B43B3B] to-[#B43B3B]/70 bg-clip-text text-transparent">
+                  {events.length}
+                </div>
+                <div className="text-sm text-[#4A5568]">Upcoming Events</div>
+              </div>
             </div>
           </div>
         </div>
@@ -611,15 +765,19 @@ const Dashboard = () => {
           {/* Main Content - Feed */}
           <div className="lg:col-span-2 space-y-6">
             {announcements.length === 0 ? (
-              <Card>
+              <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
                 <CardContent className="py-12 text-center">
-                  <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">No announcements yet</h3>
-                  <p className="text-muted-foreground mb-4">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#00A3FF]/5 flex items-center justify-center">
+                    <Bell className="h-8 w-8 text-[#4A5568]" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2 text-[#1A1A2E]">No announcements yet</h3>
+                  <p className="text-[#4A5568] mb-4">
                     Join organizations or check back later for updates
                   </p>
                   <Link to="/explore">
-                    <Button>Explore Organizations</Button>
+                    <Button className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm">
+                      Explore Organizations
+                    </Button>
                   </Link>
                 </CardContent>
               </Card>
@@ -635,17 +793,19 @@ const Dashboard = () => {
                   : truncateText(announcement.content, 300);
 
                 return (
-                  <Card key={announcement.id} className="overflow-hidden">
+                  <Card key={announcement.id} className="overflow-hidden border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
                     {/* Post Header */}
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
+                        <Avatar className="h-10 w-10 border border-[#00A3FF]/30">
                           <AvatarImage src={orgProfilePic || undefined} />
-                          <AvatarFallback>{orgName.charAt(0)}</AvatarFallback>
+                          <AvatarFallback className="bg-[#00A3FF]/5 text-[#00A3FF]">
+                            {orgName.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
-                          <CardTitle className="text-base">{orgName}</CardTitle>
-                          <CardDescription>
+                          <CardTitle className="text-base text-[#1A1A2E]">{orgName}</CardTitle>
+                          <CardDescription className="text-[#4A5568]">
                             {format(new Date(announcement.created_at), "MMM d 'at' h:mm a")}
                           </CardDescription>
                         </div>
@@ -654,11 +814,11 @@ const Dashboard = () => {
 
                     <CardContent className="space-y-4">
                       {/* Title */}
-                      <h3 className="font-semibold text-lg">{announcement.title}</h3>
+                      <h3 className="font-semibold text-lg text-[#1A1A2E]">{announcement.title}</h3>
                       
                       {/* Image */}
                       {announcement.image_url && (
-                        <div className="rounded-lg overflow-hidden bg-muted/20">
+                        <div className="rounded-lg overflow-hidden border border-[#00A3FF]/20 bg-[#FCF9F5]">
                           <img
                             src={announcement.image_url}
                             alt={announcement.title}
@@ -669,14 +829,14 @@ const Dashboard = () => {
                       
                       {/* Description */}
                       <div className="space-y-2">
-                        <p className="text-muted-foreground whitespace-pre-wrap">
+                        <p className="text-[#4A5568] whitespace-pre-wrap">
                           {displayContent}
                         </p>
                         {announcement.content.length > 300 && (
                           <Button
                             variant="link"
                             size="sm"
-                            className="h-auto p-0 text-primary"
+                            className="h-auto p-0 text-[#00A3FF] hover:text-[#00A3FF]/80"
                             onClick={() => toggleDescription(announcement.id)}
                           >
                             {isExpanded ? (
@@ -689,20 +849,20 @@ const Dashboard = () => {
                       </div>
 
                       {/* Post Actions */}
-                      <div className="flex items-center gap-4 pt-4 border-t">
+                      <div className="flex items-center gap-4 pt-4 border-t border-[#00A3FF]/20">
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className={`gap-2 ${likeData.userLiked ? 'text-red-500' : 'text-muted-foreground'}`}
+                          className={`gap-2 ${likeData.userLiked ? 'text-[#B43B3B]' : 'text-[#4A5568]'} hover:text-[#B43B3B] hover:bg-[#B43B3B]/5`}
                           onClick={() => toggleLike(announcement.id)}
                         >
-                          <Heart className={`h-4 w-4 ${likeData.userLiked ? 'fill-current' : ''}`} />
+                          <Heart className={`h-4 w-4 ${likeData.userLiked ? 'fill-[#B43B3B]' : ''}`} />
                           <span>{likeData.count}</span>
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="gap-2 text-muted-foreground"
+                          className="gap-2 text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
                           onClick={() => toggleComments(announcement.id)}
                         >
                           <MessageCircle className="h-4 w-4" />
@@ -712,7 +872,7 @@ const Dashboard = () => {
 
                       {/* Comments Section */}
                       {openComments[announcement.id] && (
-                        <div className="border-t pt-4">
+                        <div className="border-t border-[#00A3FF]/20 pt-4">
                           <CommentSection 
                             announcementId={announcement.id} 
                             orgId={announcement.org_id}
@@ -731,42 +891,71 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            {/* User Profile Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile</CardTitle>
+            {/* User Profile Card - with badges */}
+            <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-[#1A1A2E]">Profile</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3 mb-4">
-                  <Avatar className="h-12 w-12">
+                  <Avatar className="h-12 w-12 border border-[#00A3FF]/30">
                     <AvatarImage src={profile?.profile_picture || undefined} />
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-[#00A3FF]/5 text-[#00A3FF]">
                       {profile?.name ? getInitials(profile.name) : user?.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold">{profile?.name || user?.email?.split('@')[0]}</p>
-                    <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
+                    <p className="font-semibold text-[#1A1A2E]">{profile?.name || user?.email?.split('@')[0]}</p>
+                    <p className="text-sm text-[#4A5568]">{profile?.email || user?.email}</p>
                   </div>
                 </div>
-                <SignOutButton variant="outline" className="w-full" />
+
+                {/* Badges Section */}
+                {badges.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-[#4A5568] mb-2 flex items-center gap-1">
+                      <Award className="h-3 w-3" />
+                      Achievements
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {badges.map((badge) => (
+                        <div
+                          key={badge.id}
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${badge.color} group relative`}
+                          title={badge.description}
+                        >
+                          {badge.icon}
+                          {badge.name}
+                          {/* Tooltip on hover */}
+                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#1A1A2E] text-[#FCF9F5] text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            {badge.description}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Upcoming Events Card */}
-            <Card>
+            {/* Upcoming Events Card - RED THEME with depth */}
+            <Card className="border border-[#B43B3B]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#B43B3B]/5 to-transparent rounded-bl-full"></div>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
+                <CardTitle className="flex items-center gap-2 text-[#1A1A2E]">
+                  <Calendar className="h-5 w-5 text-[#B43B3B]" />
                   Upcoming Events
                 </CardTitle>
-                <CardDescription>Events from your organizations</CardDescription>
+                <CardDescription className="text-[#4A5568]">Events from your organizations</CardDescription>
               </CardHeader>
               <CardContent>
                 {events.length === 0 ? (
                   <div className="py-6 text-center">
-                    <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">No upcoming events</p>
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#B43B3B]/5 flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-[#4A5568]" />
+                    </div>
+                    <p className="text-sm text-[#4A5568]">No upcoming events</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -779,32 +968,32 @@ const Dashboard = () => {
                         <button
                           key={event.id}
                           onClick={() => handleEventClick(event)}
-                          className="w-full text-left group rounded-lg border p-3 hover:border-primary hover:shadow-md transition-all"
+                          className="w-full text-left group rounded-lg border border-[#B43B3B]/30 p-3 hover:border-[#FFD966] hover:shadow-md transition-all bg-white/50 hover:bg-white"
                         >
                           <div className="flex items-start gap-3">
-                            {/* Date Box */}
-                            <div className="min-w-12 rounded-lg bg-primary/10 p-2 text-center border border-primary/20">
-                              <div className="text-sm font-bold text-primary">
+                            {/* Date Box - Red theme */}
+                            <div className="min-w-12 rounded-lg bg-[#B43B3B]/5 p-2 text-center border border-[#B43B3B]/30">
+                              <div className="text-sm font-bold text-[#B43B3B]">
                                 {format(eventDate, "d")}
                               </div>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-[#4A5568]">
                                 {format(eventDate, "MMM")}
                               </div>
                             </div>
                             
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                              <h4 className="font-semibold text-[#1A1A2E] truncate group-hover:text-[#B43B3B] transition-colors">
                                 {event.name}
                               </h4>
                               
                               {/* Date & Time */}
-                              <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                              <div className="mt-1 flex items-center gap-1 text-xs text-[#4A5568]">
                                 <Clock className="h-3 w-3" />
                                 {format(eventDate, "h:mm a")}
                               </div>
                               
-                              {/* Organization Name */}
-                              <p className="mt-2 text-xs text-primary font-medium truncate">
+                              {/* Organization Name - Red theme */}
+                              <p className="mt-2 text-xs text-[#B43B3B] font-medium truncate">
                                 {orgName}
                               </p>
                             </div>
@@ -817,42 +1006,53 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Quick Links */}
-            <Card>
+            {/* Quick Links - with depth */}
+            <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
               <CardHeader>
-                <CardTitle>Quick Links</CardTitle>
+                <CardTitle className="text-[#1A1A2E]">Quick Links</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Link to="/explore">
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                     <Users className="mr-2 h-4 w-4" />
                     Explore Organizations
                   </Button>
                 </Link>
                 <Link to="/calendar">
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                     <Calendar className="mr-2 h-4 w-4" />
                     Calendar View
                   </Button>
                 </Link>
                 <Link to="/profile">
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
                     <User className="mr-2 h-4 w-4" />
                     Your Profile
                   </Button>
                 </Link>
               </CardContent>
             </Card>
+
+            {/* Japanese Wisdom Quote */}
+            <div className="text-center text-xs text-[#4A5568]/60 italic pt-2">
+              <p>"You make the world a better place. So show up, okay?"</p>
+              <div className="flex justify-center gap-1 mt-1">
+                <Waves className="h-3 w-3 text-[#00A3FF]/30" />
+                <Wind className="h-3 w-3 text-[#B43B3B]/30" />
+                <Leaf className="h-3 w-3 text-[#FFD966]/30" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Event Details Modal */}
+      {/* Event Details Modal - RED THEME with depth */}
       <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
-        <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden bg-background/95 backdrop-blur-sm">
+        <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden bg-[#FCF9F5] border border-[#B43B3B]/30 shadow-xl">
           {/* Header */}
           <div className="flex items-center justify-between p-6 pb-2">
-            <DialogTitle className="text-xl font-bold">Event Details</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-[#1A1A2E]">Event Details</DialogTitle>
           </div>
 
           {selectedEvent && selectedEvent.organizations && (
@@ -860,21 +1060,21 @@ const Dashboard = () => {
               {/* Organization Header - Clickable */}
               <div 
                 onClick={(e) => handleOrgClick(selectedEvent.org_id, e)}
-                className="px-6 py-3 bg-muted/20 border-y hover:bg-muted/30 cursor-pointer transition-colors"
+                className="px-6 py-3 bg-[#B43B3B]/5 border-y border-[#B43B3B]/20 hover:bg-[#B43B3B]/10 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border-2 border-background">
+                  <Avatar className="h-10 w-10 border border-[#B43B3B]/30">
                     <AvatarImage src={selectedEvent.organizations.profile_picture || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary">
+                    <AvatarFallback className="bg-[#B43B3B]/5 text-[#B43B3B]">
                       {getInitials(selectedEvent.organizations.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold">{selectedEvent.organizations.name}</p>
-                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                      <p className="font-semibold text-[#1A1A2E]">{selectedEvent.organizations.name}</p>
+                      <ExternalLink className="h-3 w-3 text-[#4A5568]" />
                     </div>
-                    <p className="text-xs text-muted-foreground">Click to view organization</p>
+                    <p className="text-xs text-[#4A5568]">Click to view organization</p>
                   </div>
                 </div>
               </div>
@@ -883,33 +1083,33 @@ const Dashboard = () => {
               <div className="p-6 space-y-6">
                 {/* Event Name */}
                 <div>
-                  <h3 className="text-2xl font-bold text-foreground">{selectedEvent.name}</h3>
+                  <h3 className="text-2xl font-bold text-[#1A1A2E]">{selectedEvent.name}</h3>
                   {isPastEvent(selectedEvent.event_date) && (
-                    <Badge variant="outline" className="mt-2">Past Event</Badge>
+                    <Badge variant="outline" className="mt-2 border-[#B43B3B]/30 text-[#B43B3B]">Past Event</Badge>
                   )}
                 </div>
 
                 {/* Date, Time, Location Grid */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-primary" />
+                    <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Date</p>
+                    <div className="flex items-center gap-2 text-sm text-[#1A1A2E]">
+                      <Calendar className="h-4 w-4 text-[#B43B3B]" />
                       <span>{format(new Date(selectedEvent.event_date), "EEEE, MMMM d, yyyy")}</span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-primary" />
+                    <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Time</p>
+                    <div className="flex items-center gap-2 text-sm text-[#1A1A2E]">
+                      <Clock className="h-4 w-4 text-[#B43B3B]" />
                       <span>{format(new Date(selectedEvent.event_date), "h:mm a")}</span>
                     </div>
                   </div>
                   {selectedEvent.location && (
                     <div className="col-span-2 space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-primary" />
+                      <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Location</p>
+                      <div className="flex items-center gap-2 text-sm text-[#1A1A2E]">
+                        <MapPin className="h-4 w-4 text-[#B43B3B]" />
                         <span>{selectedEvent.location}</span>
                       </div>
                     </div>
@@ -919,9 +1119,9 @@ const Dashboard = () => {
                 {/* Description */}
                 {selectedEvent.description && (
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</p>
-                    <div className="bg-muted/20 rounded-lg p-4">
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Description</p>
+                    <div className="bg-[#B43B3B]/5 rounded-lg p-4 border border-[#B43B3B]/20">
+                      <p className="text-sm text-[#1A1A2E] whitespace-pre-wrap leading-relaxed">
                         {selectedEvent.description}
                       </p>
                     </div>
@@ -932,6 +1132,27 @@ const Dashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Footer */}
+      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#00A3FF]/20">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center text-sm text-[#FCF9F5]/60">
+            <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Add subtle floating animation */}
+      <style>{`
+        @keyframes float-subtle {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          25% { transform: translateY(-5px) rotate(1deg); }
+          75% { transform: translateY(5px) rotate(-1deg); }
+        }
+        .animate-float-subtle {
+          animation: float-subtle 8s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };
