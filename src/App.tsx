@@ -17,6 +17,7 @@ import OrganizationDocuments from "./pages/OrganizationDocuments";
 import Admin from "./pages/Admin";
 import Calendar from "./pages/Calendar";
 import Profile from "./pages/Profile";
+import ProfileView from "./pages/ProfileView"
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/:userId"
+              element={
+                <ProtectedRoute>
+                  <ProfileView />
                 </ProtectedRoute>
               }
             />

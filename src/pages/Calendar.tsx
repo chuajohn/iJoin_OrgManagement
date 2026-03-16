@@ -176,15 +176,15 @@ export default function Calendar() {
 
   // Navigation functions - now working properly
   const goToPreviousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setCurrentDate(prevDate => subMonths(startOfMonth(prevDate), 1));
   };
 
   const goToNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setCurrentDate(prevDate => addMonths(startOfMonth(prevDate), 1));
   };
 
   const goToToday = () => {
-    setCurrentDate(new Date());
+    setCurrentDate(startOfMonth(new Date()));
   };
 
   return (
@@ -266,47 +266,47 @@ export default function Calendar() {
           {/* Calendar */}
           <Card className="md:col-span-2 border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-[#00A3FF]/5 border border-[#00A3FF]/20">
-                    <CalendarIcon className="h-5 w-5 text-[#00A3FF]" />
+              <CardHeader>
+                <div className="flex items-center justify-between relative z-20">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-[#00A3FF]/5 border border-[#00A3FF]/20">
+                      <CalendarIcon className="h-5 w-5 text-[#00A3FF]" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-[#1A1A2E]">{format(currentDate, "MMMM yyyy")}</CardTitle>
+                      <CardDescription className="text-[#4A5568] mt-2">
+                        {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} scheduled
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="text-[#1A1A2E]">{format(currentDate, "MMMM yyyy")}</CardTitle>
-                    <CardDescription className="text-[#4A5568] mt-2">
-                      {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} scheduled
-                    </CardDescription>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={goToPreviousMonth}
+                      className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={goToToday}
+                      className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                    >
+                      Today
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={goToNextMonth}
+                      className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                    >
+                      Next
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={goToPreviousMonth}
-                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5"
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={goToToday}
-                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5"
-                  >
-                    Today
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={goToNextMonth}
-                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5"
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
+              </CardHeader>
             <CardContent>
               <div className="grid grid-cols-7 gap-2">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (

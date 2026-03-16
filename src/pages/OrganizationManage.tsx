@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import { usePendingRequests } from "@/hooks/usePendingRequests";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,9 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Users, Megaphone, Calendar, FileText, Upload, Pencil, Trash2, Settings, Save, Image as ImageIcon, X, GripVertical, Camera, Move, ZoomIn, RotateCcw } from "lucide-react";
+import { ArrowLeft, Users, Megaphone, Calendar, FileText, Upload, Pencil, Trash2, Settings, Save, Image as ImageIcon, X, GripVertical, Camera, Move, ZoomIn, RotateCcw, Instagram, Facebook } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { AnnouncementForm } from "@/components/AnnouncementForm";
@@ -22,6 +24,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { FaInstagram, FaFacebookF } from "react-icons/fa";
 
 interface Photo {
   id: string;
@@ -102,6 +105,7 @@ const OrganizationManage = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { isOfficer, isLeader, loading: roleLoading } = useUserRole(id);
+  const { pendingCounts, refresh: refreshPendingCounts } = usePendingRequests();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [organization, setOrganization] = useState<any>(null);
   const [documents, setDocuments] = useState<any[]>([]);
@@ -113,6 +117,8 @@ const OrganizationManage = () => {
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editProfilePicture, setEditProfilePicture] = useState("");
+  const [editInstagram, setEditInstagram] = useState("");
+  const [editFacebook, setEditFacebook] = useState("");
   const [savingOrg, setSavingOrg] = useState(false);
   
   // Profile picture upload/crop state
@@ -145,6 +151,8 @@ const OrganizationManage = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const pendingCount = id ? pendingCounts[id] || 0 : 0;
 
   const fetchDocuments = async () => {
     if (!id) return;
@@ -198,6 +206,8 @@ const OrganizationManage = () => {
         setEditName(data.name);
         setEditDescription(data.description || "");
         setEditProfilePicture(data.profile_picture || "");
+        setEditInstagram(data.instagram_url || ""); 
+        setEditFacebook(data.facebook_url || "");   
       }
       setLoading(false);
     };
@@ -205,6 +215,7 @@ const OrganizationManage = () => {
     fetchOrganization();
     fetchDocuments();
     fetchPhotos();
+    refreshPendingCounts(); // Refresh pending counts when component mounts
   }, [id]);
 
   // Logo upload handlers
@@ -404,7 +415,6 @@ const OrganizationManage = () => {
     try {
       let profilePictureUrl = editProfilePicture;
 
-      // Upload new logo if selected
       if (selectedLogoFile) {
         const uploadedUrl = await uploadLogo();
         if (uploadedUrl) {
@@ -412,22 +422,37 @@ const OrganizationManage = () => {
         }
       }
 
-      const { error } = await supabase
-        .from("organizations")
-        .update({
-          name: editName.trim(),
-          description: editDescription.trim() || null,
-          profile_picture: profilePictureUrl.trim() || null,
-        })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setOrganization((prev: any) => ({
-        ...prev,
+      const updates = {
         name: editName.trim(),
         description: editDescription.trim() || null,
         profile_picture: profilePictureUrl.trim() || null,
+        instagram_url: editInstagram?.trim() || null,
+        facebook_url: editFacebook?.trim() || null,
+      };
+
+      const { error } = await supabase
+        .from("organizations")
+        .update(updates)
+        .eq("id", id);
+
+      if (error) {
+        console.error("Update error:", error);
+        
+        // User-friendly error messages
+        if (error.message?.includes('permission denied')) {
+          toast.error("You don't have permission to update this organization");
+        } else if (error.message?.includes('violates row-level security')) {
+          toast.error("You don't have permission to update this organization");
+        } else {
+          toast.error("Failed to update organization");
+        }
+        return;
+      }
+
+      // Update local state
+      setOrganization((prev: any) => ({
+        ...prev,
+        ...updates,
       }));
 
       setIsEditing(false);
@@ -435,8 +460,8 @@ const OrganizationManage = () => {
       setLogoPreviewUrl(null);
       toast.success("Organization updated successfully");
     } catch (error: any) {
-      console.error("Error updating organization:", error);
-      toast.error("Failed to update organization");
+      console.error("Unexpected error:", error);
+      toast.error("An unexpected error occurred");
     } finally {
       setSavingOrg(false);
     }
@@ -777,9 +802,17 @@ const OrganizationManage = () => {
               <FileText className="mr-2 h-4 w-4" />
               Documents
             </TabsTrigger>
-            <TabsTrigger value="members">
+            <TabsTrigger value="members" className="relative">
               <Users className="mr-2 h-4 w-4" />
               Members
+              {pendingCount > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="ml-2 px-1.5 py-0.5 text-xs animate-pulse"
+                >
+                  {pendingCount}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -873,6 +906,105 @@ const OrganizationManage = () => {
                       />
                     </div>
 
+                    {/* Social Media Links - With react-icons */}
+                    <div className="space-y-4 pt-4 border-t">
+                      <h4 className="font-medium">Social Media Links</h4>
+                      
+                      {/* Instagram */}
+                      <div className="space-y-2">
+                        <Label htmlFor="instagram" className="flex items-center gap-2">
+                          <FaInstagram className="w-5 h-5 text-[#E4405F]" />
+                          Instagram URL
+                        </Label>
+                        <div className="flex gap-2">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm">
+                            instagram.com/
+                          </span>
+                          <Input
+                            id="instagram"
+                            placeholder="your-organization"
+                            value={(() => {
+                              if (!editInstagram) return '';
+                              const match = editInstagram.match(/(?:instagram\.com\/)([^/?]+)/);
+                              return match ? match[1] : editInstagram;
+                            })()}
+                            onChange={(e) => {
+                              const input = e.target.value;
+                              
+                              if (input.includes('instagram.com/')) {
+                                const match = input.match(/(?:instagram\.com\/)([^/?]+)/);
+                                if (match) {
+                                  setEditInstagram(`https://instagram.com/${match[1]}`);
+                                } else {
+                                  setEditInstagram(input);
+                                }
+                              } else {
+                                const username = input.replace(/[^a-zA-Z0-9._]/g, '');
+                                if (username) {
+                                  setEditInstagram(`https://instagram.com/${username}`);
+                                } else {
+                                  setEditInstagram('');
+                                }
+                              }
+                            }}
+                            className="flex-1 rounded-l-none"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Enter your Instagram username or paste the full URL
+                        </p>
+                      </div>
+
+                      {/* Facebook */}
+                      <div className="space-y-2">
+                        <Label htmlFor="facebook" className="flex items-center gap-2">
+                          <FaFacebookF className="w-5 h-5 text-[#1877F2]" />
+                          Facebook URL
+                        </Label>
+                        <div className="flex gap-2">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm">
+                            facebook.com/
+                          </span>
+                          <Input
+                            id="facebook"
+                            placeholder="your-organization"
+                            value={(() => {
+                              if (!editFacebook) return '';
+                              const match = editFacebook.match(/(?:facebook\.com\/)([^/?]+)/);
+                              return match ? match[1] : editFacebook;
+                            })()}
+                            onChange={(e) => {
+                              const input = e.target.value;
+                              
+                              if (input.includes('facebook.com/')) {
+                                const match = input.match(/(?:facebook\.com\/)([^/?]+)/);
+                                if (match) {
+                                  setEditFacebook(`https://facebook.com/${match[1]}`);
+                                } else {
+                                  setEditFacebook(input);
+                                }
+                              } else {
+                                const pageName = input.replace(/[^a-zA-Z0-9.]/g, '');
+                                if (pageName) {
+                                  setEditFacebook(`https://facebook.com/${pageName}`);
+                                } else {
+                                  setEditFacebook('');
+                                }
+                              }
+                            }}
+                            className="flex-1 rounded-l-none"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Enter your Facebook page name or paste the full URL
+                        </p>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground">
+                        Leave empty to hide social media links
+                      </p>
+                    </div>
+
                     <div className="flex gap-2 pt-4">
                       <Button 
                         onClick={handleSaveOrganization} 
@@ -888,6 +1020,8 @@ const OrganizationManage = () => {
                           setEditName(organization.name);
                           setEditDescription(organization.description || "");
                           setEditProfilePicture(organization.profile_picture || "");
+                          setEditInstagram(organization.instagram_url || "");
+                          setEditFacebook(organization.facebook_url || "");
                           setSelectedLogoFile(null);
                           setLogoPreviewUrl(null);
                         }}
@@ -924,6 +1058,39 @@ const OrganizationManage = () => {
                         {organization?.description || "No description provided."}
                       </p>
                     </div>
+
+                    {/* Social Media Links Display */}
+                    {(organization?.instagram_url || organization?.facebook_url) && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Connect With Us</h4>
+                        <div className="flex items-center gap-3">
+                          {organization?.instagram_url && (
+                            <a
+                              href={organization.instagram_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-pink-600 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Instagram className="h-4 w-4" />
+                              <span className="hover:underline">Instagram</span>
+                            </a>
+                          )}
+                          {organization?.facebook_url && (
+                            <a
+                              href={organization.facebook_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-blue-600 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Facebook className="h-4 w-4" />
+                              <span className="hover:underline">Facebook</span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                       <div>

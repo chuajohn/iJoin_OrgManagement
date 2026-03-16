@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import OrgLogo from "@/components/OrgLogo";
 import { SignOutButton } from "@/components/SignOutButton";
 import { NotificationItem } from "@/components/NotificationItem";
+import { usePendingRequests } from "@/hooks/usePendingRequests";
 import { format } from "date-fns";
 
 interface Organization {
@@ -61,6 +62,8 @@ const Explore = () => {
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
   const isStudent = isSHSStudent || isUGStudent;
+
+  const { pendingCounts } = usePendingRequests();
 
   // Set default tab based on user role
   useEffect(() => {
@@ -663,10 +666,15 @@ const Explore = () => {
                     </Link>
 
                     {manage && (
-                      <Link to={`/org/${org.id}/manage`} className="w-full">
-                        <Button variant="secondary" className="w-full gap-2 bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm">
+                      <Link to={`/org/${org.id}/manage`} className="relative w-full">
+                        <Button variant="secondary" className="w-full gap-2 relative">
                           <Settings className="h-4 w-4" />
                           Manage
+                          {pendingCounts[org.id] > 0 && (
+                            <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                              {pendingCounts[org.id] > 9 ? '9+' : pendingCounts[org.id]}
+                            </span>
+                          )}
                         </Button>
                       </Link>
                     )}
