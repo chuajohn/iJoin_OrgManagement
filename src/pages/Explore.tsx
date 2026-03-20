@@ -354,14 +354,14 @@ const Explore = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0057A3] border-t-transparent" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
+      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -381,7 +381,7 @@ const Explore = () => {
           {user && (
             <div className="flex items-center gap-4">
               {isSHSStudent && (
-                <Badge variant="secondary" className="gap-1 bg-[#00A3FF]/5 text-[#00A3FF] border-[#00A3FF]/30">
+                <Badge variant="secondary" className="gap-1 bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30">
                   <School className="h-3 w-3" />
                   SHS Student
                 </Badge>
@@ -399,7 +399,7 @@ const Explore = () => {
                 </Badge>
               )}
               {isSAO && (
-                <Badge variant="default" className="gap-1 bg-[#00A3FF] text-white border-none">
+                <Badge variant="default" className="gap-1 bg-[#0057A3] text-white border-none">
                   <Shield className="h-3 w-3" />
                   SAO
                 </Badge>
@@ -408,7 +408,7 @@ const Explore = () => {
               {/* Notifications Popover */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#B43B3B] text-white text-xs rounded-full flex items-center justify-center shadow-sm">
@@ -417,14 +417,14 @@ const Explore = () => {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-96 p-0 border border-[#00A3FF]/30 shadow-lg" align="end">
-                  <div className="flex items-center justify-between p-4 border-b border-[#00A3FF]/20">
+                <PopoverContent className="w-96 p-0 border border-[#0057A3]/30 shadow-lg" align="end">
+                  <div className="flex items-center justify-between p-4 border-b border-[#0057A3]/20">
                     <h3 className="font-semibold text-[#1A1A2E]">Notifications</h3>
                     {unreadCount > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 text-xs gap-1 text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                        className="h-8 text-xs gap-1 text-[#0057A3] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
                         onClick={markAllAsRead}
                       >
                         <CheckCheck className="h-3 w-3" />
@@ -453,12 +453,12 @@ const Explore = () => {
                 </PopoverContent>
               </Popover>
 
-              <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5" />
+              <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5" />
             </div>
           )}
           {!user && (
             <Link to="/auth">
-              <Button size="sm" className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm">
+              <Button size="sm" className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#0057A3]/30 shadow-sm">
                 Sign In
               </Button>
             </Link>
@@ -467,16 +467,16 @@ const Explore = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Decorative background elements */}
-        <div className="absolute top-20 left-0 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl -z-10"></div>
+        {/* Decorative background elements - updated blue */}
+        <div className="absolute top-20 left-0 w-64 h-64 bg-[#0057A3]/5 rounded-full blur-3xl -z-10"></div>
         <div className="absolute bottom-20 right-0 w-80 h-80 bg-[#B43B3B]/5 rounded-full blur-3xl -z-10"></div>
         
         {/* Header Section with Propose Org Button */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative">
           <div className="relative">
-            <div className="absolute -top-6 -left-6 w-12 h-12 bg-[#00A3FF]/10 rounded-full blur-2xl"></div>
+            <div className="absolute -top-6 -left-6 w-12 h-12 bg-[#0057A3]/10 rounded-full blur-2xl"></div>
             <h1 className="mb-2 text-3xl font-bold text-[#1A1A2E] flex items-center gap-2">
-              <Compass className="h-8 w-8 text-[#00A3FF]" />
+              <Compass className="h-8 w-8 text-[#0057A3]" />
               Explore Organizations
             </h1>
             <p className="text-[#4A5568]">
@@ -489,7 +489,7 @@ const Explore = () => {
           {/* Propose Org Button - Always visible when logged in */}
           {user && (
             <Link to="/create-organization">
-              <Button size="lg" className="gap-2 bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm hover:shadow-md transition-all">
+              <Button size="lg" className="gap-2 bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#0057A3]/30 shadow-sm hover:shadow-md transition-all">
                 <PlusCircle className="h-5 w-5" />
                 Request New Organization
               </Button>
@@ -497,12 +497,12 @@ const Explore = () => {
           )}
         </div>
 
-        {/* Stats badges with depth */}
+        {/* Stats badges with depth - updated blue */}
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Badge variant="outline" className="border-[#00A3FF]/30 text-[#1A1A2E] bg-white/80 backdrop-blur-sm">
+          <Badge variant="outline" className="border-[#0057A3]/30 text-[#1A1A2E] bg-white/80 backdrop-blur-sm">
             {organizations.length} total organizations
           </Badge>
-          <Badge variant="secondary" className="bg-[#00A3FF]/5 text-[#00A3FF] border-[#00A3FF]/30">
+          <Badge variant="secondary" className="bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30">
             <School className="mr-1 h-3 w-3" />
             {organizations.filter(o => o.is_shs_org).length} SHS
           </Badge>
@@ -511,14 +511,14 @@ const Explore = () => {
             {organizations.filter(o => !o.is_shs_org).length} College
           </Badge>
           {isStudent && (
-            <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#00A3FF]/30 gap-1 shadow-sm">
+            <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#0057A3]/30 gap-1 shadow-sm">
               <UserCheck className="mr-1 h-3 w-3" />
               {organizations.filter(o => o.membershipStatus === "accepted").length} Joined
             </Badge>
           )}
         </div>
 
-        {/* Search Bar with depth */}
+        {/* Search Bar with depth - updated blue */}
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4A5568]" />
@@ -527,29 +527,29 @@ const Explore = () => {
               placeholder="Search organizations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm focus-visible:ring-[#FFD966] shadow-sm"
+              className="pl-10 border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm focus-visible:ring-[#FFD966] shadow-sm"
             />
           </div>
         </div>
 
-        {/* Tab Filters with depth */}
+        {/* Tab Filters with depth - updated blue */}
         <div className="mb-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabFilter)} className="w-full">
-            <TabsList className={`grid w-full ${isStudent ? 'grid-cols-4' : 'grid-cols-3'} max-w-2xl mx-auto bg-[#E1E8F0]/80 backdrop-blur-sm border border-[#00A3FF]/30 p-1`}>
-              <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+            <TabsList className={`grid w-full ${isStudent ? 'grid-cols-4' : 'grid-cols-3'} max-w-2xl mx-auto bg-[#E1E8F0]/80 backdrop-blur-sm border border-[#0057A3]/30 p-1`}>
+              <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <Users className="h-4 w-4" />
                 All
               </TabsTrigger>
-              <TabsTrigger value="shs" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="shs" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <School className="h-4 w-4" />
                 SHS
               </TabsTrigger>
-              <TabsTrigger value="college" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="college" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <GraduationCap className="h-4 w-4" />
                 College
               </TabsTrigger>
               {isStudent && (
-                <TabsTrigger value="myorgs" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+                <TabsTrigger value="myorgs" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                   <UserCheck className="h-4 w-4" />
                   My Orgs
                 </TabsTrigger>
@@ -563,11 +563,11 @@ const Explore = () => {
           Showing {filteredOrgs.length} {filteredOrgs.length === 1 ? 'organization' : 'organizations'}
         </div>
 
-        {/* Organizations Grid */}
+        {/* Organizations Grid - untouched below here except removing yellow dot */}
         {filteredOrgs.length === 0 ? (
-          <div className="py-12 text-center bg-white/80 backdrop-blur-sm border border-[#00A3FF]/30 rounded-lg shadow-sm">
+          <div className="py-12 text-center bg-white/80 backdrop-blur-sm border border-[#0057A3]/30 rounded-lg shadow-sm">
             <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-[#E1E8F0]/80 p-4 border border-[#00A3FF]/30">
+              <div className="rounded-full bg-[#E1E8F0]/80 p-4 border border-[#0057A3]/30">
                 <Users className="h-8 w-8 text-[#4A5568]" />
               </div>
             </div>
@@ -581,7 +581,7 @@ const Explore = () => {
             </p>
             {user && (
               <Link to="/create-organization" className="mt-4 inline-block">
-                <Button variant="outline" className="gap-2 border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5">
+                <Button variant="outline" className="gap-2 border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5">
                   <PlusCircle className="h-4 w-4" />
                   Request a New Organization
                 </Button>
@@ -597,14 +597,14 @@ const Explore = () => {
               const isPending = org.membershipStatus === "pending" && isStudent;
 
               return (
-                <Card key={org.id} className="group transition-all hover:shadow-lg relative flex flex-col h-full border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm hover:bg-white overflow-hidden">
-                  {/* Decorative corner accent */}
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
+                <Card key={org.id} className="group transition-all hover:shadow-lg relative flex flex-col h-full border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm hover:bg-white overflow-hidden">
+                  {/* Decorative corner accent - updated blue */}
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-[#0057A3]/5 to-transparent rounded-bl-full"></div>
                   
-                  {/* Level badge */}
+                  {/* Level badge - updated blue */}
                   <div className="absolute top-2 left-2 z-10">
                     {org.is_shs_org ? (
-                      <Badge variant="secondary" className="bg-[#00A3FF]/5 text-[#00A3FF] border-[#00A3FF]/30 gap-1">
+                      <Badge variant="secondary" className="bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30 gap-1">
                         <School className="h-3 w-3" />
                         SHS
                       </Badge>
@@ -630,7 +630,7 @@ const Explore = () => {
                         </Badge>
                       )}
                       {manage && (
-                        <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#00A3FF]/30 gap-1 shadow-sm">
+                        <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#0057A3]/30 gap-1 shadow-sm">
                           <Settings className="h-3 w-3" />
                           {org.membershipRole === "leader" ? "Leader" : "Officer"}
                         </Badge>
@@ -645,9 +645,9 @@ const Explore = () => {
                           src={org.profile_picture} 
                           alt={org.name} 
                           size="lg" 
-                          className="border border-[#00A3FF]/30 rounded-xl"
+                          className="border border-[#0057A3]/30 rounded-xl"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-[#FFD966] rounded-full border border-white"></div>
+                        {/* Removed the yellow dot here */}
                       </div>
                     </div>
                     <CardTitle className="line-clamp-1 text-center mt-2 text-[#1A1A2E]">
@@ -660,7 +660,7 @@ const Explore = () => {
                   
                   <CardContent className="flex flex-col gap-3 mt-auto pt-2">
                     <Link to={`/org/${org.id}`} className="w-full">
-                      <Button variant="outline" className="w-full border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 hover:border-[#00A3FF]/50">
+                      <Button variant="outline" className="w-full border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5 hover:border-[#0057A3]/50">
                         View Organization
                       </Button>
                     </Link>
@@ -681,7 +681,7 @@ const Explore = () => {
 
                     {isStudent && !manage && !isMember && !isPending && canJoin ? (
                       <Button 
-                        className="w-full bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90 shadow-sm" 
+                        className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90 shadow-sm" 
                         onClick={() => handleJoinOrg(org.id)}
                       >
                         Join Organization
@@ -691,7 +691,7 @@ const Explore = () => {
                     {!user && (
                       <Button 
                         variant="default" 
-                        className="w-full bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90 shadow-sm"
+                        className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90 shadow-sm"
                         onClick={() => navigate("/auth")}
                       >
                         Sign in to Join
@@ -706,7 +706,7 @@ const Explore = () => {
       </div>
 
       {/* Footer - Dark Navy from Landing Page */}
-      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#00A3FF]/20">
+      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#0057A3]/20">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-[#FCF9F5]/60">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>

@@ -12,7 +12,7 @@ import {
   DialogContent, 
   DialogTitle 
 } from "@/components/ui/dialog";
-import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, MapPin, Clock, Search, X, ChevronDown, ChevronUp, CheckCheck, Award, Crown, Star, Medal, Gem, Sparkles, Waves, Wind, Leaf, Fish } from "lucide-react";
+import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, MapPin, Clock, Search, X, ChevronDown, ChevronUp, CheckCheck, Award, Crown, Star, Medal, Gem, Sparkles, Waves, Wind, Leaf, Fish, Cherry, Mountain, Cloud, Sun, Moon, Droplets, Flower, TreePine, Bird, Rabbit, Turtle, Shell } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -129,79 +129,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error fetching memberships:", error);
     }
-  };
-
-  // Get user badges based on roles and memberships
-  const getUserBadges = () => {
-    const badges = [];
-
-    // Game Changer badge - everyone gets this (iACADEMY student)
-    badges.push({
-      id: 'game-changer',
-      name: 'Game Changer',
-      icon: <Sparkles className="h-3 w-3" />,
-      color: 'bg-gradient-to-r from-[#FFD966] to-[#FFC107] text-[#1A1A2E] border-[#00A3FF]/30',
-      description: 'iACADEMY Student'
-    });
-
-    // Leader/Officer badges from memberships
-    const leaderOrgs = memberships.filter(m => m.role === 'leader');
-    const officerOrgs = memberships.filter(m => m.role === 'officer');
-
-    if (leaderOrgs.length > 0) {
-      badges.push({
-        id: 'leader',
-        name: `Leader ${leaderOrgs.length > 1 ? `(×${leaderOrgs.length})` : ''}`,
-        icon: <Crown className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#B43B3B] to-[#B43B3B]/80 text-white border-[#B43B3B]/30',
-        description: leaderOrgs.map(o => o.organizations.name).join(', ')
-      });
-    }
-
-    if (officerOrgs.length > 0) {
-      badges.push({
-        id: 'officer',
-        name: `Officer ${officerOrgs.length > 1 ? `(×${officerOrgs.length})` : ''}`,
-        icon: <Star className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#00A3FF] to-[#00A3FF]/80 text-white border-[#00A3FF]/30',
-        description: officerOrgs.map(o => o.organizations.name).join(', ')
-      });
-    }
-
-    // Member badge (if they have memberships but no leadership roles)
-    const memberCount = memberships.filter(m => m.role === 'member').length;
-    if (memberCount > 0) {
-      badges.push({
-        id: 'member',
-        name: `Member ${memberCount > 1 ? `(×${memberCount})` : ''}`,
-        icon: <Users className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#4A5568]/10 to-[#4A5568]/5 text-[#1A1A2E] border-[#4A5568]/20',
-        description: `${memberCount} organization${memberCount > 1 ? 's' : ''}`
-      });
-    }
-
-    // Admin/SAO badges
-    if (isAdmin) {
-      badges.push({
-        id: 'admin',
-        name: 'Admin',
-        icon: <Shield className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#B43B3B] to-[#B43B3B]/80 text-white border-[#B43B3B]/30',
-        description: 'System Administrator'
-      });
-    }
-
-    if (isSAO) {
-      badges.push({
-        id: 'sao',
-        name: 'SAO',
-        icon: <Shield className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#00A3FF] to-[#00A3FF]/80 text-white border-[#00A3FF]/30',
-        description: 'Student Affairs Office'
-      });
-    }
-
-    return badges;
   };
 
   const fetchDashboardData = async () => {
@@ -587,54 +514,104 @@ const Dashboard = () => {
     return new Date(eventDate) < new Date();
   };
 
-  const badges = getUserBadges();
-
-  // Floating Japanese elements
+  // EXPANDED floating Japanese elements - 35 icons with better visibility
   const japaneseElements = [
-    { Icon: Waves, color: "#00A3FF", top: "15%", right: "5%", delay: "0s", size: 24, opacity: 0.1 },
-    { Icon: Wind, color: "#B43B3B", top: "40%", right: "8%", delay: "2s", size: 28, opacity: 0.1 },
-    { Icon: Leaf, color: "#FFD966", bottom: "30%", right: "3%", delay: "1s", size: 26, opacity: 0.1 },
-    { Icon: Fish, color: "#00A3FF", bottom: "60%", right: "12%", delay: "3s", size: 22, opacity: 0.1 },
-    { Icon: Gem, color: "#B43B3B", top: "70%", right: "15%", delay: "1.5s", size: 24, opacity: 0.1 },
+    // Blue theme (Waves, Fish, Mountain, Droplets, Shell)
+    { Icon: Waves, color: "#0057A3", top: "8%", left: "7%", delay: "0s", size: 28 },
+    { Icon: Fish, color: "#0057A3", top: "16%", right: "12%", delay: "0.8s", size: 26 },
+    { Icon: Mountain, color: "#0057A3", top: "24%", left: "15%", delay: "1.5s", size: 32 },
+    { Icon: Droplets, color: "#0057A3", top: "32%", right: "18%", delay: "2.2s", size: 24 },
+    { Icon: Shell, color: "#0057A3", top: "40%", left: "8%", delay: "2.9s", size: 26 },
+    { Icon: Waves, color: "#0057A3", top: "48%", right: "8%", delay: "3.5s", size: 30 },
+    { Icon: Fish, color: "#0057A3", top: "56%", left: "18%", delay: "4.2s", size: 25 },
+    { Icon: Mountain, color: "#0057A3", top: "64%", right: "15%", delay: "4.9s", size: 28 },
+    { Icon: Droplets, color: "#0057A3", top: "72%", left: "12%", delay: "5.5s", size: 22 },
+    { Icon: Shell, color: "#0057A3", top: "80%", right: "10%", delay: "6.2s", size: 24 },
+    
+    // Red theme (Wind, Gem, Cloud, Flower, Bird)
+    { Icon: Wind, color: "#B43B3B", top: "5%", right: "8%", delay: "0.3s", size: 30 },
+    { Icon: Gem, color: "#B43B3B", top: "14%", left: "12%", delay: "1.1s", size: 28 },
+    { Icon: Cloud, color: "#B43B3B", top: "22%", right: "15%", delay: "1.8s", size: 32 },
+    { Icon: Flower, color: "#B43B3B", top: "30%", left: "20%", delay: "2.5s", size: 26 },
+    { Icon: Bird, color: "#B43B3B", top: "38%", right: "10%", delay: "3.2s", size: 24 },
+    { Icon: Wind, color: "#B43B3B", top: "46%", left: "5%", delay: "3.9s", size: 29 },
+    { Icon: Gem, color: "#B43B3B", top: "54%", right: "20%", delay: "4.5s", size: 27 },
+    { Icon: Cloud, color: "#B43B3B", top: "62%", left: "16%", delay: "5.2s", size: 31 },
+    { Icon: Flower, color: "#B43B3B", top: "70%", right: "12%", delay: "5.9s", size: 25 },
+    { Icon: Bird, color: "#B43B3B", top: "78%", left: "10%", delay: "6.5s", size: 23 },
+    
+    // Yellow theme (Leaf, Cherry, Sun, Star, Sparkles)
+    { Icon: Leaf, color: "#FFD966", top: "10%", left: "20%", delay: "0.5s", size: 27 },
+    { Icon: Cherry, color: "#FFD966", top: "18%", right: "5%", delay: "1.3s", size: 29 },
+    { Icon: Sun, color: "#FFD966", top: "26%", left: "10%", delay: "2.0s", size: 34 },
+    { Icon: Star, color: "#FFD966", top: "34%", right: "22%", delay: "2.7s", size: 26 },
+    { Icon: Sparkles, color: "#FFD966", top: "42%", left: "22%", delay: "3.4s", size: 28 },
+    { Icon: Leaf, color: "#FFD966", top: "50%", right: "5%", delay: "4.1s", size: 25 },
+    { Icon: Cherry, color: "#FFD966", top: "58%", left: "14%", delay: "4.8s", size: 27 },
+    { Icon: Sun, color: "#FFD966", top: "66%", right: "18%", delay: "5.4s", size: 32 },
+    { Icon: Star, color: "#FFD966", top: "74%", left: "8%", delay: "6.1s", size: 24 },
+    { Icon: Sparkles, color: "#FFD966", top: "82%", right: "14%", delay: "6.8s", size: 26 },
+    
+    // Extra scattered small icons
+    { Icon: Rabbit, color: "#0057A3", top: "15%", left: "25%", delay: "1.7s", size: 22 },
+    { Icon: Turtle, color: "#B43B3B", top: "35%", right: "25%", delay: "2.8s", size: 24 },
+    { Icon: TreePine, color: "#FFD966", top: "55%", left: "25%", delay: "3.8s", size: 26 },
+    { Icon: Moon, color: "#0057A3", top: "75%", right: "22%", delay: "4.8s", size: 28 },
+    { Icon: Cloud, color: "#B43B3B", top: "85%", left: "20%", delay: "5.8s", size: 30 },
   ];
+
+  // Debug logging
+  useEffect(() => {
+    console.log("Dashboard - User:", user?.id);
+    console.log("Dashboard - Profile:", profile);
+    console.log("Dashboard - isAdmin:", isAdmin);
+    console.log("Dashboard - isSAO:", isSAO);
+  }, [user, profile, isAdmin, isSAO]);
+
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Profile button clicked - navigating to /profile");
+    navigate("/profile");
+  };
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0057A3] border-t-transparent" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
-      {/* Floating Japanese Elements */}
+      {/* Floating Japanese Elements - Dense and Visible */}
       {japaneseElements.map((item, index) => {
         const IconComponent = item.Icon;
         return (
           <div
             key={index}
-            className="absolute pointer-events-none animate-float-subtle"
+            className="absolute pointer-events-none animate-float-playful"
             style={{
               top: item.top,
+              left: item.left,
               right: item.right,
-              bottom: item.bottom,
               animationDelay: item.delay,
-              animationDuration: "8s",
-              opacity: item.opacity,
+              animationDuration: "10s",
+              opacity: 0.35,
+              zIndex: 0,
             }}
           >
             <IconComponent 
               size={item.size} 
               color={item.color}
-              strokeWidth={1}
+              strokeWidth={1.2}
             />
           </div>
         );
       })}
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
+      {/* Header - with deeper blue */}
+      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="flex items-center gap-3">
@@ -651,26 +628,26 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center gap-2">
             <Link to="/explore">
-              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                 <Search className="h-4 w-4 mr-1"/>
                 Explore
               </Button>
             </Link>
             <Link to="/calendar">
-              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                 <Calendar className="h-4 w-4 mr-1" />
                 Calendar
               </Button>
             </Link>
             <Link to="/create-organization">
-              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                 <Plus className="h-4 w-4 mr-1" />
                 Request org
               </Button>
             </Link>
             {(isAdmin || isSAO) && (
               <Link to="/admin">
-                <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                   <Shield className="h-4 w-4 mr-2" />
                   Admin
                 </Button>
@@ -678,7 +655,7 @@ const Dashboard = () => {
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#B43B3B] text-white text-xs rounded-full flex items-center justify-center shadow-sm">
@@ -687,14 +664,14 @@ const Dashboard = () => {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-96 p-0 border border-[#00A3FF]/30 shadow-lg" align="end">
-                <div className="flex items-center justify-between p-4 border-b border-[#00A3FF]/20">
+              <PopoverContent className="w-96 p-0 border border-[#0057A3]/30 shadow-lg" align="end">
+                <div className="flex items-center justify-between p-4 border-b border-[#0057A3]/20">
                   <h3 className="font-semibold text-[#1A1A2E]">Notifications</h3>
                   {unreadCount > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 text-xs gap-1 text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                      className="h-8 text-xs gap-1 text-[#0057A3] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
                       onClick={markAllAsRead}
                     >
                       <CheckCheck className="h-3 w-3" />
@@ -722,20 +699,27 @@ const Dashboard = () => {
                 </ScrollArea>
               </PopoverContent>
             </Popover>
-            <Link to="/profile">
-              <Button variant="ghost" size="icon" title="Profile" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
-            <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5" />
+            
+            {/* Profile Button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              title="Profile"
+              className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
+              onClick={handleProfileClick}
+            >
+              <User className="h-5 w-5" />
+            </Button>
+            
+            <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5" />
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 py-8 max-w-6xl relative z-10">
         {/* Welcome Section with subtle depth */}
         <div className="mb-8 relative">
-          <div className="absolute -top-4 -left-4 w-24 h-24 bg-[#00A3FF]/5 rounded-full blur-3xl"></div>
+          <div className="absolute -top-4 -left-4 w-24 h-24 bg-[#0057A3]/5 rounded-full blur-3xl"></div>
           <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-[#B43B3B]/5 rounded-full blur-3xl"></div>
           <div className="relative">
             <h1 className="mb-2 text-3xl font-bold text-[#1A1A2E]">
@@ -746,7 +730,7 @@ const Dashboard = () => {
             </p>
             <div className="flex gap-6 mt-4">
               <div className="text-center">
-                <div className="text-2xl font-bold bg-gradient-to-b from-[#00A3FF] to-[#00A3FF]/70 bg-clip-text text-transparent">
+                <div className="text-2xl font-bold bg-gradient-to-b from-[#0057A3] to-[#0057A3]/70 bg-clip-text text-transparent">
                   {announcements.length}
                 </div>
                 <div className="text-sm text-[#4A5568]">Announcements</div>
@@ -765,9 +749,9 @@ const Dashboard = () => {
           {/* Main Content - Feed */}
           <div className="lg:col-span-2 space-y-6">
             {announcements.length === 0 ? (
-              <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+              <Card className="border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
                 <CardContent className="py-12 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#00A3FF]/5 flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#0057A3]/5 flex items-center justify-center">
                     <Bell className="h-8 w-8 text-[#4A5568]" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2 text-[#1A1A2E]">No announcements yet</h3>
@@ -775,7 +759,7 @@ const Dashboard = () => {
                     Join organizations or check back later for updates
                   </p>
                   <Link to="/explore">
-                    <Button className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm">
+                    <Button className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#0057A3]/30 shadow-sm">
                       Explore Organizations
                     </Button>
                   </Link>
@@ -793,13 +777,13 @@ const Dashboard = () => {
                   : truncateText(announcement.content, 300);
 
                 return (
-                  <Card key={announcement.id} className="overflow-hidden border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+                  <Card key={announcement.id} className="overflow-hidden border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
                     {/* Post Header */}
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border border-[#00A3FF]/30">
+                        <Avatar className="h-10 w-10 border border-[#0057A3]/30">
                           <AvatarImage src={orgProfilePic || undefined} />
-                          <AvatarFallback className="bg-[#00A3FF]/5 text-[#00A3FF]">
+                          <AvatarFallback className="bg-[#0057A3]/5 text-[#0057A3]">
                             {orgName.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
@@ -818,7 +802,7 @@ const Dashboard = () => {
                       
                       {/* Image */}
                       {announcement.image_url && (
-                        <div className="rounded-lg overflow-hidden border border-[#00A3FF]/20 bg-[#FCF9F5]">
+                        <div className="rounded-lg overflow-hidden border border-[#0057A3]/20 bg-[#FCF9F5]">
                           <img
                             src={announcement.image_url}
                             alt={announcement.title}
@@ -836,7 +820,7 @@ const Dashboard = () => {
                           <Button
                             variant="link"
                             size="sm"
-                            className="h-auto p-0 text-[#00A3FF] hover:text-[#00A3FF]/80"
+                            className="h-auto p-0 text-[#0057A3] hover:text-[#0057A3]/80"
                             onClick={() => toggleDescription(announcement.id)}
                           >
                             {isExpanded ? (
@@ -849,7 +833,7 @@ const Dashboard = () => {
                       </div>
 
                       {/* Post Actions */}
-                      <div className="flex items-center gap-4 pt-4 border-t border-[#00A3FF]/20">
+                      <div className="flex items-center gap-4 pt-4 border-t border-[#0057A3]/20">
                         <Button 
                           variant="ghost" 
                           size="sm" 
@@ -862,7 +846,7 @@ const Dashboard = () => {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="gap-2 text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                          className="gap-2 text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
                           onClick={() => toggleComments(announcement.id)}
                         >
                           <MessageCircle className="h-4 w-4" />
@@ -872,7 +856,7 @@ const Dashboard = () => {
 
                       {/* Comments Section */}
                       {openComments[announcement.id] && (
-                        <div className="border-t border-[#00A3FF]/20 pt-4">
+                        <div className="border-t border-[#0057A3]/20 pt-4">
                           <CommentSection 
                             announcementId={announcement.id} 
                             orgId={announcement.org_id}
@@ -891,17 +875,17 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            {/* User Profile Card - with badges */}
-            <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
+            {/* User Profile Card - with medals */}
+            <Card className="border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#0057A3]/5 to-transparent rounded-bl-full"></div>
               <CardHeader className="pb-2">
                 <CardTitle className="text-[#1A1A2E]">Profile</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3 mb-4">
-                  <Avatar className="h-12 w-12 border border-[#00A3FF]/30">
+                  <Avatar className="h-12 w-12 border border-[#0057A3]/30">
                     <AvatarImage src={profile?.profile_picture || undefined} />
-                    <AvatarFallback className="bg-[#00A3FF]/5 text-[#00A3FF]">
+                    <AvatarFallback className="bg-[#0057A3]/5 text-[#0057A3]">
                       {profile?.name ? getInitials(profile.name) : user?.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -911,31 +895,26 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Badges Section */}
-                {badges.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-xs font-medium text-[#4A5568] mb-2 flex items-center gap-1">
-                      <Award className="h-3 w-3" />
-                      Achievements
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {badges.map((badge) => (
-                        <div
-                          key={badge.id}
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${badge.color} group relative`}
-                          title={badge.description}
-                        >
-                          {badge.icon}
-                          {badge.name}
-                          {/* Tooltip on hover */}
-                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#1A1A2E] text-[#FCF9F5] text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                            {badge.description}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Medals Section - left-aligned */}
+                <div className="flex items-center gap-3 mt-2">
+                  {/* Game Changer Medal - for all users */}
+                  <img 
+                    src="/medals/game_medal.png" 
+                    alt="Game Changer Medal" 
+                    className="w-12 h-12 object-contain hover:scale-110 transition-transform cursor-default"
+                    title="iACADEMY Game Changer"
+                  />
+                  
+                  {/* Admin Medal - only for admins */}
+                  {(isAdmin || isSAO) && (
+                    <img 
+                      src="/medals/admin_medal.png" 
+                      alt="Admin Medal" 
+                      className="w-12 h-12 object-contain hover:scale-110 transition-transform cursor-default"
+                      title={isAdmin ? "System Administrator" : "Student Affairs Office"}
+                    />
+                  )}
+                </div>
               </CardContent>
             </Card>
 
@@ -1007,26 +986,26 @@ const Dashboard = () => {
             </Card>
 
             {/* Quick Links - with depth */}
-            <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
+            <Card className="border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#0057A3]/5 to-transparent rounded-bl-full"></div>
               <CardHeader>
                 <CardTitle className="text-[#1A1A2E]">Quick Links</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Link to="/explore">
-                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                     <Users className="mr-2 h-4 w-4" />
                     Explore Organizations
                   </Button>
                 </Link>
                 <Link to="/calendar">
-                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                     <Calendar className="mr-2 h-4 w-4" />
                     Calendar View
                   </Button>
                 </Link>
                 <Link to="/profile">
-                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                     <User className="mr-2 h-4 w-4" />
                     Your Profile
                   </Button>
@@ -1038,7 +1017,7 @@ const Dashboard = () => {
             <div className="text-center text-xs text-[#4A5568]/60 italic pt-2">
               <p>"You make the world a better place. So show up, okay?"</p>
               <div className="flex justify-center gap-1 mt-1">
-                <Waves className="h-3 w-3 text-[#00A3FF]/30" />
+                <Waves className="h-3 w-3 text-[#0057A3]/30" />
                 <Wind className="h-3 w-3 text-[#B43B3B]/30" />
                 <Leaf className="h-3 w-3 text-[#FFD966]/30" />
               </div>
@@ -1134,7 +1113,7 @@ const Dashboard = () => {
       </Dialog>
 
       {/* Footer */}
-      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#00A3FF]/20">
+      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#0057A3]/20">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-[#FCF9F5]/60">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
@@ -1144,13 +1123,14 @@ const Dashboard = () => {
 
       {/* Add subtle floating animation */}
       <style>{`
-        @keyframes float-subtle {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          25% { transform: translateY(-5px) rotate(1deg); }
-          75% { transform: translateY(5px) rotate(-1deg); }
+        @keyframes float-playful {
+          0%, 100% { transform: translateY(0px); }
+          25% { transform: translateY(-8px); }
+          50% { transform: translateY(4px); }
+          75% { transform: translateY(6px); }
         }
-        .animate-float-subtle {
-          animation: float-subtle 8s ease-in-out infinite;
+        .animate-float-playful {
+          animation: float-playful 10s ease-in-out infinite;
         }
       `}</style>
     </div>

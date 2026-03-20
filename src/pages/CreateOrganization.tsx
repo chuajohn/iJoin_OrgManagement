@@ -64,28 +64,28 @@ const RequestOrganization = () => {
     }
   };
 
-  // Floating icons for different org categories
+  // Floating icons for different org categories - increased visibility
   const floatingIcons = [
-    { Icon: Code, color: "#00A3FF", top: "15%", left: "5%", delay: "0s", size: 24 },
-    { Icon: Palette, color: "#B43B3B", top: "25%", right: "8%", delay: "2s", size: 28 },
-    { Icon: Trophy, color: "#FFD966", bottom: "30%", left: "7%", delay: "1s", size: 26 },
-    { Icon: Music, color: "#00A3FF", top: "60%", right: "5%", delay: "3s", size: 22 },
-    { Icon: Camera, color: "#B43B3B", bottom: "15%", right: "12%", delay: "1.5s", size: 24 },
-    { Icon: Gamepad2, color: "#FFD966", top: "40%", left: "10%", delay: "2.5s", size: 28 },
-    { Icon: Mic, color: "#00A3FF", bottom: "45%", left: "12%", delay: "0.5s", size: 22 },
-    { Icon: Cpu, color: "#B43B3B", top: "70%", right: "10%", delay: "3.5s", size: 26 },
-    { Icon: Dumbbell, color: "#FFD966", bottom: "60%", right: "15%", delay: "4s", size: 24 },
+    { Icon: Code, color: "#0057A3", top: "15%", left: "5%", delay: "0s", size: 28 },
+    { Icon: Palette, color: "#B43B3B", top: "25%", right: "8%", delay: "2s", size: 32 },
+    { Icon: Trophy, color: "#FFD966", bottom: "30%", left: "7%", delay: "1s", size: 30 },
+    { Icon: Music, color: "#0057A3", top: "60%", right: "5%", delay: "3s", size: 26 },
+    { Icon: Camera, color: "#B43B3B", bottom: "15%", right: "12%", delay: "1.5s", size: 28 },
+    { Icon: Gamepad2, color: "#FFD966", top: "40%", left: "10%", delay: "2.5s", size: 32 },
+    { Icon: Mic, color: "#0057A3", bottom: "45%", left: "12%", delay: "0.5s", size: 26 },
+    { Icon: Cpu, color: "#B43B3B", top: "70%", right: "10%", delay: "3.5s", size: 30 },
+    { Icon: Dumbbell, color: "#FFD966", bottom: "60%", right: "15%", delay: "4s", size: 28 },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
-      {/* Floating Icons - Very Subtle */}
+      {/* Floating Icons - More visible (increased opacity) */}
       {floatingIcons.map((item, index) => {
         const IconComponent = item.Icon;
         return (
           <div
             key={index}
-            className="absolute pointer-events-none animate-float-subtle opacity-10 hover:opacity-20 transition-opacity"
+            className="absolute pointer-events-none animate-float-subtle"
             style={{
               top: item.top,
               left: item.left,
@@ -93,6 +93,7 @@ const RequestOrganization = () => {
               bottom: item.bottom,
               animationDelay: item.delay,
               animationDuration: "8s",
+              opacity: 0.25, // Increased from 0.1 to 0.25
             }}
           >
             <IconComponent 
@@ -104,14 +105,14 @@ const RequestOrganization = () => {
         );
       })}
 
-      {/* Very subtle background elements */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl"></div>
+      {/* Very subtle background elements - updated blue */}
+      <div className="absolute top-20 left-10 w-64 h-64 bg-[#0057A3]/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#B43B3B]/5 rounded-full blur-3xl"></div>
 
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30">
+      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30">
         <div className="container mx-auto flex h-16 items-center px-4">
           <Link to="/dashboard">
-            <Button variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+            <Button variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -139,7 +140,7 @@ const RequestOrganization = () => {
           </p>
         </div>
 
-        <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm">
+        <Card className="border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-sm">
           <CardHeader>
             <CardTitle className="text-[#1A1A2E]">Request Organization</CardTitle>
             <CardDescription className="text-[#4A5568]">
@@ -152,24 +153,24 @@ const RequestOrganization = () => {
               
               <Alert className={`
                 ${orgType === 'shs' 
-                  ? 'bg-[#00A3FF]/5 border-[#00A3FF]/30' 
+                  ? 'bg-[#0057A3]/5 border-[#0057A3]/30' 
                   : 'bg-[#B43B3B]/5 border-[#B43B3B]/30'
                 }
               `}>
                 <div className="flex items-start gap-3">
                   <div className={`
                     p-2 rounded-lg
-                    ${orgType === 'shs' ? 'bg-[#00A3FF]/10' : 'bg-[#B43B3B]/10'}
+                    ${orgType === 'shs' ? 'bg-[#0057A3]/10' : 'bg-[#B43B3B]/10'}
                   `}>
                     {orgType === 'shs' ? (
-                      <School className={`h-5 w-5 ${orgType === 'shs' ? 'text-[#00A3FF]' : 'text-[#B43B3B]'}`} />
+                      <School className={`h-5 w-5 ${orgType === 'shs' ? 'text-[#0057A3]' : 'text-[#B43B3B]'}`} />
                     ) : (
-                      <GraduationCap className={`h-5 w-5 ${orgType === 'shs' ? 'text-[#00A3FF]' : 'text-[#B43B3B]'}`} />
+                      <GraduationCap className={`h-5 w-5 ${orgType === 'shs' ? 'text-[#0057A3]' : 'text-[#B43B3B]'}`} />
                     )}
                   </div>
                   <div className="flex-1">
                     <h4 className={`font-medium ${
-                      orgType === 'shs' ? 'text-[#00A3FF]' : 'text-[#B43B3B]'
+                      orgType === 'shs' ? 'text-[#0057A3]' : 'text-[#B43B3B]'
                     }`}>
                       Requesting a {orgType === 'shs' ? 'SHS' : 'College'} Organization
                     </h4>
@@ -188,7 +189,7 @@ const RequestOrganization = () => {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                   disabled={loading}
-                  className="border-[#00A3FF]/30 bg-white focus-visible:ring-[#FFD966]/50 placeholder:text-[#4A5568]/50"
+                  className="border-[#0057A3]/30 bg-white focus-visible:ring-[#FFD966]/50 placeholder:text-[#4A5568]/50"
                 />
               </div>
 
@@ -203,7 +204,7 @@ const RequestOrganization = () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={5}
                   disabled={loading}
-                  className="border-[#00A3FF]/30 bg-white focus-visible:ring-[#FFD966]/50 placeholder:text-[#4A5568]/50"
+                  className="border-[#0057A3]/30 bg-white focus-visible:ring-[#FFD966]/50 placeholder:text-[#4A5568]/50"
                 />
               </div>
 
@@ -218,19 +219,19 @@ const RequestOrganization = () => {
                   value={formData.profilePicture}
                   onChange={(e) => setFormData({ ...formData, profilePicture: e.target.value })}
                   disabled={loading}
-                  className="border-[#00A3FF]/30 bg-white focus-visible:ring-[#FFD966]/50 placeholder:text-[#4A5568]/50"
+                  className="border-[#0057A3]/30 bg-white focus-visible:ring-[#FFD966]/50 placeholder:text-[#4A5568]/50"
                 />
               </div>
 
-              {/* Category icons row */}
+              {/* Category icons row - updated blue */}
               <div className="flex items-center justify-center gap-3 pt-2">
-                <Code className="h-4 w-4 text-[#00A3FF]/40" />
+                <Code className="h-4 w-4 text-[#0057A3]/40" />
                 <Palette className="h-4 w-4 text-[#B43B3B]/40" />
                 <Trophy className="h-4 w-4 text-[#FFD966]/40" />
-                <Music className="h-4 w-4 text-[#00A3FF]/40" />
+                <Music className="h-4 w-4 text-[#0057A3]/40" />
                 <Camera className="h-4 w-4 text-[#B43B3B]/40" />
                 <Gamepad2 className="h-4 w-4 text-[#FFD966]/40" />
-                <Dumbbell className="h-4 w-4 text-[#00A3FF]/40" />
+                <Dumbbell className="h-4 w-4 text-[#0057A3]/40" />
                 <Mic className="h-4 w-4 text-[#B43B3B]/40" />
               </div>
 
@@ -238,7 +239,7 @@ const RequestOrganization = () => {
                 <Button 
                   type="submit" 
                   disabled={loading || !formData.name.trim()} 
-                  className="flex-1 bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90"
+                  className="flex-1 bg-[#0057A3] text-white hover:bg-[#0057A3]/90"
                   size="lg"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -250,7 +251,7 @@ const RequestOrganization = () => {
                   onClick={() => navigate("/dashboard")}
                   disabled={loading}
                   size="lg"
-                  className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5"
+                  className="border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5"
                 >
                   Cancel
                 </Button>
@@ -265,8 +266,8 @@ const RequestOrganization = () => {
         </p>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-12 bg-[#1A1A2E] border-t border-[#00A3FF]/20">
+      {/* Footer - updated blue */}
+      <footer className="mt-12 bg-[#1A1A2E] border-t border-[#0057A3]/20">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-[#FCF9F5]/40">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>

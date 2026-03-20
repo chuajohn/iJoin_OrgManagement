@@ -53,7 +53,7 @@ const Auth = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0057A3] border-t-transparent" />
       </div>
     );
   }
@@ -100,27 +100,27 @@ const Auth = () => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 flex items-center justify-center p-4">
         {/* Decorative elements */}
-        <div className="absolute top-20 left-10 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-64 h-64 bg-[#0057A3]/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#B43B3B]/5 rounded-full blur-3xl"></div>
         
-        <Card className="w-full max-w-md border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-xl">
+        <Card className="w-full max-w-md border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-xl">
           <CardHeader>
             <div className="flex justify-center mb-4">
-              <div className="h-16 w-16 rounded-full bg-[#00A3FF]/10 border-2 border-[#00A3FF]/30 flex items-center justify-center">
-                <MailCheck className="h-8 w-8 text-[#00A3FF]" />
+              <div className="h-16 w-16 rounded-full bg-[#0057A3]/10 border-2 border-[#0057A3]/30 flex items-center justify-center">
+                <MailCheck className="h-8 w-8 text-[#0057A3]" />
               </div>
             </div>
             <CardTitle className="text-center text-2xl text-[#1A1A2E]">Verify Your Email</CardTitle>
             <CardDescription className="text-center text-base text-[#4A5568]">
               We sent a verification link to:
               <br />
-              <span className="font-medium text-[#00A3FF] mt-2 block break-all">
+              <span className="font-medium text-[#0057A3] mt-2 block break-all">
                 {verifiedEmail}
               </span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-[#00A3FF]/5 border border-[#00A3FF]/20 rounded-lg p-4 text-sm text-[#1A1A2E]">
+            <div className="bg-[#0057A3]/5 border border-[#0057A3]/20 rounded-lg p-4 text-sm text-[#1A1A2E]">
               <p className="font-medium mb-1">📧 Can't find the email?</p>
               <p className="text-[#4A5568]">Check your spam folder or wait a few minutes.</p>
             </div>
@@ -129,7 +129,7 @@ const Auth = () => {
               <Button 
                 variant="outline" 
                 onClick={() => setShowVerification(false)}
-                className="w-full border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5"
+                className="w-full border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5"
               >
                 Back to Sign In
               </Button>
@@ -149,7 +149,7 @@ const Auth = () => {
                     toast.error(error.message);
                   }
                 }}
-                className="w-full text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                className="w-full text-[#0057A3] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
               >
                 Resend Verification Email
               </Button>
@@ -167,17 +167,17 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
       {/* Decorative background elements */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl"></div>
+      <div className="absolute top-20 left-10 w-64 h-64 bg-[#0057A3]/5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#B43B3B]/5 rounded-full blur-3xl"></div>
       
       {/* Lightning pattern overlay */}
       <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 15 L35 15 L30 30 L40 30 L20 45 L25 30 L15 30 L25 15' fill='%2300A3FF' opacity='0.2'/%3E%3C/svg%3E")`,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 15 L35 15 L30 30 L40 30 L20 45 L25 30 L15 30 L25 15' fill='%230057A3' opacity='0.2'/%3E%3C/svg%3E")`,
         backgroundSize: '60px 60px'
       }}></div>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
+      <header className="sticky top-0 z-30 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-3">
             <div className="relative">
@@ -191,7 +191,7 @@ const Auth = () => {
             <span className="text-xl font-bold text-[#1A1A2E]">iJoin</span>
           </Link>
           <Link to="/">
-            <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+            <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
@@ -201,8 +201,8 @@ const Auth = () => {
 
       {/* Auth Form */}
       <div className="container mx-auto flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
-        <Card className="w-full max-w-md border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-xl">
-          <div className="absolute top-0 left-0 w-16 h-16 border-l border-t border-[#00A3FF]/30"></div>
+        <Card className="w-full max-w-md border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-xl">
+          <div className="absolute top-0 left-0 w-16 h-16 border-l border-t border-[#0057A3]/30"></div>
           <div className="absolute top-0 right-0 w-16 h-16 border-r border-t border-[#B43B3B]/30"></div>
           
           <CardHeader>
@@ -211,16 +211,16 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-[#E1E8F0]/80 border border-[#00A3FF]/30 p-1">
+              <TabsList className="grid w-full grid-cols-2 bg-[#E1E8F0]/80 border border-[#0057A3]/30 p-1">
                 <TabsTrigger 
                   value="signin" 
-                  className="data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm"
+                  className="data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm"
                 >
                   Sign In
                 </TabsTrigger>
                 <TabsTrigger 
                   value="signup" 
-                  className="data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm"
+                  className="data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm"
                 >
                   Sign Up
                 </TabsTrigger>
@@ -237,7 +237,7 @@ const Auth = () => {
                       placeholder="student@iacademy.edu"
                       {...signInForm.register("email")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signInForm.formState.errors.email && (
                       <p className="text-sm text-[#B43B3B]">
@@ -252,7 +252,7 @@ const Auth = () => {
                       type="password"
                       {...signInForm.register("password")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signInForm.formState.errors.password && (
                       <p className="text-sm text-[#B43B3B]">
@@ -262,7 +262,7 @@ const Auth = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90" 
+                    className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -289,7 +289,7 @@ const Auth = () => {
                       placeholder="Juan Dela Cruz"
                       {...signUpForm.register("name")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signUpForm.formState.errors.name && (
                       <p className="text-sm text-[#B43B3B]">
@@ -307,7 +307,7 @@ const Auth = () => {
                       placeholder="student@iacademy.edu"
                       {...signUpForm.register("email")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signUpForm.formState.errors.email && (
                       <p className="text-sm text-[#B43B3B]">
@@ -329,21 +329,21 @@ const Auth = () => {
                       <div className={`
                         relative flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all
                         ${signUpForm.watch("userType") === 'undergraduate_student' 
-                          ? 'border-[#00A3FF] bg-[#00A3FF]/5 ring-2 ring-[#00A3FF]/20' 
-                          : 'border-[#00A3FF]/20 hover:border-[#00A3FF]/50 hover:bg-white'
+                          ? 'border-[#0057A3] bg-[#0057A3]/5 ring-2 ring-[#0057A3]/20' 
+                          : 'border-[#0057A3]/20 hover:border-[#0057A3]/50 hover:bg-white'
                         }
                       `}>
-                        <RadioGroupItem value="undergraduate_student" id="ug" className="text-[#00A3FF]" />
+                        <RadioGroupItem value="undergraduate_student" id="ug" className="text-[#0057A3]" />
                         <Label htmlFor="ug" className="flex-1 cursor-pointer font-normal">
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-full ${
                               signUpForm.watch("userType") === 'undergraduate_student' 
-                                ? 'bg-[#00A3FF]/10' 
+                                ? 'bg-[#0057A3]/10' 
                                 : 'bg-[#E1E8F0]'
                             }`}>
                               <GraduationCap className={`h-5 w-5 ${
                                 signUpForm.watch("userType") === 'undergraduate_student' 
-                                  ? 'text-[#00A3FF]' 
+                                  ? 'text-[#0057A3]' 
                                   : 'text-[#4A5568]'
                               }`} />
                             </div>
@@ -360,7 +360,7 @@ const Auth = () => {
                         relative flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all
                         ${signUpForm.watch("userType") === 'senior_highschool_student' 
                           ? 'border-[#B43B3B] bg-[#B43B3B]/5 ring-2 ring-[#B43B3B]/20' 
-                          : 'border-[#00A3FF]/20 hover:border-[#B43B3B]/50 hover:bg-white'
+                          : 'border-[#0057A3]/20 hover:border-[#B43B3B]/50 hover:bg-white'
                         }
                       `}>
                         <RadioGroupItem value="senior_highschool_student" id="shs" className="text-[#B43B3B]" />
@@ -400,7 +400,7 @@ const Auth = () => {
                       type="password"
                       {...signUpForm.register("password")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signUpForm.formState.errors.password ? (
                       <p className="text-sm text-[#B43B3B]">
@@ -415,7 +415,7 @@ const Auth = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90" 
+                    className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -435,10 +435,10 @@ const Auth = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#1A1A2E] border-t border-[#00A3FF]/20">
+      <footer className="bg-[#1A1A2E] border-t border-[#0057A3]/20">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-[#FCF9F5]/40">
-            <p>© 2024 iJoin - iACADEMY Student Platform. All rights reserved.</p>
+            <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
         </div>
       </footer>

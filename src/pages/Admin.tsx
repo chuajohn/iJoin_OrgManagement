@@ -4,7 +4,7 @@ import { UserRoleManagement } from "@/components/admin/UserRoleManagement";
 import { OrganizationManagement } from "@/components/admin/OrganizationManagement";
 import { EventManagement } from "@/components/admin/EventManagement";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Shield, Settings, Users, Calendar, Bookmark, ChevronDown, ChevronRight, Menu, X } from "lucide-react";
+import { ArrowLeft, Shield, Settings, Users, Calendar, Bookmark, ChevronDown, ChevronRight, Menu } from "lucide-react";
 import { SignOutButton } from "@/components/SignOutButton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -174,7 +174,7 @@ export default function Admin() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
       {/* Decorative background elements */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#B43B3B]/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -199,7 +199,7 @@ export default function Admin() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* Mobile Menu - Fixed */}
+            {/* Mobile Menu */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
@@ -218,7 +218,6 @@ export default function Admin() {
                       className="w-full justify-start gap-2"
                       onClick={() => {
                         scrollToSection(section.id);
-                        // Fix: Cast to HTMLElement to access click method
                         const closeButton = document.querySelector('[data-radix-collection-item]');
                         if (closeButton instanceof HTMLElement) {
                           closeButton.click();
@@ -385,7 +384,8 @@ export default function Admin() {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 py-2 relative z-10">
+      {/* Main Content Area - Grows to push footer down */}
+      <main className="flex-1 container mx-auto px-4 py-2 relative z-10">
         <div className="space-y-4 max-w-5xl mx-auto">
           {sections.map((section) => (
             <div
@@ -472,7 +472,7 @@ export default function Admin() {
         </div>
       </main>
 
-      {/* Quick Navigation Floating Button (Mobile) - Fixed */}
+      {/* Quick Navigation Floating Button (Mobile) */}
       <div className="fixed bottom-4 right-4 md:hidden z-50">
         <Sheet>
           <SheetTrigger asChild>
@@ -492,7 +492,6 @@ export default function Admin() {
                   className="w-full justify-start gap-2"
                   onClick={() => {
                     scrollToSection(section.id);
-                    // Fix: Cast to HTMLElement to access click method
                     const closeButton = document.querySelector('[data-radix-collection-item]');
                     if (closeButton instanceof HTMLElement) {
                       closeButton.click();
@@ -508,14 +507,13 @@ export default function Admin() {
                   )}
                 </Button>
               ))}
-              {/* ... rest of the content ... */}
             </div>
           </SheetContent>
         </Sheet>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-12 bg-[#1A1A2E] border-t border-[#00A3FF]/20">
+      {/* Footer - Always at bottom */}
+      <footer className="bg-[#1A1A2E] border-t border-[#00A3FF]/20 mt-auto">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-[#FCF9F5]/40">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
