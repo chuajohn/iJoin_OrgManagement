@@ -20,7 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowLeft, Calendar, MapPin, Trash2, Pencil, FileText, UserPlus, UserMinus, Clock, Users as UsersIcon, ExternalLink, X } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Trash2, Pencil, FileText, UserPlus, UserMinus, Clock, Users as UsersIcon, ExternalLink, X, Users, CheckCircle, XCircle, Download } from "lucide-react";
 import { FaInstagram, FaFacebookF } from "react-icons/fa";
 import OrgLogo from "@/components/OrgLogo";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { RSVPButton } from "@/components/RSVPButton";
+import { RSVPManager } from "@/components/RSVPManager";
 
 interface Organization {
   id: string;
@@ -69,6 +71,7 @@ interface Event {
   event_date: string;
   location: string;
   status: string;
+  visibility: string;
   created_by: string;
   org_id: string;
   organizations?: {
@@ -119,6 +122,7 @@ const Organization = () => {
   // Event modal state
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [eventModalTab, setEventModalTab] = useState<string>('details');
   
   // Membership state
   const [membershipStatus, setMembershipStatus] = useState<'none' | 'pending' | 'accepted'>('none');
@@ -135,6 +139,7 @@ const Organization = () => {
   const canDeleteAnnouncements = isOfficer || isLeader || isSAO || isAdmin;
   const canEditEvents = isOfficer || isLeader || isSAO || isAdmin;
   const canDeleteEvents = isLeader || isSAO || isAdmin;
+  const canManageRegistrations = isOfficer || isLeader || isSAO || isAdmin;
 
   //leave Confirmation
   const [leaveConfirmationOpen, setLeaveConfirmationOpen] = useState(false);
@@ -533,6 +538,7 @@ const Organization = () => {
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
+    setEventModalTab('details');
     setIsEventModalOpen(true);
   };
 
@@ -668,7 +674,7 @@ const Organization = () => {
                   )}
                 </div>
 
-                {/* Social Media Icons - Moved under the profile and action buttons */}
+                {/* Social Media Icons */}
                 {(organization.instagram_url || organization.facebook_url) && (
                   <div className="flex items-center gap-2 mt-4 pt-4 border-t">
                     {organization.instagram_url && (
@@ -1110,79 +1116,135 @@ const Organization = () => {
 
         {/* Event Details Modal */}
         <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
-          <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden">
-            <DialogHeader className="p-6 pb-2">
-              <DialogTitle className="text-xl font-bold">Event Details</DialogTitle>
-            </DialogHeader>
-
+          <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-background">
             {selectedEvent && selectedEvent.organizations && (
               <>
-                <div 
-                  onClick={(e) => handleOrgClick(selectedEvent.org_id, e)}
-                  className="px-6 py-3 bg-muted/50 border-y hover:bg-muted/80 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={selectedEvent.organizations.profile_picture || undefined} />
-                      <AvatarFallback className="bg-primary/10">
-                        {getInitials(selectedEvent.organizations.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold">{selectedEvent.organizations.name}</p>
-                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
-                      </div>
-                      <p className="text-xs text-muted-foreground">Click to view organization</p>
-                    </div>
-                  </div>
+                <DialogHeader className="p-6 pb-2">
+                  <DialogTitle className="text-xl font-bold">Event Details</DialogTitle>
+                </DialogHeader>
+
+                <div className="px-6 border-b">
+                  <Tabs value={eventModalTab} onValueChange={setEventModalTab} className="w-full">
+                    <TabsList className="bg-transparent h-auto p-0 gap-6">
+                      <TabsTrigger 
+                        value="details" 
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-1 py-2 text-sm font-medium"
+                      >
+                        Details
+                      </TabsTrigger>
+                      {canManageRegistrations && (
+                        <TabsTrigger 
+                          value="registrations" 
+                          className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-1 py-2 text-sm font-medium"
+                        >
+                          Registrations
+                        </TabsTrigger>
+                      )}
+                    </TabsList>
+                  </Tabs>
                 </div>
 
-                <div className="p-6 space-y-6">
-                  <div>
-                    <h3 className="text-2xl font-bold">{selectedEvent.name}</h3>
-                    {isPastEvent(selectedEvent.event_date) && (
-                      <Badge variant="outline" className="mt-2">Past Event</Badge>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        <span>{format(new Date(selectedEvent.event_date), "EEEE, MMMM d, yyyy")}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span>{format(new Date(selectedEvent.event_date), "h:mm a")}</span>
-                      </div>
-                    </div>
-                    {selectedEvent.location && (
-                      <div className="col-span-2 space-y-1">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          <span>{selectedEvent.location}</span>
+                <Tabs value={eventModalTab} onValueChange={setEventModalTab} className="w-full">
+                  {/* Details Tab */}
+                  <TabsContent value="details" className="mt-0">
+                    <div className="p-6 space-y-6">
+                      {/* Organization Header */}
+                      <div 
+                        onClick={(e) => handleOrgClick(selectedEvent.org_id, e)}
+                        className="px-0 py-3 hover:bg-muted/20 cursor-pointer transition-colors rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={selectedEvent.organizations.profile_picture || undefined} />
+                            <AvatarFallback className="bg-primary/10">
+                              {getInitials(selectedEvent.organizations.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold">{selectedEvent.organizations.name}</p>
+                              <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                            </div>
+                            <p className="text-xs text-muted-foreground">Click to view organization</p>
+                          </div>
                         </div>
                       </div>
-                    )}
-                  </div>
 
-                  {selectedEvent.description && (
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</p>
-                      <div className="bg-muted/50 rounded-lg p-4">
-                        <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                          {selectedEvent.description}
-                        </p>
+                      {/* Event Name */}
+                      <div>
+                        <h3 className="text-2xl font-bold">{selectedEvent.name}</h3>
+                        {isPastEvent(selectedEvent.event_date) && (
+                          <Badge variant="outline" className="mt-2">Past Event</Badge>
+                        )}
+                        <div className="mt-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {selectedEvent.visibility === 'public' ? 'Public Event' : 'Private Event'}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Date, Time, Location Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-primary" />
+                            <span>{format(new Date(selectedEvent.event_date), "EEEE, MMMM d, yyyy")}</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="h-4 w-4 text-primary" />
+                            <span>{format(new Date(selectedEvent.event_date), "h:mm a")}</span>
+                          </div>
+                        </div>
+                        {selectedEvent.location && (
+                          <div className="col-span-2 space-y-1">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
+                            <div className="flex items-center gap-2 text-sm">
+                              <MapPin className="h-4 w-4 text-primary" />
+                              <span>{selectedEvent.location}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Description */}
+                      {selectedEvent.description && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</p>
+                          <div className="bg-muted/50 rounded-lg p-4">
+                            <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                              {selectedEvent.description}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* RSVP Button */}
+                      <div className="pt-4 border-t">
+                        <RSVPButton 
+                          eventId={selectedEvent.id}
+                          eventName={selectedEvent.name}
+                          visibility={selectedEvent.visibility}
+                          size="lg"
+                          className="w-full"
+                        />
                       </div>
                     </div>
+                  </TabsContent>
+
+                  {/* Registrations Tab - Simplified Management */}
+                  {canManageRegistrations && (
+                    <TabsContent value="registrations" className="mt-0 p-6">
+                      <RSVPManager 
+                        eventId={selectedEvent.id}
+                        eventName={selectedEvent.name}
+                      />
+                    </TabsContent>
                   )}
-                </div>
+                </Tabs>
               </>
             )}
           </DialogContent>

@@ -3,10 +3,25 @@ import { useAuth } from "@/contexts/AuthContext";
 import { UserRoleManagement } from "@/components/admin/UserRoleManagement";
 import { OrganizationManagement } from "@/components/admin/OrganizationManagement";
 import { EventManagement } from "@/components/admin/EventManagement";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Shield, Settings, Users, Calendar, Bookmark, ChevronDown, ChevronRight, Menu, X } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { 
+  ArrowLeft, 
+  Users, 
+  Calendar, 
+  ChevronDown, 
+  ChevronRight, 
+  Menu,
+  Building2,
+  ChevronsLeft,
+  ChevronsRight,
+  Download,
+  FileSpreadsheet,
+  CheckSquare,
+  Square,
+  Loader2
+} from "lucide-react";
 import { SignOutButton } from "@/components/SignOutButton";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -17,7 +32,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Checkbox
+} from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import * as XLSX from 'xlsx';
 
 interface Section {
   id: 'users' | 'organizations' | 'events';
@@ -25,12 +54,20 @@ interface Section {
   icon: React.ReactNode;
   count?: number;
   pendingCount?: number;
-  color: string;
+  description: string;
+}
+
+interface ExportOptions {
+  users: boolean;
+  organizations: boolean;
+  memberships: boolean;
 }
 
 export default function Admin() {
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'organizations');
   const [stats, setStats] = useState({
     users: 0,
     organizations: 0,
@@ -42,54 +79,89 @@ export default function Admin() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(['users', 'organizations', 'events'])
   );
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeBookmark, setActiveBookmark] = useState<string | null>(null);
-  const [bookmarks, setBookmarks] = useState<string[]>([]);
+  
+  // Export state
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportOptions, setExportOptions] = useState<ExportOptions>({
+    users: true,
+    organizations: true,
+    memberships: true
+  });
+  
+  // Refs for section elements
+  const sectionRefs = {
+    users: useRef<HTMLDivElement>(null),
+    organizations: useRef<HTMLDivElement>(null),
+    events: useRef<HTMLDivElement>(null)
+  };
 
   useEffect(() => {
     fetchStats();
-    loadBookmarks();
   }, []);
+
+  // Handle tab parameter from URL and scroll to section
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['users', 'organizations', 'events'].includes(tab)) {
+      setActiveTab(tab);
+      
+      setExpandedSections(prev => {
+        const newSet = new Set(prev);
+        newSet.add(tab);
+        return newSet;
+      });
+
+      const attemptScroll = (attempts = 0) => {
+        const element = sectionRefs[tab as keyof typeof sectionRefs]?.current;
+        if (element) {
+          const headerOffset = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+          
+          setActiveBookmark(tab);
+          setTimeout(() => setActiveBookmark(null), 2000);
+        } else if (attempts < 10) {
+          setTimeout(() => attemptScroll(attempts + 1), 100);
+        }
+      };
+
+      setTimeout(() => attemptScroll(), 300);
+    }
+  }, [searchParams]);
 
   const fetchStats = async () => {
     try {
-      // Get total users (profiles count)
-      const { count: usersCount, error: usersError } = await supabase
+      const { count: usersCount } = await supabase
         .from("profiles")
         .select("*", { count: "exact", head: true });
 
-      if (usersError) throw usersError;
-
-      // Get total organizations (active only)
-      const { count: orgsCount, error: orgsError } = await supabase
+      const { count: orgsCount } = await supabase
         .from("organizations")
         .select("*", { count: "exact", head: true })
         .eq("status", "active");
 
-      if (orgsError) throw orgsError;
-
-      // Get pending organizations
-      const { count: pendingOrgsCount, error: pendingOrgsError } = await supabase
+      const { count: pendingOrgsCount } = await supabase
         .from("organizations")
         .select("*", { count: "exact", head: true })
         .eq("status", "pending");
 
-      if (pendingOrgsError) throw pendingOrgsError;
-
-      // Get total events (approved only)
-      const { count: eventsCount, error: eventsError } = await supabase
+      const { count: eventsCount } = await supabase
         .from("events")
         .select("*", { count: "exact", head: true })
         .eq("status", "approved");
 
-      if (eventsError) throw eventsError;
-
-      // Get pending events
-      const { count: pendingEventsCount, error: pendingEventsError } = await supabase
+      const { count: pendingEventsCount } = await supabase
         .from("events")
         .select("*", { count: "exact", head: true })
         .eq("status", "pending");
-
-      if (pendingEventsError) throw pendingEventsError;
 
       setStats({
         users: usersCount || 0,
@@ -105,27 +177,6 @@ export default function Admin() {
     }
   };
 
-  const loadBookmarks = () => {
-    const saved = localStorage.getItem('adminBookmarks');
-    if (saved) {
-      setBookmarks(JSON.parse(saved));
-    }
-  };
-
-  const saveBookmark = (sectionId: string) => {
-    if (!bookmarks.includes(sectionId)) {
-      const newBookmarks = [...bookmarks, sectionId];
-      setBookmarks(newBookmarks);
-      localStorage.setItem('adminBookmarks', JSON.stringify(newBookmarks));
-    }
-  };
-
-  const removeBookmark = (sectionId: string) => {
-    const newBookmarks = bookmarks.filter(b => b !== sectionId);
-    setBookmarks(newBookmarks);
-    localStorage.setItem('adminBookmarks', JSON.stringify(newBookmarks));
-  };
-
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => {
       const newSet = new Set(prev);
@@ -138,12 +189,137 @@ export default function Admin() {
     });
   };
 
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    navigate(`/admin?tab=${tabId}`, { replace: true });
+    
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      newSet.add(tabId);
+      return newSet;
+    });
+
+    setTimeout(() => {
+      const element = sectionRefs[tabId as keyof typeof sectionRefs]?.current;
+      if (element) {
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        
+        setActiveBookmark(tabId);
+        setTimeout(() => setActiveBookmark(null), 2000);
+      }
+    }, 200);
+  };
+
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(`section-${sectionId}`);
+    const element = sectionRefs[sectionId as keyof typeof sectionRefs]?.current;
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
       setActiveBookmark(sectionId);
+      handleTabChange(sectionId);
       setTimeout(() => setActiveBookmark(null), 2000);
+    }
+  };
+
+  const toggleExportOption = (key: keyof ExportOptions) => {
+    setExportOptions(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const exportData = async () => {
+    setExporting(true);
+    const workbook = XLSX.utils.book_new();
+    
+    try {
+      // Export Users
+      if (exportOptions.users) {
+        const { data: users } = await supabase
+          .from("profiles")
+          .select("id, name, email, created_at, profile_picture")
+          .order("created_at", { ascending: false });
+        
+        const usersData = users?.map(u => ({
+          'User ID': u.id,
+          'Name': u.name,
+          'Email': u.email,
+          'Joined': new Date(u.created_at).toLocaleDateString(),
+          'Profile Picture': u.profile_picture || 'No image'
+        })) || [];
+        
+        const ws = XLSX.utils.json_to_sheet(usersData);
+        XLSX.utils.book_append_sheet(workbook, ws, 'Users');
+      }
+
+      // Export Organizations
+      if (exportOptions.organizations) {
+        const { data: orgs } = await supabase
+          .from("organizations")
+          .select("id, name, description, status, is_shs_org, created_at, profile_picture")
+          .order("created_at", { ascending: false });
+        
+        const orgsData = orgs?.map(o => ({
+          'Organization ID': o.id,
+          'Name': o.name,
+          'Description': o.description || 'No description',
+          'Status': o.status,
+          'Type': o.is_shs_org ? 'SHS' : 'College',
+          'Created': new Date(o.created_at).toLocaleDateString(),
+          'Logo': o.profile_picture || 'No image'
+        })) || [];
+        
+        const ws = XLSX.utils.json_to_sheet(orgsData);
+        XLSX.utils.book_append_sheet(workbook, ws, 'Organizations');
+      }
+
+      // Export Memberships
+      if (exportOptions.memberships) {
+        const { data: memberships } = await supabase
+          .from("memberships")
+          .select(`
+            id, role, status, joined_at,
+            profiles (name, email),
+            organizations (name)
+          `)
+          .order("joined_at", { ascending: false });
+        
+        const membershipsData = memberships?.map(m => ({
+          'Membership ID': m.id,
+          'Member Name': m.profiles?.name || 'Unknown',
+          'Member Email': m.profiles?.email || 'Unknown',
+          'Organization': m.organizations?.name || 'Unknown',
+          'Role': m.role,
+          'Status': m.status,
+          'Joined': new Date(m.joined_at).toLocaleDateString()
+        })) || [];
+        
+        const ws = XLSX.utils.json_to_sheet(membershipsData);
+        XLSX.utils.book_append_sheet(workbook, ws, 'Memberships');
+      }
+
+      // Generate filename with current date
+      const date = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(workbook, `iJoin_Archive_${date}.xlsx`);
+      
+      toast.success(`Exported ${Object.values(exportOptions).filter(v => v).length} sections successfully!`);
+      setExportDialogOpen(false);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export data");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -153,15 +329,16 @@ export default function Admin() {
       title: 'User Management',
       icon: <Users className="h-4 w-4" />,
       count: stats.users,
-      color: 'bg-[#00A3FF]'
+      pendingCount: 0,
+      description: 'Manage user roles and permissions'
     },
     {
       id: 'organizations',
       title: 'Organization Management',
-      icon: <Settings className="h-4 w-4" />,
+      icon: <Building2 className="h-4 w-4" />,
       count: stats.organizations,
       pendingCount: stats.pendingOrgs,
-      color: 'bg-[#B43B3B]'
+      description: 'Approve and manage organizations'
     },
     {
       id: 'events',
@@ -169,359 +346,509 @@ export default function Admin() {
       icon: <Calendar className="h-4 w-4" />,
       count: stats.events,
       pendingCount: stats.pendingEvents,
-      color: 'bg-[#FFD966]'
+      description: 'Review and approve events'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-      {/* Decorative background elements */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#B43B3B]/5 rounded-full blur-3xl pointer-events-none"></div>
-
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-gray-50">
+      {/* Simple Header */}
+      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button 
               variant="ghost" 
-              size="sm" 
+              size="sm"
               onClick={() => navigate("/dashboard")}
-              className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+              className="text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Dashboard
+              Back
             </Button>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-[#B43B3B]/10 border border-[#B43B3B]/30 flex items-center justify-center">
-                <Shield className="h-4 w-4 text-[#B43B3B]" />
-              </div>
-              <h1 className="text-2xl font-bold text-[#1A1A2E]">Admin Dashboard</h1>
-            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Mobile Menu - Fixed */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px]">
-                <SheetHeader>
-                  <SheetTitle>Quick Navigation</SheetTitle>
-                </SheetHeader>
-                <div className="mt-4 space-y-2">
-                  {sections.map((section) => (
-                    <Button
-                      key={section.id}
-                      variant="ghost"
-                      className="w-full justify-start gap-2"
-                      onClick={() => {
-                        scrollToSection(section.id);
-                        // Fix: Cast to HTMLElement to access click method
-                        const closeButton = document.querySelector('[data-radix-collection-item]');
-                        if (closeButton instanceof HTMLElement) {
-                          closeButton.click();
-                        }
-                      }}
-                    >
-                      {section.icon}
-                      {section.title}
-                      {section.pendingCount && section.pendingCount > 0 && (
-                        <Badge variant="destructive" className="ml-auto">
-                          {section.pendingCount} pending
-                        </Badge>
-                      )}
-                    </Button>
-                  ))}
-                </div>
-                <Separator className="my-4" />
-                <div>
-                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Bookmark className="h-4 w-4" />
-                    Bookmarks
-                  </h4>
-                  {bookmarks.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      Click the bookmark icon on any section to save it here
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {bookmarks.map((bookmark) => {
-                        const section = sections.find(s => s.id === bookmark);
-                        if (!section) return null;
-                        return (
-                          <Button
-                            key={bookmark}
-                            variant="ghost"
-                            className="w-full justify-start gap-2"
-                            onClick={() => scrollToSection(bookmark)}
-                          >
-                            {section.icon}
-                            {section.title}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            <SignOutButton 
-              variant="ghost" 
-              size="icon" 
-              className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
-            />
-          </div>
-        </div>
-
-        {/* Quick Stats Bar */}
-        <div className="border-t border-[#00A3FF]/10 bg-white/50 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-2">
-            <div className="flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-[#4A5568]">Pending:</span>
-                <Badge variant="destructive" className="gap-1">
-                  {stats.pendingOrgs} orgs
-                </Badge>
-                <Badge variant="destructive" className="gap-1">
-                  {stats.pendingEvents} events
-                </Badge>
-              </div>
-              <Separator orientation="vertical" className="h-4" />
-              <div className="flex items-center gap-2">
-                <span className="text-[#4A5568]">Bookmarks:</span>
-                <div className="flex items-center gap-1">
-                  {bookmarks.map((bookmark) => {
-                    const section = sections.find(s => s.id === bookmark);
-                    if (!section) return null;
-                    return (
-                      <Button
-                        key={bookmark}
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => scrollToSection(bookmark)}
-                        title={`Go to ${section.title}`}
-                      >
-                        {section.icon}
-                      </Button>
-                    );
-                  })}
-                  {bookmarks.length === 0 && (
-                    <span className="text-xs text-muted-foreground">
-                      Click <Bookmark className="h-3 w-3 inline" /> to bookmark sections
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <SignOutButton variant="ghost" size="sm" />
         </div>
       </header>
 
-      {/* Stats Cards */}
-      <div className="container mx-auto px-4 py-6 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-          {sections.map((section) => (
-            <div
-              key={section.id}
-              className={cn(
-                "bg-white/50 backdrop-blur-sm border rounded-xl p-4 flex items-center gap-3 transition-all",
-                "hover:shadow-md cursor-pointer",
-                activeBookmark === section.id && "ring-2 ring-offset-2 ring-[#00A3FF]"
+      {/* Main Layout with Sticky Sidebar */}
+      <div className="flex">
+        {/* Collapsible Sidebar */}
+        <aside 
+          className={cn(
+            "bg-white border-r border-gray-200 transition-all duration-300 sticky top-[73px] h-[calc(100vh-73px)] overflow-hidden flex flex-col",
+            sidebarCollapsed ? "w-16" : "w-64"
+          )}
+        >
+          <div className="flex-1 overflow-y-auto">
+            {/* Sidebar Header with Toggle */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              {!sidebarCollapsed && (
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Menu</span>
               )}
-              onClick={() => scrollToSection(section.id)}
-            >
-              <div className={cn(
-                "h-10 w-10 rounded-lg flex items-center justify-center",
-                section.id === 'users' && "bg-[#00A3FF]/5 border border-[#00A3FF]/20",
-                section.id === 'organizations' && "bg-[#B43B3B]/5 border border-[#B43B3B]/20",
-                section.id === 'events' && "bg-[#FFD966]/5 border border-[#FFD966]/20"
-              )}>
-                <div className={cn(
-                  "h-5 w-5",
-                  section.id === 'users' && "text-[#00A3FF]",
-                  section.id === 'organizations' && "text-[#B43B3B]",
-                  section.id === 'events' && "text-[#FFD966]"
-                )}>
-                  {section.icon}
-                </div>
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-[#4A5568]">{section.title}</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-xl font-bold text-[#1A1A2E]">
-                    {loading ? "..." : section.count}
-                  </p>
-                  {section.pendingCount && section.pendingCount > 0 && (
-                    <Badge variant="destructive" className="text-xs">
-                      {section.pendingCount} pending
-                    </Badge>
-                  )}
-                </div>
-              </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn(
-                  "h-8 w-8",
-                  bookmarks.includes(section.id) && "text-[#00A3FF]"
-                )}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (bookmarks.includes(section.id)) {
-                    removeBookmark(section.id);
-                  } else {
-                    saveBookmark(section.id);
-                  }
-                }}
+                className="h-6 w-6"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               >
-                <Bookmark className="h-4 w-4" fill={bookmarks.includes(section.id) ? "currentColor" : "none"} />
+                {sidebarCollapsed ? (
+                  <ChevronsRight className="h-4 w-4" />
+                ) : (
+                  <ChevronsLeft className="h-4 w-4" />
+                )}
               </Button>
             </div>
-          ))}
-        </div>
-      </div>
 
-      <main className="container mx-auto px-4 py-2 relative z-10">
-        <div className="space-y-4 max-w-5xl mx-auto">
-          {sections.map((section) => (
-            <div
-              key={section.id}
-              id={`section-${section.id}`}
-              className="scroll-mt-24"
-            >
-              <div
-                className={cn(
-                  "border rounded-lg overflow-hidden transition-all",
-                  expandedSections.has(section.id) ? "bg-white/80" : "bg-white/50"
-                )}
+            {/* Scrollable Sidebar Content */}
+            <div className="p-3 space-y-6">
+              {/* Quick Stats */}
+              {!sidebarCollapsed ? (
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Overview</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm text-gray-700">Users</span>
+                      </div>
+                      <span className="text-sm font-semibold">{stats.users.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-indigo-500" />
+                        <span className="text-sm text-gray-700">Orgs</span>
+                      </div>
+                      <span className="text-sm font-semibold">{stats.organizations}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-gray-700">Events</span>
+                      </div>
+                      <span className="text-sm font-semibold">{stats.events}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-3">
+                    <Users className="h-5 w-5 text-blue-500" />
+                    <span className="text-xs font-semibold">{stats.users}</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-3">
+                    <Building2 className="h-5 w-5 text-indigo-500" />
+                    <span className="text-xs font-semibold">{stats.organizations}</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-3">
+                    <Calendar className="h-5 w-5 text-green-500" />
+                    <span className="text-xs font-semibold">{stats.events}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Pending Items */}
+              {(stats.pendingOrgs > 0 || stats.pendingEvents > 0) && (
+                <>
+                  <Separator />
+                  {!sidebarCollapsed ? (
+                    <div>
+                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Pending</h3>
+                      <div className="space-y-2">
+                        {stats.pendingOrgs > 0 && (
+                          <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
+                            <div className="flex items-center gap-2">
+                              <Building2 className="h-4 w-4 text-amber-600" />
+                              <span className="text-sm text-amber-700">Orgs</span>
+                            </div>
+                            <Badge className="bg-amber-100 text-amber-700 border-0">{stats.pendingOrgs}</Badge>
+                          </div>
+                        )}
+                        {stats.pendingEvents > 0 && (
+                          <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-amber-600" />
+                              <span className="text-sm text-amber-700">Events</span>
+                            </div>
+                            <Badge className="bg-amber-100 text-amber-700 border-0">{stats.pendingEvents}</Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {stats.pendingOrgs > 0 && (
+                        <div className="flex flex-col items-center gap-2">
+                          <Building2 className="h-5 w-5 text-amber-600" />
+                          <Badge className="bg-amber-100 text-amber-700 border-0">{stats.pendingOrgs}</Badge>
+                        </div>
+                      )}
+                      {stats.pendingEvents > 0 && (
+                        <div className="flex flex-col items-center gap-2">
+                          <Calendar className="h-5 w-5 text-amber-600" />
+                          <Badge className="bg-amber-100 text-amber-700 border-0">{stats.pendingEvents}</Badge>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              <Separator />
+
+              {/* Navigation */}
+              {!sidebarCollapsed ? (
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Sections</h3>
+                  <div className="space-y-1">
+                    {sections.map((section) => (
+                      <button
+                        key={section.id}
+                        onClick={() => scrollToSection(section.id)}
+                        className={cn(
+                          "w-full flex items-center justify-between p-2 rounded-lg transition-colors",
+                          activeTab === section.id 
+                            ? "bg-indigo-50 text-indigo-700" 
+                            : "hover:bg-gray-50 text-gray-700",
+                          activeBookmark === section.id && "ring-2 ring-indigo-300 ring-offset-2"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={cn(
+                            "h-5 w-5 rounded flex items-center justify-center",
+                            activeTab === section.id ? "text-indigo-600" : "text-gray-500"
+                          )}>
+                            {section.icon}
+                          </div>
+                          <span className="text-sm font-medium">{section.title}</span>
+                        </div>
+                        {section.pendingCount ? (
+                          <Badge className="bg-amber-100 text-amber-700 border-0 text-xs px-1.5">
+                            {section.pendingCount}
+                          </Badge>
+                        ) : null}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {sections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => scrollToSection(section.id)}
+                      className={cn(
+                        "w-full flex flex-col items-center gap-1 p-2 rounded-lg transition-colors",
+                        activeTab === section.id 
+                          ? "bg-indigo-50 text-indigo-700" 
+                          : "hover:bg-gray-50 text-gray-700",
+                        activeBookmark === section.id && "ring-2 ring-indigo-300 ring-offset-2"
+                      )}
+                      title={section.title}
+                    >
+                      <div className="h-5 w-5">{section.icon}</div>
+                      {section.pendingCount ? (
+                        <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px] px-1">
+                          {section.pendingCount}
+                        </Badge>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Export Button - Bottom Left */}
+          <div className="border-t border-gray-200 p-3">
+            {!sidebarCollapsed ? (
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
+                onClick={() => setExportDialogOpen(true)}
               >
-                {/* Section Header - Click to collapse/expand */}
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="icon"
+                className="w-full h-9"
+                onClick={() => setExportDialogOpen(true)}
+                title="Export"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          <div className="space-y-6">
+            {sections.map((section) => (
+              <div
+                key={section.id}
+                id={`section-${section.id}`}
+                ref={sectionRefs[section.id]}
+                className="scroll-mt-20"
+              >
                 <div
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#00A3FF]/5 transition-colors"
-                  onClick={() => toggleSection(section.id)}
+                  className={cn(
+                    "bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all",
+                    activeBookmark === section.id && "ring-2 ring-indigo-300 ring-offset-2"
+                  )}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "p-2 rounded-lg",
-                      section.id === 'users' && "bg-[#00A3FF]/5 border border-[#00A3FF]/20",
-                      section.id === 'organizations' && "bg-[#B43B3B]/5 border border-[#B43B3B]/20",
-                      section.id === 'events' && "bg-[#FFD966]/5 border border-[#FFD966]/20"
-                    )}>
+                  {/* Section Header */}
+                  <div
+                    className="flex items-center justify-between p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => toggleSection(section.id)}
+                  >
+                    <div className="flex items-center gap-3">
                       <div className={cn(
-                        "h-5 w-5",
-                        section.id === 'users' && "text-[#00A3FF]",
-                        section.id === 'organizations' && "text-[#B43B3B]",
-                        section.id === 'events' && "text-[#FFD966]"
+                        "h-10 w-10 rounded-lg flex items-center justify-center",
+                        section.id === 'users' && "bg-blue-100 text-blue-600",
+                        section.id === 'organizations' && "bg-indigo-100 text-indigo-600",
+                        section.id === 'events' && "bg-green-100 text-green-600"
                       )}>
                         {section.icon}
                       </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-semibold text-gray-900">
+                            {section.title}
+                          </h2>
+                          {section.pendingCount ? (
+                            <Badge className="bg-amber-100 text-amber-700 border-0">
+                              {section.pendingCount} pending
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <p className="text-sm text-gray-500">{section.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-[#1A1A2E]">
-                        {section.title}
-                      </h2>
-                      {section.pendingCount && section.pendingCount > 0 && (
-                        <p className="text-xs text-[#B43B3B]">
-                          {section.pendingCount} item{section.pendingCount !== 1 ? 's' : ''} pending approval
-                        </p>
+                    <div className="flex items-center gap-2">
+                      {expandedSections.has(section.id) ? (
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-gray-500" />
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (bookmarks.includes(section.id)) {
-                          removeBookmark(section.id);
-                        } else {
-                          saveBookmark(section.id);
-                        }
-                      }}
-                    >
-                      <Bookmark 
-                        className="h-4 w-4" 
-                        fill={bookmarks.includes(section.id) ? "currentColor" : "none"} 
-                      />
-                    </Button>
-                    {expandedSections.has(section.id) ? (
-                      <ChevronDown className="h-5 w-5 text-[#4A5568]" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-[#4A5568]" />
-                    )}
-                  </div>
-                </div>
 
-                {/* Section Content - Collapsible */}
-                {expandedSections.has(section.id) && (
-                  <div className="border-t border-[#00A3FF]/20">
-                    {section.id === 'users' && <UserRoleManagement />}
-                    {section.id === 'organizations' && <OrganizationManagement />}
-                    {section.id === 'events' && <EventManagement />}
-                  </div>
-                )}
+                  {/* Section Content */}
+                  {expandedSections.has(section.id) && (
+                    <div className="border-t border-gray-200 p-5">
+                      {section.id === 'users' && <UserRoleManagement />}
+                      {section.id === 'organizations' && <OrganizationManagement />}
+                      {section.id === 'events' && <EventManagement />}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      </div>
+
+      {/* Mobile Navigation */}
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button 
+            variant="default" 
+            size="icon" 
+            className="fixed bottom-4 right-4 h-12 w-12 rounded-full bg-indigo-600 hover:bg-indigo-700 shadow-lg md:hidden"
+          >
+            <Menu className="h-5 w-5 text-white" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="bottom" className="h-[70vh] rounded-t-xl">
+          <SheetHeader>
+            <SheetTitle>Navigation</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 space-y-4 overflow-y-auto max-h-[calc(70vh-80px)]">
+            {/* Export Button in Mobile */}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                setExportDialogOpen(true);
+                const closeButton = document.querySelector('[data-radix-collection-item]');
+                if (closeButton instanceof HTMLElement) {
+                  closeButton.click();
+                }
+              }}
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-2 p-2">
+              <div className="text-center p-2 rounded-lg bg-gray-50">
+                <p className="text-xs text-gray-500">Users</p>
+                <p className="text-lg font-bold text-gray-900">{stats.users}</p>
+              </div>
+              <div className="text-center p-2 rounded-lg bg-gray-50">
+                <p className="text-xs text-gray-500">Orgs</p>
+                <p className="text-lg font-bold text-gray-900">{stats.organizations}</p>
+              </div>
+              <div className="text-center p-2 rounded-lg bg-gray-50">
+                <p className="text-xs text-gray-500">Events</p>
+                <p className="text-lg font-bold text-gray-900">{stats.events}</p>
               </div>
             </div>
-          ))}
-        </div>
-      </main>
 
-      {/* Quick Navigation Floating Button (Mobile) - Fixed */}
-      <div className="fixed bottom-4 right-4 md:hidden z-50">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button className="h-12 w-12 rounded-full bg-[#00A3FF] hover:bg-[#00A3FF]/90 shadow-lg">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[60vh] rounded-t-xl">
-            <SheetHeader>
-              <SheetTitle>Quick Navigation</SheetTitle>
-            </SheetHeader>
-            <div className="mt-4 space-y-2 overflow-y-auto max-h-[calc(60vh-80px)]">
+            {/* Sections */}
+            <div className="space-y-2">
               {sections.map((section) => (
                 <Button
                   key={section.id}
                   variant="ghost"
-                  className="w-full justify-start gap-2"
+                  className="w-full justify-start gap-3 h-auto py-3"
                   onClick={() => {
-                    scrollToSection(section.id);
-                    // Fix: Cast to HTMLElement to access click method
+                    handleTabChange(section.id);
                     const closeButton = document.querySelector('[data-radix-collection-item]');
                     if (closeButton instanceof HTMLElement) {
                       closeButton.click();
                     }
                   }}
                 >
-                  {section.icon}
-                  {section.title}
-                  {section.pendingCount && section.pendingCount > 0 && (
-                    <Badge variant="destructive" className="ml-auto">
+                  <div className={cn(
+                    "h-8 w-8 rounded-lg flex items-center justify-center",
+                    section.id === 'users' && "bg-blue-100 text-blue-600",
+                    section.id === 'organizations' && "bg-indigo-100 text-indigo-600",
+                    section.id === 'events' && "bg-green-100 text-green-600"
+                  )}>
+                    {section.icon}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-medium text-gray-900">{section.title}</p>
+                    <p className="text-xs text-gray-500">{section.description}</p>
+                  </div>
+                  {section.pendingCount ? (
+                    <Badge className="bg-amber-100 text-amber-700 border-0">
                       {section.pendingCount}
                     </Badge>
-                  )}
+                  ) : null}
                 </Button>
               ))}
-              {/* ... rest of the content ... */}
             </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      {/* Footer */}
-      <footer className="mt-12 bg-[#1A1A2E] border-t border-[#00A3FF]/20">
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-[#FCF9F5]/40">
-            <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
-        </div>
-      </footer>
+        </SheetContent>
+      </Sheet>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Export Data
+            </DialogTitle>
+            <DialogDescription>
+              Select the data you want to export to Excel format. All data will be exported as separate sheets.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium">Select data to export:</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const allSelected = Object.values(exportOptions).every(v => v);
+                    setExportOptions({
+                      users: !allSelected,
+                      organizations: !allSelected,
+                      memberships: !allSelected
+                    });
+                  }}
+                  className="text-xs"
+                >
+                  {Object.values(exportOptions).every(v => v) ? 'Deselect All' : 'Select All'}
+                </Button>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                  <Checkbox
+                    id="export-users"
+                    checked={exportOptions.users}
+                    onCheckedChange={() => toggleExportOption('users')}
+                  />
+                  <Label htmlFor="export-users" className="flex-1 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-blue-500" />
+                      <span>Users</span>
+                    </div>
+                    <p className="text-xs text-gray-500">User profiles, names, emails, join dates</p>
+                  </Label>
+                  <Badge variant="outline">{stats.users} records</Badge>
+                </div>
+
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                  <Checkbox
+                    id="export-organizations"
+                    checked={exportOptions.organizations}
+                    onCheckedChange={() => toggleExportOption('organizations')}
+                  />
+                  <Label htmlFor="export-organizations" className="flex-1 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-indigo-500" />
+                      <span>Organizations</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Org details, status, type, creation date</p>
+                  </Label>
+                  <Badge variant="outline">{stats.organizations} records</Badge>
+                </div>
+
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                  <Checkbox
+                    id="export-memberships"
+                    checked={exportOptions.memberships}
+                    onCheckedChange={() => toggleExportOption('memberships')}
+                  />
+                  <Label htmlFor="export-memberships" className="flex-1 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-purple-500" />
+                      <span>Memberships</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Member-organization relationships, roles, join dates</p>
+                  </Label>
+                  <Badge variant="outline">All memberships</Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={exportData} 
+              disabled={exporting || !Object.values(exportOptions).some(v => v)}
+              className="gap-2"
+            >
+              {exporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Export to Excel
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

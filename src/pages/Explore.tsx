@@ -486,12 +486,22 @@ const Explore = () => {
             </p>
           </div>
           
-          {/* Propose Org Button - Always visible when logged in */}
-          {user && (
+          {/* Propose Org Button - Hidden for admins and SAO */}
+          {user && !isAdmin && !isSAO && (
             <Link to="/create-organization">
               <Button size="lg" className="gap-2 bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm hover:shadow-md transition-all">
                 <PlusCircle className="h-5 w-5" />
                 Request New Organization
+              </Button>
+            </Link>
+          )}
+
+          {/* For admins/SAO, maybe show a different button or nothing */}
+          {user && (isAdmin || isSAO) && (
+            <Link to="/admin">
+              <Button size="lg" className="gap-2 bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90 border border-[#00A3FF]/30 shadow-sm hover:shadow-md transition-all">
+                <Shield className="h-5 w-5" />
+                Admin Dashboard
               </Button>
             </Link>
           )}
@@ -579,11 +589,20 @@ const Explore = () => {
             <p className="mt-2 text-sm text-[#4A5568]">
               Check back later for new organizations
             </p>
-            {user && (
+            {user && !isAdmin && !isSAO && (
               <Link to="/create-organization" className="mt-4 inline-block">
                 <Button variant="outline" className="gap-2 border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5">
                   <PlusCircle className="h-4 w-4" />
                   Request a New Organization
+                </Button>
+              </Link>
+            )}
+
+            {user && (isAdmin || isSAO) && (
+              <Link to="/admin" className="mt-4 inline-block">
+                <Button variant="outline" className="gap-2 border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5">
+                  <Shield className="h-4 w-4" />
+                  Go to Admin Dashboard
                 </Button>
               </Link>
             )}

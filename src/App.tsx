@@ -9,6 +9,7 @@ import { AdminRoute } from "@/components/AdminRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import SAO from "./pages/sao";
 import Explore from "./pages/Explore";
 import CreateOrganization from "./pages/CreateOrganization";
 import OrganizationManage from "./pages/OrganizationManage";
@@ -30,14 +31,25 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/explore" element={<Explore />} />
+            
+            {/* Protected Routes */}
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sao"
+              element={
+                <ProtectedRoute>
+                  <SAO />
                 </ProtectedRoute>
               }
             />
@@ -105,6 +117,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            
+            {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

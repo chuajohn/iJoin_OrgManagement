@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { ArrowLeft, Calendar as CalendarIcon, MapPin, Clock, School, GraduationCap, Users, ExternalLink, Sunrise, Sun, Sunset, Moon } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, isAfter, isBefore, addMonths, subMonths } from "date-fns";
+import { RSVPButton } from "@/components/RSVPButton";
 
 type Event = {
   id: string;
@@ -22,6 +23,7 @@ type Event = {
   description: string | null;
   event_date: string;
   location: string | null;
+  visibility?: string;
   org_id: string;
   organizations: {
     name: string;
@@ -100,6 +102,7 @@ export default function Calendar() {
           description,
           event_date,
           location,
+          visibility,
           org_id,
           organizations (
             name,
@@ -174,7 +177,7 @@ export default function Calendar() {
     return isBefore(new Date(eventDate), new Date());
   };
 
-  // Navigation functions - now working properly
+  // Navigation functions
   const goToPreviousMonth = () => {
     setCurrentDate(prevDate => subMonths(startOfMonth(prevDate), 1));
   };
@@ -236,7 +239,7 @@ export default function Calendar() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Filter Tabs with depth */}
+        {/* Filter Tabs */}
         <div className="mb-8">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabFilter)} className="w-full">
             <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto bg-[#E1E8F0]/80 backdrop-blur-sm border border-[#00A3FF]/30 p-1">
@@ -266,47 +269,47 @@ export default function Calendar() {
           {/* Calendar */}
           <Card className="md:col-span-2 border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
-              <CardHeader>
-                <div className="flex items-center justify-between relative z-20">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-[#00A3FF]/5 border border-[#00A3FF]/20">
-                      <CalendarIcon className="h-5 w-5 text-[#00A3FF]" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-[#1A1A2E]">{format(currentDate, "MMMM yyyy")}</CardTitle>
-                      <CardDescription className="text-[#4A5568] mt-2">
-                        {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} scheduled
-                      </CardDescription>
-                    </div>
+            <CardHeader>
+              <div className="flex items-center justify-between relative z-20">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-[#00A3FF]/5 border border-[#00A3FF]/20">
+                    <CalendarIcon className="h-5 w-5 text-[#00A3FF]" />
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={goToPreviousMonth}
-                      className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={goToToday}
-                      className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
-                    >
-                      Today
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={goToNextMonth}
-                      className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
-                    >
-                      Next
-                    </Button>
+                  <div>
+                    <CardTitle className="text-[#1A1A2E]">{format(currentDate, "MMMM yyyy")}</CardTitle>
+                    <CardDescription className="text-[#4A5568] mt-2">
+                      {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} scheduled
+                    </CardDescription>
                   </div>
                 </div>
-              </CardHeader>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={goToPreviousMonth}
+                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={goToToday}
+                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                  >
+                    Today
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={goToNextMonth}
+                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
             <CardContent>
               <div className="grid grid-cols-7 gap-2">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -322,51 +325,50 @@ export default function Calendar() {
 
                   return (
                     <button
-  key={idx}
-  onClick={() => setSelectedDate(day)}
-  className={`
-    aspect-square p-2 rounded-lg border text-sm relative transition-all duration-200
-    ${!isCurrentMonth ? "text-[#4A5568] bg-[#FCF9F5] border-[#00A3FF]/10" : "bg-white border-[#00A3FF]/30"}
-    ${isToday ? "border-[#FFD966] border-2" : ""}
-    ${isSelected ? "ring-2 ring-[#00A3FF] ring-offset-2" : "hover:border-[#00A3FF] hover:shadow-sm"}
-    ${dayEvents.length > 0 ? "font-semibold" : ""}
-  `}
->
-  <div className={isSelected ? "text-[#00A3FF] font-bold" : ""}>
-    {format(day, "d")}
-  </div>
-  
-  {/* Stamp effect for selected day */}
-  {isSelected && (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <div className="w-8 h-8 rotate-12 opacity-20 border-2 border-[#00A3FF] rounded-full"></div>
-      <div className="absolute w-6 h-6 -rotate-6 opacity-20 border-2 border-[#FFD966] rounded-full"></div>
-    </div>
-  )}
-  
-  {dayEvents.length > 0 && (
-    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-      {Array.from({ length: Math.min(dayEvents.length, 3) }).map((_, i) => (
-        <div
-          key={i}
-          className={`
-            h-1.5 w-1.5 rounded-full
-            ${dayEvents[i]?.organizations?.is_shs_org 
-              ? 'bg-[#00A3FF]' 
-              : 'bg-[#B43B3B]'
-            }
-            ${isSelected ? 'bg-[#00A3FF]' : ''}
-          `}
-        />
-      ))}
-      {dayEvents.length > 3 && (
-        <span className={`text-[10px] ml-0.5 ${isSelected ? 'text-[#00A3FF]' : 'text-[#4A5568]'}`}>
-          +{dayEvents.length - 3}
-        </span>
-      )}
-    </div>
-  )}
-</button>
+                      key={idx}
+                      onClick={() => setSelectedDate(day)}
+                      className={`
+                        aspect-square p-2 rounded-lg border text-sm relative transition-all duration-200
+                        ${!isCurrentMonth ? "text-[#4A5568] bg-[#FCF9F5] border-[#00A3FF]/10" : "bg-white border-[#00A3FF]/30"}
+                        ${isToday ? "border-[#FFD966] border-2" : ""}
+                        ${isSelected ? "ring-2 ring-[#00A3FF] ring-offset-2" : "hover:border-[#00A3FF] hover:shadow-sm"}
+                        ${dayEvents.length > 0 ? "font-semibold" : ""}
+                      `}
+                    >
+                      <div className={isSelected ? "text-[#00A3FF] font-bold" : ""}>
+                        {format(day, "d")}
+                      </div>
+                      
+                      {isSelected && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-8 h-8 rotate-12 opacity-20 border-2 border-[#00A3FF] rounded-full"></div>
+                          <div className="absolute w-6 h-6 -rotate-6 opacity-20 border-2 border-[#FFD966] rounded-full"></div>
+                        </div>
+                      )}
+                      
+                      {dayEvents.length > 0 && (
+                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                          {Array.from({ length: Math.min(dayEvents.length, 3) }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={`
+                                h-1.5 w-1.5 rounded-full
+                                ${dayEvents[i]?.organizations?.is_shs_org 
+                                  ? 'bg-[#00A3FF]' 
+                                  : 'bg-[#B43B3B]'
+                                }
+                                ${isSelected ? 'bg-[#00A3FF]' : ''}
+                              `}
+                            />
+                          ))}
+                          {dayEvents.length > 3 && (
+                            <span className={`text-[10px] ml-0.5 ${isSelected ? 'text-[#00A3FF]' : 'text-[#4A5568]'}`}>
+                              +{dayEvents.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </button>
                   );
                 })}
               </div>
@@ -490,7 +492,7 @@ export default function Calendar() {
           </Card>
         </div>
 
-        {/* Upcoming Events List - Only shows future events */}
+        {/* Upcoming Events List */}
         <Card className="mt-8 border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-[#FFD966]/10 to-transparent rounded-bl-full"></div>
           <CardHeader>
@@ -530,7 +532,6 @@ export default function Calendar() {
                       onClick={() => handleEventClick(event)}
                       className="w-full text-left border border-[#00A3FF]/30 rounded-lg p-4 hover:shadow-md hover:border-[#00A3FF] transition-all bg-white/50 hover:bg-white relative overflow-hidden group"
                     >
-                      {/* Time gradient line */}
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#00A3FF] to-[#B43B3B] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       
                       <div className="flex items-start justify-between">
@@ -594,20 +595,19 @@ export default function Calendar() {
         </Card>
       </main>
 
-      {/* Event Details Modal - FIXED: X button no longer overlaps with date */}
+      {/* Event Details Modal with RSVP Button */}
       <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
-        <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden bg-[#FCF9F5] border border-[#00A3FF]/30 shadow-xl">
-          {/* Header with proper spacing */}
-          <div className="flex items-center justify-between p-6 pr-12 relative">
+        <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-[#FCF9F5] border border-[#00A3FF]/30 shadow-xl">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 pb-2">
             <DialogTitle className="text-xl font-bold text-[#1A1A2E]">
               Event Details
             </DialogTitle>
             {selectedEvent && (
-              <Badge variant="outline" className="absolute right-12 border-[#00A3FF]/30 text-[#4A5568]">
+              <Badge variant="outline" className="border-[#00A3FF]/30 text-[#4A5568]">
                 {format(new Date(selectedEvent.event_date), "MMM d, yyyy")}
               </Badge>
             )}
-            {/* The X button is built into DialogContent and now has space due to pr-12 */}
           </div>
 
           {selectedEvent && selectedEvent.organizations && (
@@ -655,6 +655,11 @@ export default function Calendar() {
                   {isPastEvent(selectedEvent.event_date) && (
                     <Badge variant="outline" className="border-[#B43B3B]/30 text-[#B43B3B]">Past Event</Badge>
                   )}
+                  <div className="mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {selectedEvent.visibility === 'public' ? 'Public Event' : 'Private Event'}
+                    </Badge>
+                  </div>
                 </div>
 
                 {/* Date, Time, Location Grid */}
@@ -696,8 +701,19 @@ export default function Calendar() {
                   </div>
                 )}
 
+                {/* RSVP Button */}
+                <div className="pt-4 border-t">
+                  <RSVPButton 
+                    eventId={selectedEvent.id}
+                    eventName={selectedEvent.name}
+                    visibility={selectedEvent.visibility}
+                    size="lg"
+                    className="w-full"
+                  />
+                </div>
+
                 {/* Type Badge */}
-                <div className="pt-4 border-t border-[#00A3FF]/20 flex justify-center">
+                <div className="pt-2 flex justify-center">
                   {getOrgTypeBadge(selectedEvent.organizations.is_shs_org)}
                 </div>
               </div>
