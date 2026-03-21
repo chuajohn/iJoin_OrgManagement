@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link, Navigate } from "react-router-dom";
-import { Users, GraduationCap, School, Loader2, MailCheck, ArrowLeft } from "lucide-react";
+import { Users, GraduationCap, School, Loader2, MailCheck, ArrowLeft, Waves, Wind, Leaf, Fish, Gem, Cherry, Mountain, Cloud, Sun, Moon, Star, Sparkles, Droplets, Flower, Bird, TreePine, Shell } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -50,10 +50,75 @@ const Auth = () => {
     },
   });
 
+  // Floating Japanese elements - from groupmate's code
+  const floatingElements = [
+    // Blue theme
+    { Icon: Waves, color: "#0057A3", top: "5%", left: "3%", delay: "0s", size: 28, opacity: 0.2 },
+    { Icon: Fish, color: "#0057A3", top: "15%", right: "4%", delay: "0.8s", size: 26, opacity: 0.2 },
+    { Icon: Mountain, color: "#0057A3", top: "25%", left: "6%", delay: "1.5s", size: 32, opacity: 0.2 },
+    { Icon: Droplets, color: "#0057A3", top: "35%", right: "8%", delay: "2.2s", size: 24, opacity: 0.2 },
+    { Icon: Shell, color: "#0057A3", top: "45%", left: "5%", delay: "2.9s", size: 26, opacity: 0.2 },
+    { Icon: Waves, color: "#0057A3", top: "55%", right: "5%", delay: "3.5s", size: 30, opacity: 0.2 },
+    { Icon: Fish, color: "#0057A3", top: "65%", left: "8%", delay: "4.2s", size: 25, opacity: 0.2 },
+    { Icon: Mountain, color: "#0057A3", top: "75%", right: "6%", delay: "4.9s", size: 28, opacity: 0.2 },
+    { Icon: Droplets, color: "#0057A3", top: "85%", left: "4%", delay: "5.5s", size: 22, opacity: 0.2 },
+    
+    // Red theme
+    { Icon: Wind, color: "#B43B3B", top: "8%", right: "6%", delay: "0.3s", size: 30, opacity: 0.2 },
+    { Icon: Gem, color: "#B43B3B", top: "18%", left: "7%", delay: "1.1s", size: 28, opacity: 0.2 },
+    { Icon: Cloud, color: "#B43B3B", top: "28%", right: "3%", delay: "1.8s", size: 32, opacity: 0.2 },
+    { Icon: Flower, color: "#B43B3B", top: "38%", left: "9%", delay: "2.5s", size: 26, opacity: 0.2 },
+    { Icon: Bird, color: "#B43B3B", top: "48%", right: "7%", delay: "3.2s", size: 24, opacity: 0.2 },
+    { Icon: Wind, color: "#B43B3B", top: "58%", left: "2%", delay: "3.9s", size: 29, opacity: 0.2 },
+    { Icon: Gem, color: "#B43B3B", top: "68%", right: "9%", delay: "4.5s", size: 27, opacity: 0.2 },
+    { Icon: Cloud, color: "#B43B3B", top: "78%", left: "5%", delay: "5.2s", size: 31, opacity: 0.2 },
+    { Icon: Flower, color: "#B43B3B", top: "88%", right: "4%", delay: "5.9s", size: 25, opacity: 0.2 },
+    
+    // Yellow theme
+    { Icon: Leaf, color: "#FFD966", top: "10%", left: "8%", delay: "0.5s", size: 27, opacity: 0.2 },
+    { Icon: Cherry, color: "#FFD966", top: "20%", right: "5%", delay: "1.3s", size: 29, opacity: 0.2 },
+    { Icon: Sun, color: "#FFD966", top: "30%", left: "4%", delay: "2.0s", size: 34, opacity: 0.2 },
+    { Icon: Star, color: "#FFD966", top: "40%", right: "2%", delay: "2.7s", size: 26, opacity: 0.2 },
+    { Icon: Sparkles, color: "#FFD966", top: "50%", left: "6%", delay: "3.4s", size: 28, opacity: 0.2 },
+    { Icon: Leaf, color: "#FFD966", top: "60%", right: "8%", delay: "4.1s", size: 25, opacity: 0.2 },
+    { Icon: Cherry, color: "#FFD966", top: "70%", left: "3%", delay: "4.8s", size: 27, opacity: 0.2 },
+    { Icon: Sun, color: "#FFD966", top: "80%", right: "7%", delay: "5.4s", size: 32, opacity: 0.2 },
+    { Icon: Star, color: "#FFD966", top: "90%", left: "7%", delay: "6.1s", size: 24, opacity: 0.2 },
+    
+    // Extra scattered
+    { Icon: TreePine, color: "#0057A3", top: "12%", left: "12%", delay: "1.7s", size: 22, opacity: 0.2 },
+    { Icon: Moon, color: "#B43B3B", top: "32%", right: "12%", delay: "2.8s", size: 24, opacity: 0.2 },
+  ];
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+        {/* Floating elements during loading */}
+        {floatingElements.map((item, index) => {
+          const IconComponent = item.Icon;
+          return (
+            <div
+              key={index}
+              className="absolute pointer-events-none animate-float-playful"
+              style={{
+                top: item.top,
+                left: item.left,
+                right: item.right,
+                animationDelay: item.delay,
+                animationDuration: "10s",
+                opacity: item.opacity,
+                zIndex: 0,
+              }}
+            >
+              <IconComponent 
+                size={item.size} 
+                color={item.color}
+                strokeWidth={1.2}
+              />
+            </div>
+          );
+        })}
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0057A3] border-t-transparent relative z-10" />
       </div>
     );
   }
@@ -98,29 +163,64 @@ const Auth = () => {
   // Email verification screen - NO REDIRECT, just info
   if (showVerification) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 flex items-center justify-center p-4">
-        {/* Decorative elements */}
-        <div className="absolute top-20 left-10 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#B43B3B]/5 rounded-full blur-3xl"></div>
+      <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Floating Japanese elements */}
+        {floatingElements.map((item, index) => {
+          const IconComponent = item.Icon;
+          return (
+            <div
+              key={index}
+              className="absolute pointer-events-none animate-float-playful"
+              style={{
+                top: item.top,
+                left: item.left,
+                right: item.right,
+                animationDelay: item.delay,
+                animationDuration: "10s",
+                opacity: item.opacity,
+                zIndex: 0,
+              }}
+            >
+              <IconComponent 
+                size={item.size} 
+                color={item.color}
+                strokeWidth={1.2}
+              />
+            </div>
+          );
+        })}
         
-        <Card className="w-full max-w-md border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-xl">
+        {/* Subtle side decorations */}
+        <div className="fixed left-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
+          <div className="absolute top-20 left-10 w-20 h-20 border border-[#0057A3]/20 rounded-full"></div>
+          <div className="absolute bottom-40 left-10 w-32 h-32 border border-[#B43B3B]/20 rounded-full"></div>
+          <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-[#0057A3]/20 to-transparent"></div>
+        </div>
+        
+        <div className="fixed right-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
+          <div className="absolute top-40 right-10 w-24 h-24 border border-[#FFD966]/20 rounded-full"></div>
+          <div className="absolute bottom-60 right-10 w-40 h-40 border border-[#0057A3]/20 rounded-full"></div>
+          <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-[#B43B3B]/20 to-transparent"></div>
+        </div>
+        
+        <Card className="w-full max-w-md border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-xl relative z-10">
           <CardHeader>
             <div className="flex justify-center mb-4">
-              <div className="h-16 w-16 rounded-full bg-[#00A3FF]/10 border-2 border-[#00A3FF]/30 flex items-center justify-center">
-                <MailCheck className="h-8 w-8 text-[#00A3FF]" />
+              <div className="h-16 w-16 rounded-full bg-[#0057A3]/10 border-2 border-[#0057A3]/30 flex items-center justify-center">
+                <MailCheck className="h-8 w-8 text-[#0057A3]" />
               </div>
             </div>
             <CardTitle className="text-center text-2xl text-[#1A1A2E]">Verify Your Email</CardTitle>
             <CardDescription className="text-center text-base text-[#4A5568]">
               We sent a verification link to:
               <br />
-              <span className="font-medium text-[#00A3FF] mt-2 block break-all">
+              <span className="font-medium text-[#0057A3] mt-2 block break-all">
                 {verifiedEmail}
               </span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-[#00A3FF]/5 border border-[#00A3FF]/20 rounded-lg p-4 text-sm text-[#1A1A2E]">
+            <div className="bg-[#0057A3]/5 border border-[#0057A3]/20 rounded-lg p-4 text-sm text-[#1A1A2E]">
               <p className="font-medium mb-1">📧 Can't find the email?</p>
               <p className="text-[#4A5568]">Check your spam folder or wait a few minutes.</p>
             </div>
@@ -129,7 +229,7 @@ const Auth = () => {
               <Button 
                 variant="outline" 
                 onClick={() => setShowVerification(false)}
-                className="w-full border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5"
+                className="w-full border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5"
               >
                 Back to Sign In
               </Button>
@@ -149,7 +249,7 @@ const Auth = () => {
                     toast.error(error.message);
                   }
                 }}
-                className="w-full text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                className="w-full text-[#0057A3] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
               >
                 Resend Verification Email
               </Button>
@@ -165,19 +265,54 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-      {/* Decorative background elements */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#B43B3B]/5 rounded-full blur-3xl"></div>
+    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+      {/* Floating Japanese Elements */}
+      {floatingElements.map((item, index) => {
+        const IconComponent = item.Icon;
+        return (
+          <div
+            key={index}
+            className="absolute pointer-events-none animate-float-playful"
+            style={{
+              top: item.top,
+              left: item.left,
+              right: item.right,
+              animationDelay: item.delay,
+              animationDuration: "10s",
+              opacity: item.opacity,
+              zIndex: 0,
+            }}
+          >
+            <IconComponent 
+              size={item.size} 
+              color={item.color}
+              strokeWidth={1.2}
+            />
+          </div>
+        );
+      })}
       
-      {/* Lightning pattern overlay */}
+      {/* Subtle side decorations - from groupmate's code */}
+      <div className="fixed left-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
+        <div className="absolute top-20 left-10 w-20 h-20 border border-[#0057A3]/20 rounded-full"></div>
+        <div className="absolute bottom-40 left-10 w-32 h-32 border border-[#B43B3B]/20 rounded-full"></div>
+        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-[#0057A3]/20 to-transparent"></div>
+      </div>
+      
+      <div className="fixed right-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
+        <div className="absolute top-40 right-10 w-24 h-24 border border-[#FFD966]/20 rounded-full"></div>
+        <div className="absolute bottom-60 right-10 w-40 h-40 border border-[#0057A3]/20 rounded-full"></div>
+        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-[#B43B3B]/20 to-transparent"></div>
+      </div>
+      
+      {/* Lightning pattern overlay - from groupmate's code */}
       <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 15 L35 15 L30 30 L40 30 L20 45 L25 30 L15 30 L25 15' fill='%2300A3FF' opacity='0.2'/%3E%3C/svg%3E")`,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 15 L35 15 L30 30 L40 30 L20 45 L25 30 L15 30 L25 15' fill='%230057A3' opacity='0.2'/%3E%3C/svg%3E")`,
         backgroundSize: '60px 60px'
       }}></div>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
+      <header className="sticky top-0 z-30 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-3">
             <div className="relative">
@@ -191,7 +326,7 @@ const Auth = () => {
             <span className="text-xl font-bold text-[#1A1A2E]">iJoin</span>
           </Link>
           <Link to="/">
-            <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+            <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
@@ -200,10 +335,13 @@ const Auth = () => {
       </header>
 
       {/* Auth Form */}
-      <div className="container mx-auto flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
-        <Card className="w-full max-w-md border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-xl">
-          <div className="absolute top-0 left-0 w-16 h-16 border-l border-t border-[#00A3FF]/30"></div>
+      <div className="container mx-auto flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12 relative z-10">
+        <Card className="w-full max-w-md border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-xl relative overflow-hidden">
+          {/* Corner decorations - from groupmate's code */}
+          <div className="absolute top-0 left-0 w-16 h-16 border-l border-t border-[#0057A3]/30"></div>
           <div className="absolute top-0 right-0 w-16 h-16 border-r border-t border-[#B43B3B]/30"></div>
+          <div className="absolute bottom-0 left-0 w-16 h-16 border-l border-b border-[#FFD966]/30"></div>
+          <div className="absolute bottom-0 right-0 w-16 h-16 border-r border-b border-[#0057A3]/30"></div>
           
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-[#1A1A2E]">Welcome to iJoin</CardTitle>
@@ -211,16 +349,16 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-[#E1E8F0]/80 border border-[#00A3FF]/30 p-1">
+              <TabsList className="grid w-full grid-cols-2 bg-[#E1E8F0]/80 border border-[#0057A3]/30 p-1">
                 <TabsTrigger 
                   value="signin" 
-                  className="data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm"
+                  className="data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm"
                 >
                   Sign In
                 </TabsTrigger>
                 <TabsTrigger 
                   value="signup" 
-                  className="data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm"
+                  className="data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm"
                 >
                   Sign Up
                 </TabsTrigger>
@@ -237,7 +375,7 @@ const Auth = () => {
                       placeholder="student@iacademy.edu"
                       {...signInForm.register("email")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signInForm.formState.errors.email && (
                       <p className="text-sm text-[#B43B3B]">
@@ -252,7 +390,7 @@ const Auth = () => {
                       type="password"
                       {...signInForm.register("password")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signInForm.formState.errors.password && (
                       <p className="text-sm text-[#B43B3B]">
@@ -262,7 +400,7 @@ const Auth = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90" 
+                    className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -289,7 +427,7 @@ const Auth = () => {
                       placeholder="Juan Dela Cruz"
                       {...signUpForm.register("name")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signUpForm.formState.errors.name && (
                       <p className="text-sm text-[#B43B3B]">
@@ -307,7 +445,7 @@ const Auth = () => {
                       placeholder="student@iacademy.edu"
                       {...signUpForm.register("email")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signUpForm.formState.errors.email && (
                       <p className="text-sm text-[#B43B3B]">
@@ -329,21 +467,21 @@ const Auth = () => {
                       <div className={`
                         relative flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all
                         ${signUpForm.watch("userType") === 'undergraduate_student' 
-                          ? 'border-[#00A3FF] bg-[#00A3FF]/5 ring-2 ring-[#00A3FF]/20' 
-                          : 'border-[#00A3FF]/20 hover:border-[#00A3FF]/50 hover:bg-white'
+                          ? 'border-[#0057A3] bg-[#0057A3]/5 ring-2 ring-[#0057A3]/20' 
+                          : 'border-[#0057A3]/20 hover:border-[#0057A3]/50 hover:bg-white'
                         }
                       `}>
-                        <RadioGroupItem value="undergraduate_student" id="ug" className="text-[#00A3FF]" />
+                        <RadioGroupItem value="undergraduate_student" id="ug" className="text-[#0057A3]" />
                         <Label htmlFor="ug" className="flex-1 cursor-pointer font-normal">
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-full ${
                               signUpForm.watch("userType") === 'undergraduate_student' 
-                                ? 'bg-[#00A3FF]/10' 
+                                ? 'bg-[#0057A3]/10' 
                                 : 'bg-[#E1E8F0]'
                             }`}>
                               <GraduationCap className={`h-5 w-5 ${
                                 signUpForm.watch("userType") === 'undergraduate_student' 
-                                  ? 'text-[#00A3FF]' 
+                                  ? 'text-[#0057A3]' 
                                   : 'text-[#4A5568]'
                               }`} />
                             </div>
@@ -360,7 +498,7 @@ const Auth = () => {
                         relative flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all
                         ${signUpForm.watch("userType") === 'senior_highschool_student' 
                           ? 'border-[#B43B3B] bg-[#B43B3B]/5 ring-2 ring-[#B43B3B]/20' 
-                          : 'border-[#00A3FF]/20 hover:border-[#B43B3B]/50 hover:bg-white'
+                          : 'border-[#0057A3]/20 hover:border-[#B43B3B]/50 hover:bg-white'
                         }
                       `}>
                         <RadioGroupItem value="senior_highschool_student" id="shs" className="text-[#B43B3B]" />
@@ -400,7 +538,7 @@ const Auth = () => {
                       type="password"
                       {...signUpForm.register("password")}
                       disabled={isLoading}
-                      className="border-[#00A3FF]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
                     />
                     {signUpForm.formState.errors.password ? (
                       <p className="text-sm text-[#B43B3B]">
@@ -415,7 +553,7 @@ const Auth = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90" 
+                    className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -434,14 +572,27 @@ const Auth = () => {
         </Card>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-[#1A1A2E] border-t border-[#00A3FF]/20">
+      {/* Footer - updated with gradient */}
+      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#0057A3]/20">
         <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-[#FCF9F5]/40">
-            <p>© 2024 iJoin - iACADEMY Student Platform. All rights reserved.</p>
+          <div className="text-center text-sm text-[#FCF9F5]/60">
+            <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      {/* Add subtle floating animation */}
+      <style>{`
+        @keyframes float-playful {
+          0%, 100% { transform: translateY(0px); }
+          25% { transform: translateY(-8px); }
+          50% { transform: translateY(4px); }
+          75% { transform: translateY(6px); }
+        }
+        .animate-float-playful {
+          animation: float-playful 10s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

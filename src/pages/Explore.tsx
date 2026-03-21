@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Search, ArrowLeft, Bell, Settings, School, GraduationCap, Sparkles, UserCheck, Shield, CheckCheck, PlusCircle, Compass } from "lucide-react";
+import { Users, Search, ArrowLeft, Bell, Settings, School, GraduationCap, Sparkles, UserCheck, Shield, CheckCheck, PlusCircle, Compass, Waves, Wind, Leaf, Fish, Gem, Cherry, Mountain, Cloud, Sun, Moon, Star, Droplets, Flower, Bird, TreePine, Shell } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import OrgLogo from "@/components/OrgLogo";
@@ -64,6 +64,46 @@ const Explore = () => {
   const isStudent = isSHSStudent || isUGStudent;
 
   const { pendingCounts } = usePendingRequests();
+
+  // Floating Japanese elements - from groupmate's code
+  const floatingElements = [
+    // Blue theme
+    { Icon: Waves, color: "#0057A3", top: "5%", left: "3%", delay: "0s", size: 28, opacity: 0.2 },
+    { Icon: Fish, color: "#0057A3", top: "15%", right: "4%", delay: "0.8s", size: 26, opacity: 0.2 },
+    { Icon: Mountain, color: "#0057A3", top: "25%", left: "6%", delay: "1.5s", size: 32, opacity: 0.2 },
+    { Icon: Droplets, color: "#0057A3", top: "35%", right: "8%", delay: "2.2s", size: 24, opacity: 0.2 },
+    { Icon: Shell, color: "#0057A3", top: "45%", left: "5%", delay: "2.9s", size: 26, opacity: 0.2 },
+    { Icon: Waves, color: "#0057A3", top: "55%", right: "5%", delay: "3.5s", size: 30, opacity: 0.2 },
+    { Icon: Fish, color: "#0057A3", top: "65%", left: "8%", delay: "4.2s", size: 25, opacity: 0.2 },
+    { Icon: Mountain, color: "#0057A3", top: "75%", right: "6%", delay: "4.9s", size: 28, opacity: 0.2 },
+    { Icon: Droplets, color: "#0057A3", top: "85%", left: "4%", delay: "5.5s", size: 22, opacity: 0.2 },
+    
+    // Red theme
+    { Icon: Wind, color: "#B43B3B", top: "8%", right: "6%", delay: "0.3s", size: 30, opacity: 0.2 },
+    { Icon: Gem, color: "#B43B3B", top: "18%", left: "7%", delay: "1.1s", size: 28, opacity: 0.2 },
+    { Icon: Cloud, color: "#B43B3B", top: "28%", right: "3%", delay: "1.8s", size: 32, opacity: 0.2 },
+    { Icon: Flower, color: "#B43B3B", top: "38%", left: "9%", delay: "2.5s", size: 26, opacity: 0.2 },
+    { Icon: Bird, color: "#B43B3B", top: "48%", right: "7%", delay: "3.2s", size: 24, opacity: 0.2 },
+    { Icon: Wind, color: "#B43B3B", top: "58%", left: "2%", delay: "3.9s", size: 29, opacity: 0.2 },
+    { Icon: Gem, color: "#B43B3B", top: "68%", right: "9%", delay: "4.5s", size: 27, opacity: 0.2 },
+    { Icon: Cloud, color: "#B43B3B", top: "78%", left: "5%", delay: "5.2s", size: 31, opacity: 0.2 },
+    { Icon: Flower, color: "#B43B3B", top: "88%", right: "4%", delay: "5.9s", size: 25, opacity: 0.2 },
+    
+    // Yellow theme
+    { Icon: Leaf, color: "#FFD966", top: "10%", left: "8%", delay: "0.5s", size: 27, opacity: 0.2 },
+    { Icon: Cherry, color: "#FFD966", top: "20%", right: "5%", delay: "1.3s", size: 29, opacity: 0.2 },
+    { Icon: Sun, color: "#FFD966", top: "30%", left: "4%", delay: "2.0s", size: 34, opacity: 0.2 },
+    { Icon: Star, color: "#FFD966", top: "40%", right: "2%", delay: "2.7s", size: 26, opacity: 0.2 },
+    { Icon: Sparkles, color: "#FFD966", top: "50%", left: "6%", delay: "3.4s", size: 28, opacity: 0.2 },
+    { Icon: Leaf, color: "#FFD966", top: "60%", right: "8%", delay: "4.1s", size: 25, opacity: 0.2 },
+    { Icon: Cherry, color: "#FFD966", top: "70%", left: "3%", delay: "4.8s", size: 27, opacity: 0.2 },
+    { Icon: Sun, color: "#FFD966", top: "80%", right: "7%", delay: "5.4s", size: 32, opacity: 0.2 },
+    { Icon: Star, color: "#FFD966", top: "90%", left: "7%", delay: "6.1s", size: 24, opacity: 0.2 },
+    
+    // Extra scattered
+    { Icon: TreePine, color: "#0057A3", top: "12%", left: "12%", delay: "1.7s", size: 22, opacity: 0.2 },
+    { Icon: Moon, color: "#B43B3B", top: "32%", right: "12%", delay: "2.8s", size: 24, opacity: 0.2 },
+  ];
 
   // Set default tab based on user role
   useEffect(() => {
@@ -353,15 +393,79 @@ const Explore = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+        {/* Floating elements during loading */}
+        {floatingElements.map((item, index) => {
+          const IconComponent = item.Icon;
+          return (
+            <div
+              key={index}
+              className="absolute pointer-events-none animate-float-playful"
+              style={{
+                top: item.top,
+                left: item.left,
+                right: item.right,
+                animationDelay: item.delay,
+                animationDuration: "10s",
+                opacity: item.opacity,
+                zIndex: 0,
+              }}
+            >
+              <IconComponent 
+                size={item.size} 
+                color={item.color}
+                strokeWidth={1.2}
+              />
+            </div>
+          );
+        })}
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0057A3] border-t-transparent relative z-10" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+      {/* Floating Japanese Elements - from groupmate's code */}
+      {floatingElements.map((item, index) => {
+        const IconComponent = item.Icon;
+        return (
+          <div
+            key={index}
+            className="absolute pointer-events-none animate-float-playful"
+            style={{
+              top: item.top,
+              left: item.left,
+              right: item.right,
+              animationDelay: item.delay,
+              animationDuration: "10s",
+              opacity: item.opacity,
+              zIndex: 0,
+            }}
+          >
+            <IconComponent 
+              size={item.size} 
+              color={item.color}
+              strokeWidth={1.2}
+            />
+          </div>
+        );
+      })}
+
+      {/* Subtle side decorations - from groupmate's code */}
+      <div className="fixed left-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
+        <div className="absolute top-20 left-10 w-20 h-20 border border-[#0057A3]/20 rounded-full"></div>
+        <div className="absolute bottom-40 left-10 w-32 h-32 border border-[#B43B3B]/20 rounded-full"></div>
+        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-[#0057A3]/20 to-transparent"></div>
+      </div>
+      
+      <div className="fixed right-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
+        <div className="absolute top-40 right-10 w-24 h-24 border border-[#FFD966]/20 rounded-full"></div>
+        <div className="absolute bottom-60 right-10 w-40 h-40 border border-[#0057A3]/20 rounded-full"></div>
+        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-[#B43B3B]/20 to-transparent"></div>
+      </div>
+
+      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -381,7 +485,7 @@ const Explore = () => {
           {user && (
             <div className="flex items-center gap-4">
               {isSHSStudent && (
-                <Badge variant="secondary" className="gap-1 bg-[#00A3FF]/5 text-[#00A3FF] border-[#00A3FF]/30">
+                <Badge variant="secondary" className="gap-1 bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30">
                   <School className="h-3 w-3" />
                   SHS Student
                 </Badge>
@@ -399,7 +503,7 @@ const Explore = () => {
                 </Badge>
               )}
               {isSAO && (
-                <Badge variant="default" className="gap-1 bg-[#00A3FF] text-white border-none">
+                <Badge variant="default" className="gap-1 bg-[#0057A3] text-white border-none">
                   <Shield className="h-3 w-3" />
                   SAO
                 </Badge>
@@ -408,7 +512,7 @@ const Explore = () => {
               {/* Notifications Popover */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#B43B3B] text-white text-xs rounded-full flex items-center justify-center shadow-sm">
@@ -417,14 +521,14 @@ const Explore = () => {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-96 p-0 border border-[#00A3FF]/30 shadow-lg" align="end">
-                  <div className="flex items-center justify-between p-4 border-b border-[#00A3FF]/20">
+                <PopoverContent className="w-96 p-0 border border-[#0057A3]/30 shadow-lg" align="end">
+                  <div className="flex items-center justify-between p-4 border-b border-[#0057A3]/20">
                     <h3 className="font-semibold text-[#1A1A2E]">Notifications</h3>
                     {unreadCount > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 text-xs gap-1 text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                        className="h-8 text-xs gap-1 text-[#0057A3] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
                         onClick={markAllAsRead}
                       >
                         <CheckCheck className="h-3 w-3" />
@@ -453,12 +557,12 @@ const Explore = () => {
                 </PopoverContent>
               </Popover>
 
-              <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5" />
+              <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5" />
             </div>
           )}
           {!user && (
             <Link to="/auth">
-              <Button size="sm" className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm">
+              <Button size="sm" className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#0057A3]/30 shadow-sm">
                 Sign In
               </Button>
             </Link>
@@ -466,17 +570,13 @@ const Explore = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Decorative background elements */}
-        <div className="absolute top-20 left-0 w-64 h-64 bg-[#00A3FF]/5 rounded-full blur-3xl -z-10"></div>
-        <div className="absolute bottom-20 right-0 w-80 h-80 bg-[#B43B3B]/5 rounded-full blur-3xl -z-10"></div>
-        
+      <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header Section with Propose Org Button */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative">
           <div className="relative">
-            <div className="absolute -top-6 -left-6 w-12 h-12 bg-[#00A3FF]/10 rounded-full blur-2xl"></div>
+            <div className="absolute -top-6 -left-6 w-12 h-12 bg-[#0057A3]/10 rounded-full blur-2xl"></div>
             <h1 className="mb-2 text-3xl font-bold text-[#1A1A2E] flex items-center gap-2">
-              <Compass className="h-8 w-8 text-[#00A3FF]" />
+              <Compass className="h-8 w-8 text-[#0057A3]" />
               Explore Organizations
             </h1>
             <p className="text-[#4A5568]">
@@ -486,22 +586,12 @@ const Explore = () => {
             </p>
           </div>
           
-          {/* Propose Org Button - Hidden for admins and SAO */}
-          {user && !isAdmin && !isSAO && (
+          {/* Propose Org Button - Always visible when logged in */}
+          {user && (
             <Link to="/create-organization">
-              <Button size="lg" className="gap-2 bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm hover:shadow-md transition-all">
+              <Button size="lg" className="gap-2 bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#0057A3]/30 shadow-sm hover:shadow-md transition-all">
                 <PlusCircle className="h-5 w-5" />
                 Request New Organization
-              </Button>
-            </Link>
-          )}
-
-          {/* For admins/SAO, maybe show a different button or nothing */}
-          {user && (isAdmin || isSAO) && (
-            <Link to="/admin">
-              <Button size="lg" className="gap-2 bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90 border border-[#00A3FF]/30 shadow-sm hover:shadow-md transition-all">
-                <Shield className="h-5 w-5" />
-                Admin Dashboard
               </Button>
             </Link>
           )}
@@ -509,10 +599,10 @@ const Explore = () => {
 
         {/* Stats badges with depth */}
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Badge variant="outline" className="border-[#00A3FF]/30 text-[#1A1A2E] bg-white/80 backdrop-blur-sm">
+          <Badge variant="outline" className="border-[#0057A3]/30 text-[#1A1A2E] bg-white/80 backdrop-blur-sm">
             {organizations.length} total organizations
           </Badge>
-          <Badge variant="secondary" className="bg-[#00A3FF]/5 text-[#00A3FF] border-[#00A3FF]/30">
+          <Badge variant="secondary" className="bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30">
             <School className="mr-1 h-3 w-3" />
             {organizations.filter(o => o.is_shs_org).length} SHS
           </Badge>
@@ -521,7 +611,7 @@ const Explore = () => {
             {organizations.filter(o => !o.is_shs_org).length} College
           </Badge>
           {isStudent && (
-            <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#00A3FF]/30 gap-1 shadow-sm">
+            <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#0057A3]/30 gap-1 shadow-sm">
               <UserCheck className="mr-1 h-3 w-3" />
               {organizations.filter(o => o.membershipStatus === "accepted").length} Joined
             </Badge>
@@ -537,7 +627,7 @@ const Explore = () => {
               placeholder="Search organizations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm focus-visible:ring-[#FFD966] shadow-sm"
+              className="pl-10 border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm focus-visible:ring-[#FFD966] shadow-sm"
             />
           </div>
         </div>
@@ -545,21 +635,21 @@ const Explore = () => {
         {/* Tab Filters with depth */}
         <div className="mb-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabFilter)} className="w-full">
-            <TabsList className={`grid w-full ${isStudent ? 'grid-cols-4' : 'grid-cols-3'} max-w-2xl mx-auto bg-[#E1E8F0]/80 backdrop-blur-sm border border-[#00A3FF]/30 p-1`}>
-              <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+            <TabsList className={`grid w-full ${isStudent ? 'grid-cols-4' : 'grid-cols-3'} max-w-2xl mx-auto bg-[#E1E8F0]/80 backdrop-blur-sm border border-[#0057A3]/30 p-1`}>
+              <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <Users className="h-4 w-4" />
                 All
               </TabsTrigger>
-              <TabsTrigger value="shs" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="shs" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <School className="h-4 w-4" />
                 SHS
               </TabsTrigger>
-              <TabsTrigger value="college" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="college" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <GraduationCap className="h-4 w-4" />
                 College
               </TabsTrigger>
               {isStudent && (
-                <TabsTrigger value="myorgs" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+                <TabsTrigger value="myorgs" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                   <UserCheck className="h-4 w-4" />
                   My Orgs
                 </TabsTrigger>
@@ -575,9 +665,9 @@ const Explore = () => {
 
         {/* Organizations Grid */}
         {filteredOrgs.length === 0 ? (
-          <div className="py-12 text-center bg-white/80 backdrop-blur-sm border border-[#00A3FF]/30 rounded-lg shadow-sm">
+          <div className="py-12 text-center bg-white/80 backdrop-blur-sm border border-[#0057A3]/30 rounded-lg shadow-sm">
             <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-[#E1E8F0]/80 p-4 border border-[#00A3FF]/30">
+              <div className="rounded-full bg-[#E1E8F0]/80 p-4 border border-[#0057A3]/30">
                 <Users className="h-8 w-8 text-[#4A5568]" />
               </div>
             </div>
@@ -589,20 +679,11 @@ const Explore = () => {
             <p className="mt-2 text-sm text-[#4A5568]">
               Check back later for new organizations
             </p>
-            {user && !isAdmin && !isSAO && (
+            {user && (
               <Link to="/create-organization" className="mt-4 inline-block">
-                <Button variant="outline" className="gap-2 border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5">
+                <Button variant="outline" className="gap-2 border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5">
                   <PlusCircle className="h-4 w-4" />
                   Request a New Organization
-                </Button>
-              </Link>
-            )}
-
-            {user && (isAdmin || isSAO) && (
-              <Link to="/admin" className="mt-4 inline-block">
-                <Button variant="outline" className="gap-2 border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5">
-                  <Shield className="h-4 w-4" />
-                  Go to Admin Dashboard
                 </Button>
               </Link>
             )}
@@ -616,14 +697,14 @@ const Explore = () => {
               const isPending = org.membershipStatus === "pending" && isStudent;
 
               return (
-                <Card key={org.id} className="group transition-all hover:shadow-lg relative flex flex-col h-full border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm hover:bg-white overflow-hidden">
+                <Card key={org.id} className="group transition-all hover:shadow-lg relative flex flex-col h-full border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm hover:bg-white overflow-hidden">
                   {/* Decorative corner accent */}
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-[#0057A3]/5 to-transparent rounded-bl-full"></div>
                   
                   {/* Level badge */}
                   <div className="absolute top-2 left-2 z-10">
                     {org.is_shs_org ? (
-                      <Badge variant="secondary" className="bg-[#00A3FF]/5 text-[#00A3FF] border-[#00A3FF]/30 gap-1">
+                      <Badge variant="secondary" className="bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30 gap-1">
                         <School className="h-3 w-3" />
                         SHS
                       </Badge>
@@ -649,7 +730,7 @@ const Explore = () => {
                         </Badge>
                       )}
                       {manage && (
-                        <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#00A3FF]/30 gap-1 shadow-sm">
+                        <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#0057A3]/30 gap-1 shadow-sm">
                           <Settings className="h-3 w-3" />
                           {org.membershipRole === "leader" ? "Leader" : "Officer"}
                         </Badge>
@@ -664,9 +745,8 @@ const Explore = () => {
                           src={org.profile_picture} 
                           alt={org.name} 
                           size="lg" 
-                          className="border border-[#00A3FF]/30 rounded-xl"
+                          className="border border-[#0057A3]/30 rounded-xl"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-[#FFD966] rounded-full border border-white"></div>
                       </div>
                     </div>
                     <CardTitle className="line-clamp-1 text-center mt-2 text-[#1A1A2E]">
@@ -679,7 +759,7 @@ const Explore = () => {
                   
                   <CardContent className="flex flex-col gap-3 mt-auto pt-2">
                     <Link to={`/org/${org.id}`} className="w-full">
-                      <Button variant="outline" className="w-full border border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 hover:border-[#00A3FF]/50">
+                      <Button variant="outline" className="w-full border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5 hover:border-[#0057A3]/50">
                         View Organization
                       </Button>
                     </Link>
@@ -700,7 +780,7 @@ const Explore = () => {
 
                     {isStudent && !manage && !isMember && !isPending && canJoin ? (
                       <Button 
-                        className="w-full bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90 shadow-sm" 
+                        className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90 shadow-sm" 
                         onClick={() => handleJoinOrg(org.id)}
                       >
                         Join Organization
@@ -710,7 +790,7 @@ const Explore = () => {
                     {!user && (
                       <Button 
                         variant="default" 
-                        className="w-full bg-[#00A3FF] text-white hover:bg-[#00A3FF]/90 shadow-sm"
+                        className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90 shadow-sm"
                         onClick={() => navigate("/auth")}
                       >
                         Sign in to Join
@@ -725,13 +805,26 @@ const Explore = () => {
       </div>
 
       {/* Footer - Dark Navy from Landing Page */}
-      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#00A3FF]/20">
+      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#0057A3]/20">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-[#FCF9F5]/60">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      {/* Add subtle floating animation */}
+      <style>{`
+        @keyframes float-playful {
+          0%, 100% { transform: translateY(0px); }
+          25% { transform: translateY(-8px); }
+          50% { transform: translateY(4px); }
+          75% { transform: translateY(6px); }
+        }
+        .animate-float-playful {
+          animation: float-playful 10s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

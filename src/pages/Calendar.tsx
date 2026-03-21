@@ -13,7 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import { ArrowLeft, Calendar as CalendarIcon, MapPin, Clock, School, GraduationCap, Users, ExternalLink, Sunrise, Sun, Sunset, Moon } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon, MapPin, Clock, School, GraduationCap, Users, ExternalLink, Sunrise, Sun, Sunset, Moon, Waves, Wind, Leaf, Fish, Gem, Cherry, Mountain, Cloud, Star, Sparkles, Droplets, Flower, Bird, TreePine, Shell } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, isAfter, isBefore, addMonths, subMonths } from "date-fns";
 import { RSVPButton } from "@/components/RSVPButton";
 
@@ -48,6 +48,46 @@ export default function Calendar() {
   // Event modal state
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+
+  // Floating Japanese elements - from groupmate's code
+  const floatingElements = [
+    // Blue theme
+    { Icon: Waves, color: "#0057A3", top: "5%", left: "3%", delay: "0s", size: 28, opacity: 0.2 },
+    { Icon: Fish, color: "#0057A3", top: "15%", right: "4%", delay: "0.8s", size: 26, opacity: 0.2 },
+    { Icon: Mountain, color: "#0057A3", top: "25%", left: "6%", delay: "1.5s", size: 32, opacity: 0.2 },
+    { Icon: Droplets, color: "#0057A3", top: "35%", right: "8%", delay: "2.2s", size: 24, opacity: 0.2 },
+    { Icon: Shell, color: "#0057A3", top: "45%", left: "5%", delay: "2.9s", size: 26, opacity: 0.2 },
+    { Icon: Waves, color: "#0057A3", top: "55%", right: "5%", delay: "3.5s", size: 30, opacity: 0.2 },
+    { Icon: Fish, color: "#0057A3", top: "65%", left: "8%", delay: "4.2s", size: 25, opacity: 0.2 },
+    { Icon: Mountain, color: "#0057A3", top: "75%", right: "6%", delay: "4.9s", size: 28, opacity: 0.2 },
+    { Icon: Droplets, color: "#0057A3", top: "85%", left: "4%", delay: "5.5s", size: 22, opacity: 0.2 },
+    
+    // Red theme
+    { Icon: Wind, color: "#B43B3B", top: "8%", right: "6%", delay: "0.3s", size: 30, opacity: 0.2 },
+    { Icon: Gem, color: "#B43B3B", top: "18%", left: "7%", delay: "1.1s", size: 28, opacity: 0.2 },
+    { Icon: Cloud, color: "#B43B3B", top: "28%", right: "3%", delay: "1.8s", size: 32, opacity: 0.2 },
+    { Icon: Flower, color: "#B43B3B", top: "38%", left: "9%", delay: "2.5s", size: 26, opacity: 0.2 },
+    { Icon: Bird, color: "#B43B3B", top: "48%", right: "7%", delay: "3.2s", size: 24, opacity: 0.2 },
+    { Icon: Wind, color: "#B43B3B", top: "58%", left: "2%", delay: "3.9s", size: 29, opacity: 0.2 },
+    { Icon: Gem, color: "#B43B3B", top: "68%", right: "9%", delay: "4.5s", size: 27, opacity: 0.2 },
+    { Icon: Cloud, color: "#B43B3B", top: "78%", left: "5%", delay: "5.2s", size: 31, opacity: 0.2 },
+    { Icon: Flower, color: "#B43B3B", top: "88%", right: "4%", delay: "5.9s", size: 25, opacity: 0.2 },
+    
+    // Yellow theme
+    { Icon: Leaf, color: "#FFD966", top: "10%", left: "8%", delay: "0.5s", size: 27, opacity: 0.2 },
+    { Icon: Cherry, color: "#FFD966", top: "20%", right: "5%", delay: "1.3s", size: 29, opacity: 0.2 },
+    { Icon: Sun, color: "#FFD966", top: "30%", left: "4%", delay: "2.0s", size: 34, opacity: 0.2 },
+    { Icon: Star, color: "#FFD966", top: "40%", right: "2%", delay: "2.7s", size: 26, opacity: 0.2 },
+    { Icon: Sparkles, color: "#FFD966", top: "50%", left: "6%", delay: "3.4s", size: 28, opacity: 0.2 },
+    { Icon: Leaf, color: "#FFD966", top: "60%", right: "8%", delay: "4.1s", size: 25, opacity: 0.2 },
+    { Icon: Cherry, color: "#FFD966", top: "70%", left: "3%", delay: "4.8s", size: 27, opacity: 0.2 },
+    { Icon: Sun, color: "#FFD966", top: "80%", right: "7%", delay: "5.4s", size: 32, opacity: 0.2 },
+    { Icon: Star, color: "#FFD966", top: "90%", left: "7%", delay: "6.1s", size: 24, opacity: 0.2 },
+    
+    // Extra scattered
+    { Icon: TreePine, color: "#0057A3", top: "12%", left: "12%", delay: "1.7s", size: 22, opacity: 0.2 },
+    { Icon: Moon, color: "#B43B3B", top: "32%", right: "12%", delay: "2.8s", size: 24, opacity: 0.2 },
+  ];
 
   // Get time of day for legend
   const getTimeOfDay = (hour: number) => {
@@ -142,7 +182,7 @@ export default function Calendar() {
   };
 
   const handleOrgClick = (orgId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event modal from opening
+    e.stopPropagation();
     navigate(`/org/${orgId}`);
   };
 
@@ -158,7 +198,7 @@ export default function Calendar() {
   const getOrgTypeBadge = (is_shs_org: boolean) => {
     if (is_shs_org) {
       return (
-        <Badge variant="secondary" className="bg-[#00A3FF]/5 text-[#00A3FF] border-[#00A3FF]/30 gap-1">
+        <Badge variant="secondary" className="bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30 gap-1">
           <School className="h-3 w-3" />
           SHS
         </Badge>
@@ -191,15 +231,50 @@ export default function Calendar() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-      {/* Decorative background elements */}
-      <div className="absolute top-40 left-0 w-72 h-72 bg-[#00A3FF]/5 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute bottom-40 right-0 w-96 h-96 bg-[#B43B3B]/5 rounded-full blur-3xl -z-10"></div>
+    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+      {/* Floating Japanese Elements - from groupmate's code */}
+      {floatingElements.map((item, index) => {
+        const IconComponent = item.Icon;
+        return (
+          <div
+            key={index}
+            className="absolute pointer-events-none animate-float-playful"
+            style={{
+              top: item.top,
+              left: item.left,
+              right: item.right,
+              animationDelay: item.delay,
+              animationDuration: "10s",
+              opacity: item.opacity,
+              zIndex: 0,
+            }}
+          >
+            <IconComponent 
+              size={item.size} 
+              color={item.color}
+              strokeWidth={1.2}
+            />
+          </div>
+        );
+      })}
 
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
+      {/* Subtle side decorations - from groupmate's code */}
+      <div className="fixed left-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
+        <div className="absolute top-20 left-10 w-20 h-20 border border-[#0057A3]/20 rounded-full"></div>
+        <div className="absolute bottom-40 left-10 w-32 h-32 border border-[#B43B3B]/20 rounded-full"></div>
+        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-[#0057A3]/20 to-transparent"></div>
+      </div>
+      
+      <div className="fixed right-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
+        <div className="absolute top-40 right-10 w-24 h-24 border border-[#FFD966]/20 rounded-full"></div>
+        <div className="absolute bottom-60 right-10 w-40 h-40 border border-[#0057A3]/20 rounded-full"></div>
+        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-[#B43B3B]/20 to-transparent"></div>
+      </div>
+
+      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
@@ -216,21 +291,21 @@ export default function Calendar() {
             </div>
           </div>
           
-          {/* Time Legend */}
+          {/* Time Legend - updated blue */}
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-[#00A3FF]/20">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-[#0057A3]/20">
               <Sunrise className="h-3 w-3 text-amber-500" />
               <span className="text-xs text-[#4A5568]">Morning</span>
             </div>
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-[#00A3FF]/20">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-[#0057A3]/20">
               <Sun className="h-3 w-3 text-orange-500" />
               <span className="text-xs text-[#4A5568]">Afternoon</span>
             </div>
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-[#00A3FF]/20">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-[#0057A3]/20">
               <Sunset className="h-3 w-3 text-indigo-500" />
               <span className="text-xs text-[#4A5568]">Evening</span>
             </div>
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-[#00A3FF]/20">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-[#0057A3]/20">
               <Moon className="h-3 w-3 text-blue-500" />
               <span className="text-xs text-[#4A5568]">Night</span>
             </div>
@@ -238,20 +313,20 @@ export default function Calendar() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Filter Tabs */}
+      <main className="container mx-auto px-4 py-8 relative z-10">
+        {/* Filter Tabs with depth */}
         <div className="mb-8">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabFilter)} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto bg-[#E1E8F0]/80 backdrop-blur-sm border border-[#00A3FF]/30 p-1">
-              <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+            <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto bg-[#E1E8F0]/80 backdrop-blur-sm border border-[#0057A3]/30 p-1">
+              <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <Users className="h-4 w-4" />
                 All Events
               </TabsTrigger>
-              <TabsTrigger value="shs" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="shs" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <School className="h-4 w-4" />
                 SHS Events
               </TabsTrigger>
-              <TabsTrigger value="college" className="gap-2 data-[state=active]:bg-[#00A3FF] data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="college" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <GraduationCap className="h-4 w-4" />
                 College Events
               </TabsTrigger>
@@ -266,14 +341,14 @@ export default function Calendar() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Calendar */}
-          <Card className="md:col-span-2 border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
+          {/* Calendar - with enhanced styling */}
+          <Card className="md:col-span-2 border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#0057A3]/5 to-transparent rounded-bl-full"></div>
             <CardHeader>
               <div className="flex items-center justify-between relative z-20">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-[#00A3FF]/5 border border-[#00A3FF]/20">
-                    <CalendarIcon className="h-5 w-5 text-[#00A3FF]" />
+                  <div className="p-2 rounded-lg bg-[#0057A3]/5 border border-[#0057A3]/20">
+                    <CalendarIcon className="h-5 w-5 text-[#0057A3]" />
                   </div>
                   <div>
                     <CardTitle className="text-[#1A1A2E]">{format(currentDate, "MMMM yyyy")}</CardTitle>
@@ -287,7 +362,7 @@ export default function Calendar() {
                     variant="outline"
                     size="sm"
                     onClick={goToPreviousMonth}
-                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                    className="border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5 cursor-pointer"
                   >
                     Previous
                   </Button>
@@ -295,7 +370,7 @@ export default function Calendar() {
                     variant="outline"
                     size="sm"
                     onClick={goToToday}
-                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                    className="border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5 cursor-pointer"
                   >
                     Today
                   </Button>
@@ -303,7 +378,7 @@ export default function Calendar() {
                     variant="outline"
                     size="sm"
                     onClick={goToNextMonth}
-                    className="border-[#00A3FF]/30 text-[#1A1A2E] hover:bg-[#00A3FF]/5 cursor-pointer"
+                    className="border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5 cursor-pointer"
                   >
                     Next
                   </Button>
@@ -329,19 +404,20 @@ export default function Calendar() {
                       onClick={() => setSelectedDate(day)}
                       className={`
                         aspect-square p-2 rounded-lg border text-sm relative transition-all duration-200
-                        ${!isCurrentMonth ? "text-[#4A5568] bg-[#FCF9F5] border-[#00A3FF]/10" : "bg-white border-[#00A3FF]/30"}
+                        ${!isCurrentMonth ? "text-[#4A5568] bg-[#FCF9F5] border-[#0057A3]/10" : "bg-white border-[#0057A3]/30"}
                         ${isToday ? "border-[#FFD966] border-2" : ""}
-                        ${isSelected ? "ring-2 ring-[#00A3FF] ring-offset-2" : "hover:border-[#00A3FF] hover:shadow-sm"}
+                        ${isSelected ? "ring-2 ring-[#0057A3] ring-offset-2" : "hover:border-[#0057A3] hover:shadow-sm"}
                         ${dayEvents.length > 0 ? "font-semibold" : ""}
                       `}
                     >
-                      <div className={isSelected ? "text-[#00A3FF] font-bold" : ""}>
+                      <div className={isSelected ? "text-[#0057A3] font-bold" : ""}>
                         {format(day, "d")}
                       </div>
                       
+                      {/* Stamp effect for selected day - from groupmate */}
                       {isSelected && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-8 h-8 rotate-12 opacity-20 border-2 border-[#00A3FF] rounded-full"></div>
+                          <div className="w-8 h-8 rotate-12 opacity-20 border-2 border-[#0057A3] rounded-full"></div>
                           <div className="absolute w-6 h-6 -rotate-6 opacity-20 border-2 border-[#FFD966] rounded-full"></div>
                         </div>
                       )}
@@ -354,15 +430,15 @@ export default function Calendar() {
                               className={`
                                 h-1.5 w-1.5 rounded-full
                                 ${dayEvents[i]?.organizations?.is_shs_org 
-                                  ? 'bg-[#00A3FF]' 
+                                  ? 'bg-[#0057A3]' 
                                   : 'bg-[#B43B3B]'
                                 }
-                                ${isSelected ? 'bg-[#00A3FF]' : ''}
+                                ${isSelected ? 'bg-[#0057A3]' : ''}
                               `}
                             />
                           ))}
                           {dayEvents.length > 3 && (
-                            <span className={`text-[10px] ml-0.5 ${isSelected ? 'text-[#00A3FF]' : 'text-[#4A5568]'}`}>
+                            <span className={`text-[10px] ml-0.5 ${isSelected ? 'text-[#0057A3]' : 'text-[#4A5568]'}`}>
                               +{dayEvents.length - 3}
                             </span>
                           )}
@@ -373,11 +449,11 @@ export default function Calendar() {
                 })}
               </div>
 
-              {/* Legend */}
-              <div className="mt-8 pt-5 border-t border-[#00A3FF]/20 flex items-center justify-between text-xs text-[#4A5568]">
+              {/* Legend - updated blue */}
+              <div className="mt-8 pt-5 border-t border-[#0057A3]/20 flex items-center justify-between text-xs text-[#4A5568]">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-[#00A3FF]"></span>
+                    <span className="w-2 h-2 rounded-full bg-[#0057A3]"></span>
                     <span>SHS Events</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -392,8 +468,8 @@ export default function Calendar() {
             </CardContent>
           </Card>
 
-          {/* Event Details - Clickable cards that open modal */}
-          <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
+          {/* Event Details - with enhanced styling */}
+          <Card className="border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#B43B3B]/5 to-transparent rounded-bl-full"></div>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#1A1A2E]">
@@ -410,7 +486,7 @@ export default function Calendar() {
             </CardHeader>
             <CardContent>
               {selectedDateEvents.length > 0 ? (
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#00A3FF]/20">
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#0057A3]/20">
                   {selectedDateEvents.map((event) => {
                     const isPast = isPastEvent(event.event_date);
                     const eventHour = new Date(event.event_date).getHours();
@@ -423,13 +499,13 @@ export default function Calendar() {
                         onClick={() => handleEventClick(event)}
                         className={`
                           w-full text-left border rounded-lg p-4 space-y-3 
-                          hover:shadow-md hover:border-[#00A3FF] transition-all bg-white/50 hover:bg-white
+                          hover:shadow-md hover:border-[#0057A3] transition-all bg-white/50 hover:bg-white
                           ${isPast ? 'opacity-75' : ''}
                           relative overflow-hidden group
                         `}
                       >
-                        {/* Time indicator line */}
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#00A3FF] to-[#B43B3B] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        {/* Time indicator line - updated blue */}
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#0057A3] to-[#B43B3B] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="font-semibold text-[#1A1A2E]">{event.name}</h4>
@@ -439,7 +515,7 @@ export default function Calendar() {
                           <Badge variant="outline" className="text-[10px] border-[#B43B3B]/30 text-[#B43B3B]">Past Event</Badge>
                         )}
                         <div className="flex items-center gap-2 text-sm">
-                          <span className="font-medium text-[#00A3FF]">
+                          <span className="font-medium text-[#0057A3]">
                             {event.organizations?.name}
                           </span>
                         </div>
@@ -447,7 +523,7 @@ export default function Calendar() {
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {format(new Date(event.event_date), "h:mm a")}
-                            <span className={`text-[10px] px-1 py-0.5 rounded flex items-center gap-0.5 ${timeOfDay.color} bg-white border border-[#00A3FF]/10`}>
+                            <span className={`text-[10px] px-1 py-0.5 rounded flex items-center gap-0.5 ${timeOfDay.color} bg-white border border-[#0057A3]/10`}>
                               <TimeIcon className="h-3 w-3" />
                               {timeOfDay.label}
                             </span>
@@ -460,7 +536,7 @@ export default function Calendar() {
                           )}
                         </div>
                         {event.description && (
-                          <p className="text-sm text-[#4A5568] line-clamp-2 border-t border-[#00A3FF]/10 pt-2">
+                          <p className="text-sm text-[#4A5568] line-clamp-2 border-t border-[#0057A3]/10 pt-2">
                             {event.description}
                           </p>
                         )}
@@ -470,7 +546,7 @@ export default function Calendar() {
                 </div>
               ) : (
                 <div className="text-sm text-[#4A5568] text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#E1E8F0] border border-[#00A3FF]/30 flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#E1E8F0] border border-[#0057A3]/30 flex items-center justify-center">
                     <CalendarIcon className="h-8 w-8 text-[#4A5568] opacity-50" />
                   </div>
                   <p>{selectedDate ? "No events scheduled for this day" : "Click a date to view events"}</p>
@@ -479,7 +555,7 @@ export default function Calendar() {
                       Try switching to{' '}
                       <button 
                         onClick={() => setActiveTab('all')}
-                        className="text-[#00A3FF] hover:underline"
+                        className="text-[#0057A3] hover:underline"
                       >
                         All Events
                       </button>{' '}
@@ -492,8 +568,8 @@ export default function Calendar() {
           </Card>
         </div>
 
-        {/* Upcoming Events List */}
-        <Card className="mt-8 border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
+        {/* Upcoming Events List - with enhanced styling */}
+        <Card className="mt-8 border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all overflow-hidden relative">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-[#FFD966]/10 to-transparent rounded-bl-full"></div>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -511,7 +587,7 @@ export default function Calendar() {
                 </div>
               </div>
               {activeTab !== 'all' && (
-                <Badge variant="outline" className="gap-1 border-[#00A3FF]/30 text-[#1A1A2E]">
+                <Badge variant="outline" className="gap-1 border-[#0057A3]/30 text-[#1A1A2E]">
                   {activeTab === 'shs' ? <School className="h-3 w-3" /> : <GraduationCap className="h-3 w-3" />}
                   {activeTab === 'shs' ? 'SHS' : 'College'} Events
                 </Badge>
@@ -520,7 +596,7 @@ export default function Calendar() {
           </CardHeader>
           <CardContent>
             {upcomingEvents.length > 0 ? (
-              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#00A3FF]/20">
+              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#0057A3]/20">
                 {upcomingEvents.map((event) => {
                   const eventHour = new Date(event.event_date).getHours();
                   const timeOfDay = getTimeOfDay(eventHour);
@@ -530,9 +606,10 @@ export default function Calendar() {
                     <button
                       key={event.id}
                       onClick={() => handleEventClick(event)}
-                      className="w-full text-left border border-[#00A3FF]/30 rounded-lg p-4 hover:shadow-md hover:border-[#00A3FF] transition-all bg-white/50 hover:bg-white relative overflow-hidden group"
+                      className="w-full text-left border border-[#0057A3]/30 rounded-lg p-4 hover:shadow-md hover:border-[#0057A3] transition-all bg-white/50 hover:bg-white relative overflow-hidden group"
                     >
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#00A3FF] to-[#B43B3B] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      {/* Time gradient line - from groupmate */}
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#0057A3] to-[#B43B3B] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       
                       <div className="flex items-start justify-between">
                         <div className="space-y-1 flex-1">
@@ -540,16 +617,16 @@ export default function Calendar() {
                             <h4 className="font-semibold text-[#1A1A2E]">{event.name}</h4>
                             {getOrgTypeBadge(event.organizations?.is_shs_org || false)}
                           </div>
-                          <p className="text-sm text-[#00A3FF]">{event.organizations?.name}</p>
+                          <p className="text-sm text-[#0057A3]">{event.organizations?.name}</p>
                         </div>
-                        <Badge variant="outline" className={`flex items-center gap-1 ${timeOfDay.color} border-[#00A3FF]/20 bg-white`}>
+                        <Badge variant="outline" className={`flex items-center gap-1 ${timeOfDay.color} border-[#0057A3]/20 bg-white`}>
                           <TimeIcon className="h-3 w-3" />
                           {timeOfDay.label}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-[#4A5568] mt-3">
                         <div className="flex items-center gap-1">
-                          <CalendarIcon className="h-4 w-4 text-[#00A3FF]" />
+                          <CalendarIcon className="h-4 w-4 text-[#0057A3]" />
                           {format(new Date(event.event_date), "MMM dd, yyyy")}
                         </div>
                         <div className="flex items-center gap-1">
@@ -564,7 +641,7 @@ export default function Calendar() {
                         )}
                       </div>
                       {event.description && (
-                        <p className="text-sm text-[#4A5568] line-clamp-2 border-t border-[#00A3FF]/10 pt-2 mt-2">
+                        <p className="text-sm text-[#4A5568] line-clamp-2 border-t border-[#0057A3]/10 pt-2 mt-2">
                           {event.description}
                         </p>
                       )}
@@ -574,7 +651,7 @@ export default function Calendar() {
               </div>
             ) : (
               <div className="text-center text-[#4A5568] py-12">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#E1E8F0] border border-[#00A3FF]/30 flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#E1E8F0] border border-[#0057A3]/30 flex items-center justify-center">
                   <CalendarIcon className="h-8 w-8 text-[#4A5568] opacity-50" />
                 </div>
                 <p>No upcoming events</p>
@@ -583,7 +660,7 @@ export default function Calendar() {
                     Try checking{' '}
                     <button 
                       onClick={() => setActiveTab('all')}
-                      className="text-[#00A3FF] hover:underline"
+                      className="text-[#0057A3] hover:underline"
                     >
                       All Events
                     </button>
@@ -595,16 +672,16 @@ export default function Calendar() {
         </Card>
       </main>
 
-      {/* Event Details Modal with RSVP Button */}
+      {/* Event Details Modal with RSVP Button - updated styling */}
       <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
-        <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-[#FCF9F5] border border-[#00A3FF]/30 shadow-xl">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 pb-2">
+        <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-[#FCF9F5] border border-[#0057A3]/30 shadow-xl">
+          {/* Header with proper spacing */}
+          <div className="flex items-center justify-between p-6 pr-12 relative">
             <DialogTitle className="text-xl font-bold text-[#1A1A2E]">
               Event Details
             </DialogTitle>
             {selectedEvent && (
-              <Badge variant="outline" className="border-[#00A3FF]/30 text-[#4A5568]">
+              <Badge variant="outline" className="absolute right-12 border-[#0057A3]/30 text-[#4A5568]">
                 {format(new Date(selectedEvent.event_date), "MMM d, yyyy")}
               </Badge>
             )}
@@ -612,15 +689,15 @@ export default function Calendar() {
 
           {selectedEvent && selectedEvent.organizations && (
             <>
-              {/* Organization Header - Clickable */}
+              {/* Organization Header - updated blue */}
               <div 
                 onClick={(e) => handleOrgClick(selectedEvent.org_id, e)}
-                className="px-6 py-3 bg-[#00A3FF]/5 border-y border-[#00A3FF]/20 hover:bg-[#00A3FF]/10 cursor-pointer transition-colors"
+                className="px-6 py-3 bg-[#0057A3]/5 border-y border-[#0057A3]/20 hover:bg-[#0057A3]/10 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border border-[#00A3FF]/30">
+                  <Avatar className="h-10 w-10 border border-[#0057A3]/30">
                     <AvatarImage src={selectedEvent.organizations.profile_picture || undefined} />
-                    <AvatarFallback className="bg-[#00A3FF]/5 text-[#00A3FF]">
+                    <AvatarFallback className="bg-[#0057A3]/5 text-[#0057A3]">
                       {getInitials(selectedEvent.organizations.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -645,7 +722,7 @@ export default function Calendar() {
                       const timeOfDay = getTimeOfDay(hour);
                       const TimeIcon = timeOfDay.icon;
                       return (
-                        <Badge className={`flex items-center gap-1 ${timeOfDay.color} bg-white border border-[#00A3FF]/20`}>
+                        <Badge className={`flex items-center gap-1 ${timeOfDay.color} bg-white border border-[#0057A3]/20`}>
                           <TimeIcon className="h-3 w-3" />
                           {timeOfDay.label}
                         </Badge>
@@ -662,12 +739,12 @@ export default function Calendar() {
                   </div>
                 </div>
 
-                {/* Date, Time, Location Grid */}
+                {/* Date, Time, Location Grid - updated blue */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Date</p>
                     <div className="flex items-center gap-2 text-sm text-[#1A1A2E]">
-                      <CalendarIcon className="h-4 w-4 text-[#00A3FF]" />
+                      <CalendarIcon className="h-4 w-4 text-[#0057A3]" />
                       <span>{format(new Date(selectedEvent.event_date), "EEEE, MMMM d, yyyy")}</span>
                     </div>
                   </div>
@@ -689,11 +766,11 @@ export default function Calendar() {
                   )}
                 </div>
 
-                {/* Description */}
+                {/* Description - updated blue */}
                 {selectedEvent.description && (
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Description</p>
-                    <div className="bg-[#00A3FF]/5 rounded-lg p-4 border border-[#00A3FF]/20">
+                    <div className="bg-[#0057A3]/5 rounded-lg p-4 border border-[#0057A3]/20">
                       <p className="text-sm text-[#1A1A2E] whitespace-pre-wrap leading-relaxed">
                         {selectedEvent.description}
                       </p>
@@ -722,14 +799,27 @@ export default function Calendar() {
         </DialogContent>
       </Dialog>
 
-      {/* Footer */}
-      <footer className="mt-12 bg-[#1A1A2E] border-t border-[#00A3FF]/20">
+      {/* Footer - updated blue */}
+      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#0057A3]/20">
         <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-[#FCF9F5]/40">
+          <div className="text-center text-sm text-[#FCF9F5]/60">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      {/* Add subtle floating animation */}
+      <style>{`
+        @keyframes float-playful {
+          0%, 100% { transform: translateY(0px); }
+          25% { transform: translateY(-8px); }
+          50% { transform: translateY(4px); }
+          75% { transform: translateY(6px); }
+        }
+        .animate-float-playful {
+          animation: float-playful 10s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
