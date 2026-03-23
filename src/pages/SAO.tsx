@@ -180,13 +180,13 @@ const SAO = () => {
   // Event approval state
   const [processingEvent, setProcessingEvent] = useState<string | null>(null);
 
-  // Japanese floating elements
+  // Japanese floating elements - with semantic colors
   const japaneseElements = [
-    { Icon: Waves, color: "#00A3FF", top: "15%", right: "5%", delay: "0s", size: 24, opacity: 0.1 },
-    { Icon: Wind, color: "#B43B3B", top: "40%", right: "8%", delay: "2s", size: 28, opacity: 0.1 },
-    { Icon: Leaf, color: "#FFD966", bottom: "30%", right: "3%", delay: "1s", size: 26, opacity: 0.1 },
-    { Icon: Fish, color: "#00A3FF", bottom: "60%", right: "12%", delay: "3s", size: 22, opacity: 0.1 },
-    { Icon: Gem, color: "#B43B3B", top: "70%", right: "15%", delay: "1.5s", size: 24, opacity: 0.1 },
+    { Icon: Waves, color: "hsl(var(--primary))", top: "15%", right: "5%", delay: "0s", size: 24, opacity: 0.1 },
+    { Icon: Wind, color: "hsl(var(--destructive))", top: "40%", right: "8%", delay: "2s", size: 28, opacity: 0.1 },
+    { Icon: Leaf, color: "hsl(var(--brand-yellow))", bottom: "30%", right: "3%", delay: "1s", size: 26, opacity: 0.1 },
+    { Icon: Fish, color: "hsl(var(--primary))", bottom: "60%", right: "12%", delay: "3s", size: 22, opacity: 0.1 },
+    { Icon: Gem, color: "hsl(var(--destructive))", top: "70%", right: "15%", delay: "1.5s", size: 24, opacity: 0.1 },
   ];
 
   useEffect(() => {
@@ -462,14 +462,14 @@ const SAO = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       {/* Floating Japanese Elements */}
       {japaneseElements.map((item, index) => {
         const IconComponent = item.Icon;
@@ -496,7 +496,7 @@ const SAO = () => {
       })}
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm flex-shrink-0">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm flex-shrink-0">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <Link to="/sao" className="flex items-center gap-3">
@@ -506,47 +506,47 @@ const SAO = () => {
                   alt="logo" 
                   className="h-8 w-auto md:h-10"
                 />
-                <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[#FFD966] border border-[#1A1A2E]"></div>
+                <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-brand-yellow border border-background"></div>
               </div>
-              <span className="text-xl font-bold text-[#1A1A2E] hidden sm:inline">iJoin</span>
+              <span className="text-xl font-bold text-foreground hidden sm:inline">iJoin</span>
             </Link>
-            <Badge variant="outline" className="ml-2 border-[#00A3FF]/30 text-[#00A3FF]">
+            <Badge variant="outline" className="ml-2 border-border text-primary">
               <Shield className="h-3 w-3 mr-1" />
               SAO
             </Badge>
           </div>
           <div className="flex items-center gap-2">
             <Link to="/explore">
-              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                 <Search className="h-4 w-4 mr-1"/>
                 Explore
               </Button>
             </Link>
             <Link to="/calendar">
-              <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                 <Calendar className="h-4 w-4 mr-1" />
                 Calendar
               </Button>
             </Link>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary hover:bg-primary/5">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#B43B3B] text-white text-xs rounded-full flex items-center justify-center shadow-sm">
+                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center shadow-sm">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-96 p-0 border border-[#00A3FF]/30 shadow-lg" align="end">
-                <div className="flex items-center justify-between p-4 border-b border-[#00A3FF]/20">
-                  <h3 className="font-semibold text-[#1A1A2E]">Notifications</h3>
+              <PopoverContent className="w-96 p-0 border border-border shadow-lg" align="end">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <h3 className="font-semibold text-foreground">Notifications</h3>
                   {unreadCount > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 text-xs gap-1 text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                      className="h-8 text-xs gap-1 text-primary hover:text-primary hover:bg-primary/5"
                       onClick={markAllAsRead}
                     >
                       <CheckCircle className="h-3 w-3" />
@@ -556,7 +556,7 @@ const SAO = () => {
                 </div>
                 <ScrollArea className="h-[500px]">
                   {notifications.length === 0 ? (
-                    <div className="py-12 text-center text-[#4A5568]">
+                    <div className="py-12 text-center text-muted-foreground">
                       <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p className="text-sm">No notifications yet</p>
                     </div>
@@ -575,11 +575,11 @@ const SAO = () => {
               </PopoverContent>
             </Popover>
             <Link to="/profile">
-              <Button variant="ghost" size="icon" title="Profile" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+              <Button variant="ghost" size="icon" title="Profile" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                 <User className="h-5 w-5" />
               </Button>
             </Link>
-            <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5" />
+            <SignOutButton variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" />
           </div>
         </div>
       </header>
@@ -589,84 +589,84 @@ const SAO = () => {
         <div className="container mx-auto px-8 py-6">
           {/* Header Title */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-[#1A1A2E]">SAO Dashboard</h1>
-            <p className="text-base text-[#4A5568] mt-1">
+            <h1 className="text-3xl font-bold text-foreground">SAO Dashboard</h1>
+            <p className="text-base text-muted-foreground mt-1">
               Monitor and oversee all organization activities
             </p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-white">
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-primary/10 to-card">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-blue-600">Organizations</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1">{organizations.length}</p>
+                    <p className="text-sm font-medium text-primary">Organizations</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{organizations.length}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-blue-600" />
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Building2 className="h-6 w-6 text-primary" />
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-3 text-sm">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-0 px-2 py-1">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-0 px-2 py-1">
                     <School className="h-3.5 w-3.5 mr-1" /> {organizations.filter(o => o.is_shs_org).length} SHS
                   </Badge>
-                  <Badge variant="outline" className="border-blue-200 text-blue-700 px-2 py-1">
+                  <Badge variant="outline" className="border-primary/20 text-primary px-2 py-1">
                     <GraduationCap className="h-3.5 w-3.5 mr-1" /> {organizations.filter(o => !o.is_shs_org).length} College
                   </Badge>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-white">
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-500/10 to-card">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-emerald-600">Events</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1">{events.length}</p>
+                    <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Events</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{events.length}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-emerald-600" />
+                  <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2 text-sm text-emerald-600">
+                <div className="mt-3 flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
                   <TrendingUp className="h-4 w-4" />
                   <span>Upcoming events</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-white">
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-500/10 to-card">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-amber-600">Announcements</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1">{announcements.length}</p>
+                    <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Announcements</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{announcements.length}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-lg bg-amber-100 flex items-center justify-center">
-                    <Activity className="h-6 w-6 text-amber-600" />
+                  <div className="h-12 w-12 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <Activity className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2 text-sm text-amber-600">
+                <div className="mt-3 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
                   <TrendingUp className="h-4 w-4" />
                   <span>Total posts</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-rose-50 to-white">
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-rose-500/10 to-card">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-rose-600">Pending Events</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1">{pendingItems.length}</p>
+                    <p className="text-sm font-medium text-rose-600 dark:text-rose-400">Pending Events</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{pendingItems.length}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-lg bg-rose-100 flex items-center justify-center">
-                    <Hourglass className="h-6 w-6 text-rose-600" />
+                  <div className="h-12 w-12 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                    <Hourglass className="h-6 w-6 text-rose-600 dark:text-rose-400" />
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2 text-sm text-rose-600">
+                <div className="mt-3 flex items-center gap-2 text-sm text-rose-600 dark:text-rose-400">
                   <span>Awaiting approval</span>
                 </div>
               </CardContent>
@@ -676,15 +676,15 @@ const SAO = () => {
           {/* Pending Events Section */}
           {pendingItems.length > 0 && (
             <div className="mb-6">
-              <Card className="border border-rose-200 bg-rose-50/50">
+              <Card className="border border-destructive/20 bg-destructive/5">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-rose-100 flex items-center justify-center">
-                        <AlertCircle className="h-4 w-4 text-rose-600" />
+                      <div className="h-8 w-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                        <AlertCircle className="h-4 w-4 text-destructive" />
                       </div>
-                      <h3 className="text-base font-medium text-rose-800">Pending Event Approval</h3>
-                      <Badge variant="outline" className="bg-rose-100 text-rose-700 border-rose-200 px-2 py-1 text-sm">
+                      <h3 className="text-base font-medium text-destructive">Pending Event Approval</h3>
+                      <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 px-2 py-1 text-sm">
                         {pendingItems.length} events
                       </Badge>
                     </div>
@@ -693,17 +693,17 @@ const SAO = () => {
                     {pendingItems.slice(0, 4).map((item) => (
                       <div
                         key={`${item.type}-${item.id}`}
-                        className="flex-1 min-w-[280px] bg-white rounded-lg border border-rose-200 p-4 shadow-sm"
+                        className="flex-1 min-w-[280px] bg-card rounded-lg border border-destructive/20 p-4 shadow-sm"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center">
-                            <Calendar className="h-5 w-5 text-rose-600" />
+                          <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                            <Calendar className="h-5 w-5 text-destructive" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-base text-gray-900 truncate">
+                            <p className="font-medium text-base text-foreground truncate">
                               {item.name}
                             </p>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                               {item.org_name} • {new Date(item.created_at).toLocaleDateString()}
                             </p>
                           </div>
@@ -711,7 +711,7 @@ const SAO = () => {
                         <div className="flex gap-2 mt-3">
                           <Button
                             size="sm"
-                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                             onClick={() => handleEventApproval(item.id, "approved")}
                             disabled={processingEvent === item.id}
                           >
@@ -725,7 +725,7 @@ const SAO = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="flex-1 border-rose-200 hover:bg-rose-50 hover:text-rose-600"
+                            className="flex-1 border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => handleEventApproval(item.id, "rejected")}
                             disabled={processingEvent === item.id}
                           >
@@ -744,20 +744,20 @@ const SAO = () => {
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex items-center justify-between mb-6">
-              <TabsList className="bg-gray-100/80 p-1">
-                <TabsTrigger value="overview" className="gap-2 text-sm py-2 px-4">
+              <TabsList className="bg-muted/80 p-1">
+                <TabsTrigger value="overview" className="gap-2 text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <BarChart3 className="h-4 w-4" />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="announcements" className="gap-2 text-sm py-2 px-4">
+                <TabsTrigger value="announcements" className="gap-2 text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Activity className="h-4 w-4" />
                   Announcements
                 </TabsTrigger>
-                <TabsTrigger value="events" className="gap-2 text-sm py-2 px-4">
+                <TabsTrigger value="events" className="gap-2 text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Calendar className="h-4 w-4" />
                   Events
                 </TabsTrigger>
-                <TabsTrigger value="organizations" className="gap-2 text-sm py-2 px-4">
+                <TabsTrigger value="organizations" className="gap-2 text-sm py-2 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Building2 className="h-4 w-4" />
                   Organizations
                 </TabsTrigger>
@@ -785,19 +785,19 @@ const SAO = () => {
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Recent Announcements */}
-                <Card className="lg:col-span-2 border-0 shadow-sm">
+                <Card className="lg:col-span-2 border-0 shadow-sm bg-card">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-gray-700">
+                      <CardTitle className="text-base font-semibold text-foreground">
                         Recent Announcements
-                        <span className="ml-2 text-sm font-normal text-gray-500">
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
                           ({announcements.length} total)
                         </span>
                       </CardTitle>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="gap-1 text-sm text-blue-600 hover:text-blue-700"
+                        className="gap-1 text-sm text-primary hover:text-primary/80"
                         onClick={() => setExpandedAnnouncements(!expandedAnnouncements)}
                       >
                         {expandedAnnouncements ? (
@@ -810,7 +810,7 @@ const SAO = () => {
                   </CardHeader>
                   <CardContent className="pt-0">
                     {displayedAnnouncements.length === 0 ? (
-                      <p className="text-sm text-gray-500 py-6 text-center">No announcements found</p>
+                      <p className="text-sm text-muted-foreground py-6 text-center">No announcements found</p>
                     ) : (
                       <div className={`space-y-3 ${expandedAnnouncements ? 'max-h-[400px] overflow-y-auto pr-2' : ''}`}>
                         {displayedAnnouncements.map((announcement) => {
@@ -820,29 +820,29 @@ const SAO = () => {
                             <Link
                               key={announcement.id}
                               to={`/org/${announcement.org_id}`}
-                              className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                              className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors group"
                             >
                               <Avatar className="h-10 w-10">
                                 <AvatarImage src={announcement.organizations?.profile_picture || undefined} />
-                                <AvatarFallback className="text-sm bg-gray-100">
+                                <AvatarFallback className="text-sm bg-muted text-foreground">
                                   {announcement.organizations?.name?.charAt(0) || 'O'}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <p className="text-base font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                  <p className="text-base font-medium text-foreground group-hover:text-primary transition-colors">
                                     {announcement.title}
                                   </p>
                                   {hasImage && (
-                                    <Camera className="h-3.5 w-3.5 text-blue-500" />
+                                    <Camera className="h-3.5 w-3.5 text-primary" />
                                   )}
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                                <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                                   <span>{announcement.organizations?.name}</span>
                                   <span>•</span>
                                   <span>{new Date(announcement.created_at).toLocaleDateString()}</span>
                                   {org?.is_shs_org && (
-                                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5">
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary text-xs px-2 py-0.5">
                                       SHS
                                     </Badge>
                                   )}
@@ -857,19 +857,19 @@ const SAO = () => {
                 </Card>
 
                 {/* Recent Organizations */}
-                <Card className="border-0 shadow-sm">
+                <Card className="border-0 shadow-sm bg-card">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-gray-700">
+                      <CardTitle className="text-base font-semibold text-foreground">
                         Recent Organizations
-                        <span className="ml-2 text-sm font-normal text-gray-500">
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
                           ({organizations.length} total)
                         </span>
                       </CardTitle>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="gap-1 text-sm text-blue-600 hover:text-blue-700"
+                        className="gap-1 text-sm text-primary hover:text-primary/80"
                         onClick={() => setExpandedOrganizations(!expandedOrganizations)}
                       >
                         {expandedOrganizations ? (
@@ -882,32 +882,32 @@ const SAO = () => {
                   </CardHeader>
                   <CardContent className="pt-0">
                     {displayedOrganizations.length === 0 ? (
-                      <p className="text-sm text-gray-500 py-6 text-center">No organizations yet</p>
+                      <p className="text-sm text-muted-foreground py-6 text-center">No organizations yet</p>
                     ) : (
                       <div className={`space-y-3 ${expandedOrganizations ? 'max-h-[400px] overflow-y-auto pr-2' : ''}`}>
                         {displayedOrganizations.map((org) => (
                           <Link
                             key={org.id}
                             to={`/org/${org.id}`}
-                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors group"
                           >
                             <Avatar className="h-10 w-10">
                               <AvatarImage src={org.profile_picture || undefined} />
-                              <AvatarFallback className="text-sm bg-gray-100">
+                              <AvatarFallback className="text-sm bg-muted text-foreground">
                                 {org.name.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className="text-base font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                              <p className="text-base font-medium text-foreground group-hover:text-primary transition-colors">
                                 {org.name}
                               </p>
-                              <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                                 <span>{org.is_shs_org ? 'SHS' : 'College'}</span>
                                 <span>•</span>
                                 <span>{new Date(org.created_at).toLocaleDateString()}</span>
                               </div>
                             </div>
-                            <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-500" />
+                            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                           </Link>
                         ))}
                       </div>
@@ -917,12 +917,12 @@ const SAO = () => {
               </div>
 
               {/* Upcoming Events Grid */}
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm bg-card">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold text-gray-700">
+                    <CardTitle className="text-base font-semibold text-foreground">
                       Upcoming Events
-                      <span className="ml-2 text-sm font-normal text-gray-500">
+                      <span className="ml-2 text-sm font-normal text-muted-foreground">
                         ({events.length} total)
                       </span>
                     </CardTitle>
@@ -930,7 +930,7 @@ const SAO = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="gap-1 text-sm text-blue-600 hover:text-blue-700"
+                        className="gap-1 text-sm text-primary hover:text-primary/80"
                         onClick={() => setExpandedEvents(!expandedEvents)}
                       >
                         {expandedEvents ? (
@@ -939,7 +939,7 @@ const SAO = () => {
                           <>View all <ChevronDown className="h-4 w-4" /></>
                         )}
                       </Button>
-                      <Link to="/calendar" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                      <Link to="/calendar" className="text-sm text-primary hover:text-primary/80 flex items-center gap-1">
                         Calendar
                         <ChevronRight className="h-4 w-4" />
                       </Link>
@@ -948,31 +948,31 @@ const SAO = () => {
                 </CardHeader>
                 <CardContent className="pt-0">
                   {displayedEvents.length === 0 ? (
-                    <p className="text-sm text-gray-500 py-6 text-center">No upcoming events</p>
+                    <p className="text-sm text-muted-foreground py-6 text-center">No upcoming events</p>
                   ) : (
                     <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${expandedEvents ? 'max-h-[500px] overflow-y-auto pr-2' : ''}`}>
                       {displayedEvents.map((event) => (
                         <Link
                           key={event.id}
                           to={`/org/${event.org_id}`}
-                          className="flex items-start gap-3 p-4 rounded-lg border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all group"
+                          className="flex items-start gap-3 p-4 rounded-lg border border-border hover:border-primary/30 hover:shadow-md transition-all group"
                         >
-                          <div className="min-w-12 h-12 rounded bg-blue-50 flex flex-col items-center justify-center border border-blue-100">
-                            <span className="text-sm font-bold text-blue-600">
+                          <div className="min-w-12 h-12 rounded bg-primary/10 flex flex-col items-center justify-center border border-primary/20">
+                            <span className="text-sm font-bold text-primary">
                               {new Date(event.event_date).getDate()}
                             </span>
-                            <span className="text-[10px] uppercase text-gray-500">
+                            <span className="text-[10px] uppercase text-muted-foreground">
                               {new Date(event.event_date).toLocaleString('default', { month: 'short' })}
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+                            <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
                               {event.name}
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-muted-foreground mt-1">
                               {event.organizations?.name}
                             </p>
-                            <div className="flex items-center gap-1 text-xs text-gray-400 mt-2">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
                               <Clock className="h-3 w-3" />
                               {new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
@@ -987,10 +987,10 @@ const SAO = () => {
 
             {/* Announcements Tab */}
             <TabsContent value="announcements" className="space-y-4">
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm bg-card">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold text-gray-700">All Announcements</CardTitle>
+                    <CardTitle className="text-base font-semibold text-foreground">All Announcements</CardTitle>
                     <div className="flex items-center gap-3">
                       {photosWithImages.length > 0 && (
                         <Button 
@@ -1004,7 +1004,7 @@ const SAO = () => {
                         </Button>
                       )}
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           placeholder="Search announcements..."
                           value={searchQuery}
@@ -1039,7 +1039,7 @@ const SAO = () => {
                 <CardContent className="pt-0">
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
                     {filteredAnnouncements.length === 0 ? (
-                      <p className="text-sm text-gray-500 py-10 text-center">No announcements found</p>
+                      <p className="text-sm text-muted-foreground py-10 text-center">No announcements found</p>
                     ) : (
                       filteredAnnouncements.map((announcement) => {
                         const org = organizations.find(o => o.id === announcement.org_id);
@@ -1048,21 +1048,21 @@ const SAO = () => {
                           <Link
                             key={announcement.id}
                             to={`/org/${announcement.org_id}`}
-                            className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-200"
+                            className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted transition-colors group border border-transparent hover:border-border"
                           >
                             <Avatar className="h-12 w-12">
                               <AvatarImage src={announcement.organizations?.profile_picture || undefined} />
-                              <AvatarFallback className="text-base bg-gray-100">
+                              <AvatarFallback className="text-base bg-muted text-foreground">
                                 {announcement.organizations?.name?.charAt(0) || 'O'}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
-                                <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
                                   {announcement.title}
                                 </h3>
                                 {org?.is_shs_org && (
-                                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5">
+                                  <Badge variant="secondary" className="bg-primary/10 text-primary text-xs px-2 py-0.5">
                                     SHS
                                   </Badge>
                                 )}
@@ -1073,11 +1073,11 @@ const SAO = () => {
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                                 {announcement.content}
                               </p>
-                              <div className="flex items-center gap-4 text-xs text-gray-500">
-                                <span className="font-medium text-gray-700">{announcement.organizations?.name}</span>
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <span className="font-medium text-foreground">{announcement.organizations?.name}</span>
                                 <span>•</span>
                                 <span>{new Date(announcement.created_at).toLocaleDateString()}</span>
                                 <span>•</span>
@@ -1095,13 +1095,13 @@ const SAO = () => {
 
             {/* Events Tab */}
             <TabsContent value="events" className="space-y-4">
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm bg-card">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold text-gray-700">All Events</CardTitle>
+                    <CardTitle className="text-base font-semibold text-foreground">All Events</CardTitle>
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           placeholder="Search events..."
                           value={searchQuery}
@@ -1126,31 +1126,31 @@ const SAO = () => {
                 <CardContent className="pt-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto">
                     {events.length === 0 ? (
-                      <p className="text-sm text-gray-500 py-10 text-center col-span-2">No events found</p>
+                      <p className="text-sm text-muted-foreground py-10 text-center col-span-2">No events found</p>
                     ) : (
                       events.map((event) => (
                         <Link
                           key={event.id}
                           to={`/org/${event.org_id}`}
-                          className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-200"
+                          className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted transition-colors group border border-transparent hover:border-border"
                         >
-                          <div className="min-w-14 h-14 rounded bg-blue-50 flex flex-col items-center justify-center border border-blue-100">
-                            <span className="text-base font-bold text-blue-600">
+                          <div className="min-w-14 h-14 rounded bg-primary/10 flex flex-col items-center justify-center border border-primary/20">
+                            <span className="text-base font-bold text-primary">
                               {new Date(event.event_date).getDate()}
                             </span>
-                            <span className="text-[10px] uppercase text-gray-500">
+                            <span className="text-[10px] uppercase text-muted-foreground">
                               {new Date(event.event_date).toLocaleString('default', { month: 'short' })}
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                            <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
                               {event.name}
                             </h3>
-                            <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                               {event.description}
                             </p>
-                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                              <span className="font-medium text-gray-700">{event.organizations?.name}</span>
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                              <span className="font-medium text-foreground">{event.organizations?.name}</span>
                               <span>•</span>
                               <div className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
@@ -1177,13 +1177,13 @@ const SAO = () => {
 
             {/* Organizations Tab */}
             <TabsContent value="organizations" className="space-y-4">
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm bg-card">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold text-gray-700">All Organizations</CardTitle>
+                    <CardTitle className="text-base font-semibold text-foreground">All Organizations</CardTitle>
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           placeholder="Search organizations..."
                           value={searchQuery}
@@ -1207,7 +1207,7 @@ const SAO = () => {
                 <CardContent className="pt-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto">
                     {organizations.length === 0 ? (
-                      <p className="text-sm text-gray-500 py-10 text-center col-span-2">No organizations found</p>
+                      <p className="text-sm text-muted-foreground py-10 text-center col-span-2">No organizations found</p>
                     ) : (
                       organizations
                         .filter(org => {
@@ -1224,29 +1224,29 @@ const SAO = () => {
                           <Link
                             key={org.id}
                             to={`/org/${org.id}`}
-                            className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-200"
+                            className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted transition-colors group border border-transparent hover:border-border"
                           >
                             <Avatar className="h-12 w-12">
                               <AvatarImage src={org.profile_picture || undefined} />
-                              <AvatarFallback className="text-base bg-gray-100">
+                              <AvatarFallback className="text-base bg-muted text-foreground">
                                 {org.name.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
-                                <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+                                <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors truncate">
                                   {org.name}
                                 </h3>
                                 {org.is_shs_org && (
-                                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5">
+                                  <Badge variant="secondary" className="bg-primary/10 text-primary text-xs px-2 py-0.5">
                                     SHS
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-sm text-gray-500 line-clamp-2 mb-2">
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                                 {org.description || 'No description'}
                               </p>
-                              <div className="flex items-center gap-3 text-xs text-gray-400">
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <span>Created {new Date(org.created_at).toLocaleDateString()}</span>
                                 <span>•</span>
                                 <Badge variant="outline" className="text-xs px-2 py-0.5">
@@ -1281,7 +1281,7 @@ const SAO = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-8 w-8 ${photoView === 'grid' ? 'bg-gray-100' : ''}`}
+                  className={`h-8 w-8 ${photoView === 'grid' ? 'bg-muted' : ''}`}
                   onClick={() => setPhotoView('grid')}
                 >
                   <Grid className="h-4 w-4" />
@@ -1289,7 +1289,7 @@ const SAO = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-8 w-8 ${photoView === 'list' ? 'bg-gray-100' : ''}`}
+                  className={`h-8 w-8 ${photoView === 'list' ? 'bg-muted' : ''}`}
                   onClick={() => setPhotoView('list')}
                 >
                   <List className="h-4 w-4" />
@@ -1326,7 +1326,7 @@ const SAO = () => {
                   <button
                     key={photo.id}
                     onClick={() => setSelectedPhoto(photo)}
-                    className="flex items-center gap-4 w-full p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+                    className="flex items-center gap-4 w-full p-3 rounded-lg hover:bg-muted transition-colors border border-transparent hover:border-border"
                   >
                     <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                       <img
@@ -1336,13 +1336,13 @@ const SAO = () => {
                       />
                     </div>
                     <div className="flex-1 text-left">
-                      <h4 className="text-sm font-medium text-gray-900">{photo.title}</h4>
-                      <p className="text-xs text-gray-500 mt-1">{photo.org_name}</p>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <h4 className="text-sm font-medium text-foreground">{photo.title}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">{photo.org_name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
                         {new Date(photo.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </button>
                 ))}
               </div>
@@ -1364,16 +1364,16 @@ const SAO = () => {
                 />
               </div>
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-gray-900">{selectedPhoto.title}</h3>
+                <h3 className="text-lg font-semibold text-foreground">{selectedPhoto.title}</h3>
                 <div className="flex items-center justify-between">
                   <Link
                     to={`/org/${selectedPhoto.org_id}`}
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
                   >
                     {selectedPhoto.org_name}
                     <ExternalLink className="h-3 w-3" />
                   </Link>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {new Date(selectedPhoto.created_at).toLocaleDateString()} at{' '}
                     {new Date(selectedPhoto.created_at).toLocaleTimeString()}
                   </p>
@@ -1385,9 +1385,9 @@ const SAO = () => {
       </Dialog>
 
       {/* Footer - flex-shrink-0 prevents it from shrinking */}
-      <footer className="flex-shrink-0 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#00A3FF]/20 mt-auto">
+      <footer className="flex-shrink-0 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-border mt-auto">
         <div className="container mx-auto px-8 py-6">
-          <div className="text-center text-sm text-[#FCF9F5]/60">
+          <div className="text-center text-sm text-muted-foreground/60">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
         </div>

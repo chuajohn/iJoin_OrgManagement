@@ -19,12 +19,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Check, X, UserCog, Users, Shield, Crown, User, Loader2, Calendar, ChevronDown, ArrowUpDown, ExternalLink } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Check, X, UserCog, Users, Shield, Crown, User, Loader2, Calendar, ChevronDown, ArrowUpDown, ExternalLink, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { useUserRole } from "@/hooks/useUserRole";
 import { usePendingRequests } from "@/hooks/usePendingRequests";
 import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -49,6 +60,11 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
   const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
   const [processingBulk, setProcessingBulk] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  
+  // Remove member state
+  const [memberToRemove, setMemberToRemove] = useState<any | null>(null);
+  const [removingMember, setRemovingMember] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -125,7 +141,7 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
         },
         () => {
           fetchData();
-          refreshPendingCounts(); // Refresh the badge counts
+          refreshPendingCounts();
         }
       )
       .subscribe();
@@ -144,7 +160,6 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
 
       if (error) throw error;
 
-      // Remove from selected set if present
       setSelectedRequests(prev => {
         const newSet = new Set(prev);
         newSet.delete(membershipId);
@@ -152,7 +167,7 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
       });
 
       await fetchData();
-      await refreshPendingCounts(); // Refresh the badge counts
+      await refreshPendingCounts();
       toast.success(`Membership request ${status}`);
     } catch (error) {
       toast.error("Failed to update membership request");
@@ -175,7 +190,7 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
       if (error) throw error;
 
       await fetchData();
-      await refreshPendingCounts(); // Refresh the badge counts
+      await refreshPendingCounts();
       setSelectedRequests(new Set());
       toast.success(`${selectedRequests.size} requests ${status}`);
     } catch (error) {
@@ -233,8 +248,33 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
     }
   };
 
+  const handleRemoveMember = async () => {
+    if (!memberToRemove) return;
+    
+    setRemovingMember(true);
+    try {
+      const { error } = await supabase
+        .from("memberships")
+        .delete()
+        .eq("id", memberToRemove.id);
+
+      if (error) throw error;
+
+      toast.success(`${memberToRemove.profiles?.name} has been removed from the organization`);
+      setMemberToRemove(null);
+      setConfirmText("");
+      await fetchData();
+      await refreshPendingCounts();
+    } catch (error: any) {
+      console.error("Error removing member:", error);
+      toast.error("Failed to remove member");
+    } finally {
+      setRemovingMember(false);
+    }
+  };
+
   const handleViewProfile = (userId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent any parent click handlers
+    e.stopPropagation();
     navigate(`/profile/${userId}`);
   };
 
@@ -275,6 +315,13 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
     return false;
   };
 
+  const canRemoveMember = (memberRole: string) => {
+    // Leaders can remove members and officers, but not other leaders
+    if (isAdmin || isSAO) return true;
+    if (isLeader && memberRole !== "leader") return true;
+    return false;
+  };
+
   const sortedRequests = getSortedRequests();
 
   if (loading) {
@@ -296,7 +343,7 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
               Members ({members.length})
             </CardTitle>
             <CardDescription>
-              {isLeader && "You can promote members to officers (leaders cannot be modified)"}
+              {isLeader && "You can promote members to officers and remove members (leaders cannot be modified)"}
               {(isAdmin || isSAO) && "You have full control over all roles"}
             </CardDescription>
           </CardHeader>
@@ -311,6 +358,7 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
               <div className="space-y-3">
                 {members.map((member) => {
                   const canModify = canModifyRole(member.role);
+                  const canRemove = canRemoveMember(member.role);
                   const isUpdating = updatingRole === member.id;
                   
                   return (
@@ -358,48 +406,69 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
                         </div>
                       </div>
 
-                      {/* Role Management Dropdown */}
-                      {canModify && member.role !== "leader" && (
-                        <div className="ml-4 min-w-[140px]">
-                          {isUpdating ? (
-                            <div className="flex items-center justify-center">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            </div>
-                          ) : (
-                            <Select
-                              value={member.role}
-                              onValueChange={(value) => 
-                                handleRoleChange(member.id, value, member.profiles?.name)
-                              }
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="member">
-                                  <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4" />
-                                    Member
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="officer">
-                                  <div className="flex items-center gap-2">
-                                    <Shield className="h-4 w-4" />
-                                    Officer
-                                  </div>
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {/* Role Management Dropdown */}
+                        {canModify && member.role !== "leader" && (
+                          <div className="min-w-[140px]">
+                            {isUpdating ? (
+                              <div className="flex items-center justify-center">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              </div>
+                            ) : (
+                              <Select
+                                value={member.role}
+                                onValueChange={(value) => 
+                                  handleRoleChange(member.id, value, member.profiles?.name)
+                                }
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="member">
+                                    <div className="flex items-center gap-2">
+                                      <User className="h-4 w-4" />
+                                      Member
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="officer">
+                                    <div className="flex items-center gap-2">
+                                      <Shield className="h-4 w-4" />
+                                      Officer
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
+                        )}
 
-                      {/* Show disabled state for leaders */}
-                      {member.role === "leader" && (isLeader || isAdmin || isSAO) && (
-                        <div className="ml-4 text-xs text-muted-foreground italic">
-                          Leaders cannot be modified
-                        </div>
-                      )}
+                        {/* Remove Member Button */}
+                        {canRemove && member.role !== "leader" && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => setMemberToRemove(member)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Remove member from organization</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+
+                        {/* Show disabled state for leaders */}
+                        {member.role === "leader" && (isLeader || isAdmin || isSAO) && (
+                          <div className="text-xs text-muted-foreground italic">
+                            Leaders cannot be modified
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -597,6 +666,79 @@ export function MembershipManagement({ orgId }: MembershipManagementProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Remove Member Confirmation Dialog */}
+      <AlertDialog open={!!memberToRemove} onOpenChange={() => {
+        setMemberToRemove(null);
+        setConfirmText("");
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">
+              Remove Member
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-4">
+                <p>
+                  Are you sure you want to remove <strong>{memberToRemove?.profiles?.name}</strong> from this organization?
+                </p>
+                
+                <div className="rounded-lg bg-destructive/10 p-4">
+                  <p className="text-sm font-medium text-destructive">
+                    ⚠️ This action cannot be undone. This member will:
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-destructive/80">
+                    <li>• Lose access to all organization content</li>
+                    <li>• Be removed from all organization events</li>
+                    <li>• Need to re-apply if they want to join again</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <p className="text-sm">
+                    Type <span className="font-mono font-bold">REMOVE</span> to confirm:
+                  </p>
+                  <Input
+                    placeholder="Type REMOVE here"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    className="font-mono"
+                  />
+                  {confirmText && confirmText !== "REMOVE" && (
+                    <p className="text-sm text-destructive">
+                      ❌ Text doesn't match. Please type "REMOVE" exactly.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setMemberToRemove(null);
+                setConfirmText("");
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveMember}
+              disabled={confirmText !== "REMOVE" || removingMember}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {removingMember ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Removing...
+                </>
+              ) : (
+                "Remove Member"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 }

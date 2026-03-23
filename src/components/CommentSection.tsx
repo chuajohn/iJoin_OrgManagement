@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { MoreHorizontal, Edit2, Trash2, Check, X } from "lucide-react";
+import { MoreHorizontal, Edit2, Trash2, Check, X, Shield, Crown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface Comment {
   id: string;
@@ -24,6 +26,7 @@ interface Comment {
     email: string;
     profile_picture: string | null;
   };
+  user_role?: string; // Add this for role info
 }
 
 interface CommentSectionProps {
@@ -36,21 +39,52 @@ interface CommentSectionProps {
 
 export function CommentSection({ 
   announcementId, 
+  orgId,
   onCommentAdded,
   userAvatar,
   userInitials 
 }: CommentSectionProps) {
   const { user } = useAuth();
+  const { isLeader, isAdmin, isSAO } = useUserRole(orgId);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [userRoles, setUserRoles] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchComments();
   }, [announcementId]);
+
+  // Fetch user roles for each comment
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      const userIds = [...new Set(comments.map(c => c.user_id))];
+      const roles: Record<string, string> = {};
+      
+      for (const userId of userIds) {
+        const { data } = await supabase
+          .from("memberships")
+          .select("role")
+          .eq("org_id", orgId)
+          .eq("user_id", userId)
+          .eq("status", "accepted")
+          .maybeSingle();
+        
+        if (data) {
+          roles[userId] = data.role;
+        }
+      }
+      
+      setUserRoles(roles);
+    };
+    
+    if (comments.length > 0) {
+      fetchUserRoles();
+    }
+  }, [comments, orgId]);
 
   const fetchComments = async () => {
     try {
@@ -154,8 +188,41 @@ export function CommentSection({
     }
   };
 
-  const canModifyComment = (comment: Comment) => {
+  // Check if user can delete a comment (only leaders, admins, SAO, or comment owner)
+  const canDeleteComment = (comment: Comment) => {
+    // Comment owner can delete their own
+    if (comment.user_id === user?.id) return true;
+    // Leader can delete any comment in their org
+    if (isLeader) return true;
+    // Admin or SAO can delete any comment
+    if (isAdmin || isSAO) return true;
+    return false;
+  };
+
+  // Check if user can edit a comment (only the owner)
+  const canEditComment = (comment: Comment) => {
     return comment.user_id === user?.id;
+  };
+
+  const getRoleBadge = (userId: string) => {
+    const role = userRoles[userId];
+    if (role === 'leader') {
+      return (
+        <Badge variant="default" className="bg-yellow-500 text-white text-[10px] px-1.5 py-0 gap-0.5">
+          <Crown className="h-2.5 w-2.5" />
+          Leader
+        </Badge>
+      );
+    }
+    if (role === 'officer') {
+      return (
+        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0 gap-0.5">
+          <Shield className="h-2.5 w-2.5" />
+          Officer
+        </Badge>
+      );
+    }
+    return null;
   };
 
   const getInitials = (name: string) => {
@@ -194,12 +261,13 @@ export function CommentSection({
                   <span className="font-semibold text-sm">
                     {comment.profiles?.name}
                   </span>
+                  {getRoleBadge(comment.user_id)}
                   <span className="text-xs text-gray-500">
                     {format(new Date(comment.created_at), "MMM d, h:mm a")}
                   </span>
                 </div>
 
-                {canModifyComment(comment) && (
+                {(canEditComment(comment) || canDeleteComment(comment)) && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -207,22 +275,26 @@ export function CommentSection({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setEditingCommentId(comment.id);
-                          setEditContent(comment.content);
-                        }}
-                      >
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => handleDeleteComment(comment.id)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
+                      {canEditComment(comment) && (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setEditingCommentId(comment.id);
+                            setEditContent(comment.content);
+                          }}
+                        >
+                          <Edit2 className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+                      {canDeleteComment(comment) && (
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteComment(comment.id)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
@@ -272,7 +344,7 @@ export function CommentSection({
         )}
       </div>
 
-      {/* Comment Input - Fixed avatar display */}
+      {/* Comment Input */}
       {user && (
         <div className="flex gap-3 pt-4 border-t">
           <Avatar className="h-8 w-8 flex-shrink-0">

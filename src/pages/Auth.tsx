@@ -50,49 +50,49 @@ const Auth = () => {
     },
   });
 
-  // Floating Japanese elements - from groupmate's code
+  // Floating Japanese elements - with semantic colors
   const floatingElements = [
     // Blue theme
-    { Icon: Waves, color: "#0057A3", top: "5%", left: "3%", delay: "0s", size: 28, opacity: 0.2 },
-    { Icon: Fish, color: "#0057A3", top: "15%", right: "4%", delay: "0.8s", size: 26, opacity: 0.2 },
-    { Icon: Mountain, color: "#0057A3", top: "25%", left: "6%", delay: "1.5s", size: 32, opacity: 0.2 },
-    { Icon: Droplets, color: "#0057A3", top: "35%", right: "8%", delay: "2.2s", size: 24, opacity: 0.2 },
-    { Icon: Shell, color: "#0057A3", top: "45%", left: "5%", delay: "2.9s", size: 26, opacity: 0.2 },
-    { Icon: Waves, color: "#0057A3", top: "55%", right: "5%", delay: "3.5s", size: 30, opacity: 0.2 },
-    { Icon: Fish, color: "#0057A3", top: "65%", left: "8%", delay: "4.2s", size: 25, opacity: 0.2 },
-    { Icon: Mountain, color: "#0057A3", top: "75%", right: "6%", delay: "4.9s", size: 28, opacity: 0.2 },
-    { Icon: Droplets, color: "#0057A3", top: "85%", left: "4%", delay: "5.5s", size: 22, opacity: 0.2 },
+    { Icon: Waves, color: "hsl(var(--primary))", top: "5%", left: "3%", delay: "0s", size: 28, opacity: 0.2 },
+    { Icon: Fish, color: "hsl(var(--primary))", top: "15%", right: "4%", delay: "0.8s", size: 26, opacity: 0.2 },
+    { Icon: Mountain, color: "hsl(var(--primary))", top: "25%", left: "6%", delay: "1.5s", size: 32, opacity: 0.2 },
+    { Icon: Droplets, color: "hsl(var(--primary))", top: "35%", right: "8%", delay: "2.2s", size: 24, opacity: 0.2 },
+    { Icon: Shell, color: "hsl(var(--primary))", top: "45%", left: "5%", delay: "2.9s", size: 26, opacity: 0.2 },
+    { Icon: Waves, color: "hsl(var(--primary))", top: "55%", right: "5%", delay: "3.5s", size: 30, opacity: 0.2 },
+    { Icon: Fish, color: "hsl(var(--primary))", top: "65%", left: "8%", delay: "4.2s", size: 25, opacity: 0.2 },
+    { Icon: Mountain, color: "hsl(var(--primary))", top: "75%", right: "6%", delay: "4.9s", size: 28, opacity: 0.2 },
+    { Icon: Droplets, color: "hsl(var(--primary))", top: "85%", left: "4%", delay: "5.5s", size: 22, opacity: 0.2 },
     
     // Red theme
-    { Icon: Wind, color: "#B43B3B", top: "8%", right: "6%", delay: "0.3s", size: 30, opacity: 0.2 },
-    { Icon: Gem, color: "#B43B3B", top: "18%", left: "7%", delay: "1.1s", size: 28, opacity: 0.2 },
-    { Icon: Cloud, color: "#B43B3B", top: "28%", right: "3%", delay: "1.8s", size: 32, opacity: 0.2 },
-    { Icon: Flower, color: "#B43B3B", top: "38%", left: "9%", delay: "2.5s", size: 26, opacity: 0.2 },
-    { Icon: Bird, color: "#B43B3B", top: "48%", right: "7%", delay: "3.2s", size: 24, opacity: 0.2 },
-    { Icon: Wind, color: "#B43B3B", top: "58%", left: "2%", delay: "3.9s", size: 29, opacity: 0.2 },
-    { Icon: Gem, color: "#B43B3B", top: "68%", right: "9%", delay: "4.5s", size: 27, opacity: 0.2 },
-    { Icon: Cloud, color: "#B43B3B", top: "78%", left: "5%", delay: "5.2s", size: 31, opacity: 0.2 },
-    { Icon: Flower, color: "#B43B3B", top: "88%", right: "4%", delay: "5.9s", size: 25, opacity: 0.2 },
+    { Icon: Wind, color: "hsl(var(--destructive))", top: "8%", right: "6%", delay: "0.3s", size: 30, opacity: 0.2 },
+    { Icon: Gem, color: "hsl(var(--destructive))", top: "18%", left: "7%", delay: "1.1s", size: 28, opacity: 0.2 },
+    { Icon: Cloud, color: "hsl(var(--destructive))", top: "28%", right: "3%", delay: "1.8s", size: 32, opacity: 0.2 },
+    { Icon: Flower, color: "hsl(var(--destructive))", top: "38%", left: "9%", delay: "2.5s", size: 26, opacity: 0.2 },
+    { Icon: Bird, color: "hsl(var(--destructive))", top: "48%", right: "7%", delay: "3.2s", size: 24, opacity: 0.2 },
+    { Icon: Wind, color: "hsl(var(--destructive))", top: "58%", left: "2%", delay: "3.9s", size: 29, opacity: 0.2 },
+    { Icon: Gem, color: "hsl(var(--destructive))", top: "68%", right: "9%", delay: "4.5s", size: 27, opacity: 0.2 },
+    { Icon: Cloud, color: "hsl(var(--destructive))", top: "78%", left: "5%", delay: "5.2s", size: 31, opacity: 0.2 },
+    { Icon: Flower, color: "hsl(var(--destructive))", top: "88%", right: "4%", delay: "5.9s", size: 25, opacity: 0.2 },
     
     // Yellow theme
-    { Icon: Leaf, color: "#FFD966", top: "10%", left: "8%", delay: "0.5s", size: 27, opacity: 0.2 },
-    { Icon: Cherry, color: "#FFD966", top: "20%", right: "5%", delay: "1.3s", size: 29, opacity: 0.2 },
-    { Icon: Sun, color: "#FFD966", top: "30%", left: "4%", delay: "2.0s", size: 34, opacity: 0.2 },
-    { Icon: Star, color: "#FFD966", top: "40%", right: "2%", delay: "2.7s", size: 26, opacity: 0.2 },
-    { Icon: Sparkles, color: "#FFD966", top: "50%", left: "6%", delay: "3.4s", size: 28, opacity: 0.2 },
-    { Icon: Leaf, color: "#FFD966", top: "60%", right: "8%", delay: "4.1s", size: 25, opacity: 0.2 },
-    { Icon: Cherry, color: "#FFD966", top: "70%", left: "3%", delay: "4.8s", size: 27, opacity: 0.2 },
-    { Icon: Sun, color: "#FFD966", top: "80%", right: "7%", delay: "5.4s", size: 32, opacity: 0.2 },
-    { Icon: Star, color: "#FFD966", top: "90%", left: "7%", delay: "6.1s", size: 24, opacity: 0.2 },
+    { Icon: Leaf, color: "hsl(var(--brand-yellow))", top: "10%", left: "8%", delay: "0.5s", size: 27, opacity: 0.2 },
+    { Icon: Cherry, color: "hsl(var(--brand-yellow))", top: "20%", right: "5%", delay: "1.3s", size: 29, opacity: 0.2 },
+    { Icon: Sun, color: "hsl(var(--brand-yellow))", top: "30%", left: "4%", delay: "2.0s", size: 34, opacity: 0.2 },
+    { Icon: Star, color: "hsl(var(--brand-yellow))", top: "40%", right: "2%", delay: "2.7s", size: 26, opacity: 0.2 },
+    { Icon: Sparkles, color: "hsl(var(--brand-yellow))", top: "50%", left: "6%", delay: "3.4s", size: 28, opacity: 0.2 },
+    { Icon: Leaf, color: "hsl(var(--brand-yellow))", top: "60%", right: "8%", delay: "4.1s", size: 25, opacity: 0.2 },
+    { Icon: Cherry, color: "hsl(var(--brand-yellow))", top: "70%", left: "3%", delay: "4.8s", size: 27, opacity: 0.2 },
+    { Icon: Sun, color: "hsl(var(--brand-yellow))", top: "80%", right: "7%", delay: "5.4s", size: 32, opacity: 0.2 },
+    { Icon: Star, color: "hsl(var(--brand-yellow))", top: "90%", left: "7%", delay: "6.1s", size: 24, opacity: 0.2 },
     
     // Extra scattered
-    { Icon: TreePine, color: "#0057A3", top: "12%", left: "12%", delay: "1.7s", size: 22, opacity: 0.2 },
-    { Icon: Moon, color: "#B43B3B", top: "32%", right: "12%", delay: "2.8s", size: 24, opacity: 0.2 },
+    { Icon: TreePine, color: "hsl(var(--primary))", top: "12%", left: "12%", delay: "1.7s", size: 22, opacity: 0.2 },
+    { Icon: Moon, color: "hsl(var(--destructive))", top: "32%", right: "12%", delay: "2.8s", size: 24, opacity: 0.2 },
   ];
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+      <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden">
         {/* Floating elements during loading */}
         {floatingElements.map((item, index) => {
           const IconComponent = item.Icon;
@@ -118,7 +118,7 @@ const Auth = () => {
             </div>
           );
         })}
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0057A3] border-t-transparent relative z-10" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent relative z-10" />
       </div>
     );
   }
@@ -163,7 +163,7 @@ const Auth = () => {
   // Email verification screen - NO REDIRECT, just info
   if (showVerification) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
         {/* Floating Japanese elements */}
         {floatingElements.map((item, index) => {
           const IconComponent = item.Icon;
@@ -190,46 +190,46 @@ const Auth = () => {
           );
         })}
         
-        {/* Subtle side decorations */}
+        {/* Subtle side decorations - with semantic colors */}
         <div className="fixed left-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
-          <div className="absolute top-20 left-10 w-20 h-20 border border-[#0057A3]/20 rounded-full"></div>
-          <div className="absolute bottom-40 left-10 w-32 h-32 border border-[#B43B3B]/20 rounded-full"></div>
-          <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-[#0057A3]/20 to-transparent"></div>
+          <div className="absolute top-20 left-10 w-20 h-20 border border-border rounded-full"></div>
+          <div className="absolute bottom-40 left-10 w-32 h-32 border border-destructive/20 rounded-full"></div>
+          <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-primary/20 to-transparent"></div>
         </div>
         
         <div className="fixed right-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
-          <div className="absolute top-40 right-10 w-24 h-24 border border-[#FFD966]/20 rounded-full"></div>
-          <div className="absolute bottom-60 right-10 w-40 h-40 border border-[#0057A3]/20 rounded-full"></div>
-          <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-[#B43B3B]/20 to-transparent"></div>
+          <div className="absolute top-40 right-10 w-24 h-24 border border-brand-yellow/20 rounded-full"></div>
+          <div className="absolute bottom-60 right-10 w-40 h-40 border border-primary/20 rounded-full"></div>
+          <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-destructive/20 to-transparent"></div>
         </div>
         
-        <Card className="w-full max-w-md border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-xl relative z-10">
+        <Card className="w-full max-w-md border border-border bg-card/80 backdrop-blur-sm shadow-xl relative z-10">
           <CardHeader>
             <div className="flex justify-center mb-4">
-              <div className="h-16 w-16 rounded-full bg-[#0057A3]/10 border-2 border-[#0057A3]/30 flex items-center justify-center">
-                <MailCheck className="h-8 w-8 text-[#0057A3]" />
+              <div className="h-16 w-16 rounded-full bg-primary/10 border-2 border-border flex items-center justify-center">
+                <MailCheck className="h-8 w-8 text-primary" />
               </div>
             </div>
-            <CardTitle className="text-center text-2xl text-[#1A1A2E]">Verify Your Email</CardTitle>
-            <CardDescription className="text-center text-base text-[#4A5568]">
+            <CardTitle className="text-center text-2xl text-foreground">Verify Your Email</CardTitle>
+            <CardDescription className="text-center text-base text-muted-foreground">
               We sent a verification link to:
               <br />
-              <span className="font-medium text-[#0057A3] mt-2 block break-all">
+              <span className="font-medium text-primary mt-2 block break-all">
                 {verifiedEmail}
               </span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-[#0057A3]/5 border border-[#0057A3]/20 rounded-lg p-4 text-sm text-[#1A1A2E]">
+            <div className="bg-primary/5 border border-border rounded-lg p-4 text-sm text-foreground">
               <p className="font-medium mb-1">📧 Can't find the email?</p>
-              <p className="text-[#4A5568]">Check your spam folder or wait a few minutes.</p>
+              <p className="text-muted-foreground">Check your spam folder or wait a few minutes.</p>
             </div>
             
             <div className="flex flex-col gap-3">
               <Button 
                 variant="outline" 
                 onClick={() => setShowVerification(false)}
-                className="w-full border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5"
+                className="w-full border border-border text-foreground hover:bg-primary/5"
               >
                 Back to Sign In
               </Button>
@@ -249,13 +249,13 @@ const Auth = () => {
                     toast.error(error.message);
                   }
                 }}
-                className="w-full text-[#0057A3] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
+                className="w-full text-primary hover:text-primary hover:bg-primary/5"
               >
                 Resend Verification Email
               </Button>
             </div>
             
-            <p className="text-xs text-center text-[#4A5568]">
+            <p className="text-xs text-center text-muted-foreground">
               Once verified, you can sign in with your email and password.
             </p>
           </CardContent>
@@ -265,7 +265,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Floating Japanese Elements */}
       {floatingElements.map((item, index) => {
         const IconComponent = item.Icon;
@@ -292,27 +292,27 @@ const Auth = () => {
         );
       })}
       
-      {/* Subtle side decorations - from groupmate's code */}
+      {/* Subtle side decorations - with semantic colors */}
       <div className="fixed left-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
-        <div className="absolute top-20 left-10 w-20 h-20 border border-[#0057A3]/20 rounded-full"></div>
-        <div className="absolute bottom-40 left-10 w-32 h-32 border border-[#B43B3B]/20 rounded-full"></div>
-        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-[#0057A3]/20 to-transparent"></div>
+        <div className="absolute top-20 left-10 w-20 h-20 border border-border rounded-full"></div>
+        <div className="absolute bottom-40 left-10 w-32 h-32 border border-destructive/20 rounded-full"></div>
+        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-primary/20 to-transparent"></div>
       </div>
       
       <div className="fixed right-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
-        <div className="absolute top-40 right-10 w-24 h-24 border border-[#FFD966]/20 rounded-full"></div>
-        <div className="absolute bottom-60 right-10 w-40 h-40 border border-[#0057A3]/20 rounded-full"></div>
-        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-[#B43B3B]/20 to-transparent"></div>
+        <div className="absolute top-40 right-10 w-24 h-24 border border-brand-yellow/20 rounded-full"></div>
+        <div className="absolute bottom-60 right-10 w-40 h-40 border border-primary/20 rounded-full"></div>
+        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-destructive/20 to-transparent"></div>
       </div>
       
-      {/* Lightning pattern overlay - from groupmate's code */}
+      {/* Lightning pattern overlay - with semantic colors */}
       <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 15 L35 15 L30 30 L40 30 L20 45 L25 30 L15 30 L25 15' fill='%230057A3' opacity='0.2'/%3E%3C/svg%3E")`,
         backgroundSize: '60px 60px'
       }}></div>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm">
+      <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-3">
             <div className="relative">
@@ -321,12 +321,12 @@ const Auth = () => {
                 alt="iJoin" 
                 className="h-8 w-auto md:h-10"
               />
-              <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[#FFD966] border border-[#FCF9F5]"></div>
+              <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-brand-yellow border border-background"></div>
             </div>
-            <span className="text-xl font-bold text-[#1A1A2E]">iJoin</span>
+            <span className="text-xl font-bold text-foreground">iJoin</span>
           </Link>
           <Link to="/">
-            <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
@@ -336,29 +336,29 @@ const Auth = () => {
 
       {/* Auth Form */}
       <div className="container mx-auto flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12 relative z-10">
-        <Card className="w-full max-w-md border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm shadow-xl relative overflow-hidden">
-          {/* Corner decorations - from groupmate's code */}
-          <div className="absolute top-0 left-0 w-16 h-16 border-l border-t border-[#0057A3]/30"></div>
-          <div className="absolute top-0 right-0 w-16 h-16 border-r border-t border-[#B43B3B]/30"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 border-l border-b border-[#FFD966]/30"></div>
-          <div className="absolute bottom-0 right-0 w-16 h-16 border-r border-b border-[#0057A3]/30"></div>
+        <Card className="w-full max-w-md border border-border bg-card/80 backdrop-blur-sm shadow-xl relative overflow-hidden">
+          {/* Corner decorations - with semantic colors */}
+          <div className="absolute top-0 left-0 w-16 h-16 border-l border-t border-border"></div>
+          <div className="absolute top-0 right-0 w-16 h-16 border-r border-t border-destructive/30"></div>
+          <div className="absolute bottom-0 left-0 w-16 h-16 border-l border-b border-brand-yellow/30"></div>
+          <div className="absolute bottom-0 right-0 w-16 h-16 border-r border-b border-border"></div>
           
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-[#1A1A2E]">Welcome to iJoin</CardTitle>
-            <CardDescription className="text-[#4A5568]">Sign in to your account or create a new one</CardDescription>
+            <CardTitle className="text-2xl font-bold text-foreground">Welcome to iJoin</CardTitle>
+            <CardDescription className="text-muted-foreground">Sign in to your account or create a new one</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-[#E1E8F0]/80 border border-[#0057A3]/30 p-1">
+              <TabsList className="grid w-full grid-cols-2 bg-muted/80 border border-border p-1">
                 <TabsTrigger 
                   value="signin" 
-                  className="data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   Sign In
                 </TabsTrigger>
                 <TabsTrigger 
                   value="signup" 
-                  className="data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   Sign Up
                 </TabsTrigger>
@@ -368,39 +368,39 @@ const Auth = () => {
               <TabsContent value="signin">
                 <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4 mt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-[#1A1A2E]">Email</Label>
+                    <Label htmlFor="signin-email" className="text-foreground">Email</Label>
                     <Input
                       id="signin-email"
                       type="email"
                       placeholder="student@iacademy.edu"
                       {...signInForm.register("email")}
                       disabled={isLoading}
-                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-border focus-visible:ring-brand-yellow/50"
                     />
                     {signInForm.formState.errors.email && (
-                      <p className="text-sm text-[#B43B3B]">
+                      <p className="text-sm text-destructive">
                         {signInForm.formState.errors.email.message}
                       </p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password" className="text-[#1A1A2E]">Password</Label>
+                    <Label htmlFor="signin-password" className="text-foreground">Password</Label>
                     <Input
                       id="signin-password"
                       type="password"
                       {...signInForm.register("password")}
                       disabled={isLoading}
-                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-border focus-visible:ring-brand-yellow/50"
                     />
                     {signInForm.formState.errors.password && (
-                      <p className="text-sm text-[#B43B3B]">
+                      <p className="text-sm text-destructive">
                         {signInForm.formState.errors.password.message}
                       </p>
                     )}
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90" 
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -420,17 +420,17 @@ const Auth = () => {
                 <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-5 mt-4">
                   {/* Full Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name" className="text-[#1A1A2E]">Full Name</Label>
+                    <Label htmlFor="signup-name" className="text-foreground">Full Name</Label>
                     <Input
                       id="signup-name"
                       type="text"
                       placeholder="Juan Dela Cruz"
                       {...signUpForm.register("name")}
                       disabled={isLoading}
-                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-border focus-visible:ring-brand-yellow/50"
                     />
                     {signUpForm.formState.errors.name && (
-                      <p className="text-sm text-[#B43B3B]">
+                      <p className="text-sm text-destructive">
                         {signUpForm.formState.errors.name.message}
                       </p>
                     )}
@@ -438,17 +438,17 @@ const Auth = () => {
 
                   {/* Email */}
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-[#1A1A2E]">Email</Label>
+                    <Label htmlFor="signup-email" className="text-foreground">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
                       placeholder="student@iacademy.edu"
                       {...signUpForm.register("email")}
                       disabled={isLoading}
-                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-border focus-visible:ring-brand-yellow/50"
                     />
                     {signUpForm.formState.errors.email && (
-                      <p className="text-sm text-[#B43B3B]">
+                      <p className="text-sm text-destructive">
                         {signUpForm.formState.errors.email.message}
                       </p>
                     )}
@@ -456,7 +456,7 @@ const Auth = () => {
 
                   {/* Student Type Selection */}
                   <div className="space-y-3">
-                    <Label className="text-[#1A1A2E]">I am a...</Label>
+                    <Label className="text-foreground">I am a...</Label>
                     <RadioGroup
                       value={signUpForm.watch("userType")}
                       onValueChange={(value) => signUpForm.setValue("userType", value as any, { shouldValidate: true })}
@@ -467,27 +467,27 @@ const Auth = () => {
                       <div className={`
                         relative flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all
                         ${signUpForm.watch("userType") === 'undergraduate_student' 
-                          ? 'border-[#0057A3] bg-[#0057A3]/5 ring-2 ring-[#0057A3]/20' 
-                          : 'border-[#0057A3]/20 hover:border-[#0057A3]/50 hover:bg-white'
+                          ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                          : 'border-border hover:border-primary/50 hover:bg-card'
                         }
                       `}>
-                        <RadioGroupItem value="undergraduate_student" id="ug" className="text-[#0057A3]" />
+                        <RadioGroupItem value="undergraduate_student" id="ug" className="text-primary" />
                         <Label htmlFor="ug" className="flex-1 cursor-pointer font-normal">
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-full ${
                               signUpForm.watch("userType") === 'undergraduate_student' 
-                                ? 'bg-[#0057A3]/10' 
-                                : 'bg-[#E1E8F0]'
+                                ? 'bg-primary/10' 
+                                : 'bg-muted'
                             }`}>
                               <GraduationCap className={`h-5 w-5 ${
                                 signUpForm.watch("userType") === 'undergraduate_student' 
-                                  ? 'text-[#0057A3]' 
-                                  : 'text-[#4A5568]'
+                                  ? 'text-primary' 
+                                  : 'text-muted-foreground'
                               }`} />
                             </div>
                             <div>
-                              <p className="font-medium text-[#1A1A2E]">Undergraduate Student</p>
-                              <p className="text-xs text-[#4A5568]">College • University</p>
+                              <p className="font-medium text-foreground">Undergraduate Student</p>
+                              <p className="text-xs text-muted-foreground">College • University</p>
                             </div>
                           </div>
                         </Label>
@@ -497,34 +497,34 @@ const Auth = () => {
                       <div className={`
                         relative flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all
                         ${signUpForm.watch("userType") === 'senior_highschool_student' 
-                          ? 'border-[#B43B3B] bg-[#B43B3B]/5 ring-2 ring-[#B43B3B]/20' 
-                          : 'border-[#0057A3]/20 hover:border-[#B43B3B]/50 hover:bg-white'
+                          ? 'border-destructive bg-destructive/5 ring-2 ring-destructive/20' 
+                          : 'border-border hover:border-destructive/50 hover:bg-card'
                         }
                       `}>
-                        <RadioGroupItem value="senior_highschool_student" id="shs" className="text-[#B43B3B]" />
+                        <RadioGroupItem value="senior_highschool_student" id="shs" className="text-destructive" />
                         <Label htmlFor="shs" className="flex-1 cursor-pointer font-normal">
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-full ${
                               signUpForm.watch("userType") === 'senior_highschool_student' 
-                                ? 'bg-[#B43B3B]/10' 
-                                : 'bg-[#E1E8F0]'
+                                ? 'bg-destructive/10' 
+                                : 'bg-muted'
                             }`}>
                               <School className={`h-5 w-5 ${
                                 signUpForm.watch("userType") === 'senior_highschool_student' 
-                                  ? 'text-[#B43B3B]' 
-                                  : 'text-[#4A5568]'
+                                  ? 'text-destructive' 
+                                  : 'text-muted-foreground'
                               }`} />
                             </div>
                             <div>
-                              <p className="font-medium text-[#1A1A2E]">SHS Student</p>
-                              <p className="text-xs text-[#4A5568]">Senior High School • Grades 11-12</p>
+                              <p className="font-medium text-foreground">SHS Student</p>
+                              <p className="text-xs text-muted-foreground">Senior High School • Grades 11-12</p>
                             </div>
                           </div>
                         </Label>
                       </div>
                     </RadioGroup>
                     {signUpForm.formState.errors.userType && (
-                      <p className="text-sm text-[#B43B3B]">
+                      <p className="text-sm text-destructive">
                         {signUpForm.formState.errors.userType.message}
                       </p>
                     )}
@@ -532,20 +532,20 @@ const Auth = () => {
 
                   {/* Password */}
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-[#1A1A2E]">Password</Label>
+                    <Label htmlFor="signup-password" className="text-foreground">Password</Label>
                     <Input
                       id="signup-password"
                       type="password"
                       {...signUpForm.register("password")}
                       disabled={isLoading}
-                      className="border-[#0057A3]/30 focus-visible:ring-[#FFD966]/50"
+                      className="border-border focus-visible:ring-brand-yellow/50"
                     />
                     {signUpForm.formState.errors.password ? (
-                      <p className="text-sm text-[#B43B3B]">
+                      <p className="text-sm text-destructive">
                         {signUpForm.formState.errors.password.message}
                       </p>
                     ) : (
-                      <p className="text-xs text-[#4A5568]">
+                      <p className="text-xs text-muted-foreground">
                         Must be at least 6 characters long
                       </p>
                     )}
@@ -553,7 +553,7 @@ const Auth = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90" 
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -573,9 +573,9 @@ const Auth = () => {
       </div>
 
       {/* Footer - updated with gradient */}
-      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#0057A3]/20">
+      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-border">
         <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-[#FCF9F5]/60">
+          <div className="text-center text-sm text-muted-foreground/60">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
         </div>

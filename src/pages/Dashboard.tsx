@@ -27,6 +27,7 @@ import { CommentSection } from "@/components/CommentSection";
 import { NotificationItem } from "@/components/NotificationItem";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { RSVPButton } from "@/components/RSVPButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -404,7 +405,7 @@ const Dashboard = () => {
       id: 'game-changer',
       name: 'Game Changer',
       icon: <Sparkles className="h-3 w-3" />,
-      color: 'bg-gradient-to-r from-[#FFD966] to-[#FFC107] text-[#1A1A2E] border-[#00A3FF]/30',
+      color: 'bg-brand-yellow text-foreground border-border',
       description: 'iACADEMY Student'
     });
 
@@ -416,7 +417,7 @@ const Dashboard = () => {
         id: 'leader',
         name: `Leader ${leaderOrgs.length > 1 ? `(×${leaderOrgs.length})` : ''}`,
         icon: <Crown className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#B43B3B] to-[#B43B3B]/80 text-white border-[#B43B3B]/30',
+        color: 'bg-destructive text-destructive-foreground border-border',
         description: leaderOrgs.map(o => o.organizations.name).join(', ')
       });
     }
@@ -426,7 +427,7 @@ const Dashboard = () => {
         id: 'officer',
         name: `Officer ${officerOrgs.length > 1 ? `(×${officerOrgs.length})` : ''}`,
         icon: <Star className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#00A3FF] to-[#00A3FF]/80 text-white border-[#00A3FF]/30',
+        color: 'bg-primary text-primary-foreground border-border',
         description: officerOrgs.map(o => o.organizations.name).join(', ')
       });
     }
@@ -437,7 +438,7 @@ const Dashboard = () => {
         id: 'member',
         name: `Member ${memberCount > 1 ? `(×${memberCount})` : ''}`,
         icon: <Users className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#4A5568]/10 to-[#4A5568]/5 text-[#1A1A2E] border-[#4A5568]/20',
+        color: 'bg-muted text-foreground border-border/50',
         description: `${memberCount} organization${memberCount > 1 ? 's' : ''}`
       });
     }
@@ -447,7 +448,7 @@ const Dashboard = () => {
         id: 'admin',
         name: 'Admin',
         icon: <Shield className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#B43B3B] to-[#B43B3B]/80 text-white border-[#B43B3B]/30',
+        color: 'bg-destructive text-destructive-foreground border-border',
         description: 'System Administrator'
       });
     }
@@ -457,7 +458,7 @@ const Dashboard = () => {
         id: 'sao',
         name: 'SAO',
         icon: <Shield className="h-3 w-3" />,
-        color: 'bg-gradient-to-r from-[#00A3FF] to-[#00A3FF]/80 text-white border-[#00A3FF]/30',
+        color: 'bg-primary text-primary-foreground border-border',
         description: 'Student Affairs Office'
       });
     }
@@ -754,17 +755,17 @@ const Dashboard = () => {
   const badges = getUserBadges();
 
   const japaneseElements = [
-    { Icon: Waves, color: "#00A3FF", top: "15%", right: "5%", delay: "0s", size: 24, opacity: 0.1 },
-    { Icon: Wind, color: "#B43B3B", top: "40%", right: "8%", delay: "2s", size: 28, opacity: 0.1 },
-    { Icon: Leaf, color: "#FFD966", bottom: "30%", right: "3%", delay: "1s", size: 26, opacity: 0.1 },
-    { Icon: Fish, color: "#00A3FF", bottom: "60%", right: "12%", delay: "3s", size: 22, opacity: 0.1 },
-    { Icon: Gem, color: "#B43B3B", top: "70%", right: "15%", delay: "1.5s", size: 24, opacity: 0.1 },
+    { Icon: Waves, color: "hsl(var(--primary))", top: "15%", right: "5%", delay: "0s", size: 24, opacity: 0.1 },
+    { Icon: Wind, color: "hsl(var(--destructive))", top: "40%", right: "8%", delay: "2s", size: 28, opacity: 0.1 },
+    { Icon: Leaf, color: "hsl(var(--brand-yellow))", bottom: "30%", right: "3%", delay: "1s", size: 26, opacity: 0.1 },
+    { Icon: Fish, color: "hsl(var(--primary))", bottom: "60%", right: "12%", delay: "3s", size: 22, opacity: 0.1 },
+    { Icon: Gem, color: "hsl(var(--destructive))", top: "70%", right: "15%", delay: "1.5s", size: 24, opacity: 0.1 },
   ];
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
@@ -773,7 +774,7 @@ const Dashboard = () => {
   if (isStudent) {
     return (
       <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+        <div className="min-h-screen bg-background relative overflow-hidden">
           {/* Floating Japanese Elements */}
           {japaneseElements.map((item, index) => {
             const IconComponent = item.Icon;
@@ -800,7 +801,7 @@ const Dashboard = () => {
           })}
 
           {/* Header */}
-          <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
+          <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
               <div className="flex items-center gap-3">
                 <Link to="/dashboard" className="flex items-center gap-3">
@@ -810,20 +811,21 @@ const Dashboard = () => {
                       alt="logo" 
                       className="h-8 w-auto md:h-10"
                     />
-                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[#FFD966] border border-[#1A1A2E]"></div>
+                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-brand-yellow border border-background"></div>
                   </div>
-                  <span className="text-xl font-bold text-[#1A1A2E] hidden sm:inline">iJoin</span>
+                  <span className="text-xl font-bold text-foreground hidden sm:inline">iJoin</span>
                 </Link>
               </div>
               <div className="flex items-center gap-2">
+                <ThemeToggle />
                 <Link to="/explore">
-                  <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <Search className="h-4 w-4 mr-1"/>
                     Explore
                   </Button>
                 </Link>
                 <Link to="/calendar">
-                  <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <Calendar className="h-4 w-4 mr-1" />
                     Calendar
                   </Button>
@@ -836,23 +838,23 @@ const Dashboard = () => {
                 </Link>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                    <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary hover:bg-primary/5">
                       <Bell className="h-5 w-5" />
                       {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#B43B3B] text-white text-xs rounded-full flex items-center justify-center shadow-sm">
+                        <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center shadow-sm">
                           {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-96 p-0 border border-[#00A3FF]/30 shadow-lg" align="end">
-                    <div className="flex items-center justify-between p-4 border-b border-[#00A3FF]/20">
-                      <h3 className="font-semibold text-[#1A1A2E]">Notifications</h3>
+                  <PopoverContent className="w-96 p-0 border border-border shadow-lg" align="end">
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                      <h3 className="font-semibold text-foreground">Notifications</h3>
                       {unreadCount > 0 && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 text-xs gap-1 text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                          className="h-8 text-xs gap-1 text-primary hover:text-primary hover:bg-primary/5"
                           onClick={markAllAsRead}
                         >
                           <CheckCheck className="h-3 w-3" />
@@ -862,7 +864,7 @@ const Dashboard = () => {
                     </div>
                     <ScrollArea className="h-[500px]">
                       {notifications.length === 0 ? (
-                        <div className="py-12 text-center text-[#4A5568]">
+                        <div className="py-12 text-center text-muted-foreground">
                           <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                           <p className="text-sm">No notifications yet</p>
                         </div>
@@ -881,11 +883,11 @@ const Dashboard = () => {
                   </PopoverContent>
                 </Popover>
                 <Link to="/profile">
-                  <Button variant="ghost" size="icon" title="Profile" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" size="icon" title="Profile" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <User className="h-5 w-5" />
                   </Button>
                 </Link>
-                <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5" />
+                <SignOutButton variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" />
               </div>
             </div>
           </header>
@@ -893,27 +895,27 @@ const Dashboard = () => {
           <div className="container mx-auto px-4 py-8 max-w-6xl">
             {/* Welcome Section */}
             <div className="mb-8 relative">
-              <div className="absolute -top-4 -left-4 w-24 h-24 bg-[#00A3FF]/5 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-[#B43B3B]/5 rounded-full blur-3xl"></div>
+              <div className="absolute -top-4 -left-4 w-24 h-24 bg-primary/5 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-destructive/5 rounded-full blur-3xl"></div>
               <div className="relative">
-                <h1 className="mb-2 text-3xl font-bold text-[#1A1A2E]">
+                <h1 className="mb-2 text-3xl font-bold text-foreground">
                   Welcome back, Game Changer!
                 </h1>
-                <p className="text-[#4A5568]">
+                <p className="text-muted-foreground">
                   Latest updates from your organizations
                 </p>
                 <div className="flex gap-6 mt-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold bg-gradient-to-b from-[#00A3FF] to-[#00A3FF]/70 bg-clip-text text-transparent">
+                    <div className="text-2xl font-bold bg-gradient-to-b from-primary to-primary/70 bg-clip-text text-transparent">
                       {announcements.length}
                     </div>
-                    <div className="text-sm text-[#4A5568]">Announcements</div>
+                    <div className="text-sm text-muted-foreground">Announcements</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold bg-gradient-to-b from-[#B43B3B] to-[#B43B3B]/70 bg-clip-text text-transparent">
+                    <div className="text-2xl font-bold bg-gradient-to-b from-destructive to-destructive/70 bg-clip-text text-transparent">
                       {events.length}
                     </div>
-                    <div className="text-sm text-[#4A5568]">Upcoming Events</div>
+                    <div className="text-sm text-muted-foreground">Upcoming Events</div>
                   </div>
                 </div>
               </div>
@@ -923,17 +925,17 @@ const Dashboard = () => {
               {/* Main Content - Feed */}
               <div className="lg:col-span-2 space-y-6">
                 {announcements.length === 0 ? (
-                  <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+                  <Card className="border border-border bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
                     <CardContent className="py-12 text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#00A3FF]/5 flex items-center justify-center">
-                        <Bell className="h-8 w-8 text-[#4A5568]" />
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/5 flex items-center justify-center">
+                        <Bell className="h-8 w-8 text-muted-foreground" />
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-[#1A1A2E]">No announcements yet</h3>
-                      <p className="text-[#4A5568] mb-4">
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">No announcements yet</h3>
+                      <p className="text-muted-foreground mb-4">
                         Join organizations or check back later for updates
                       </p>
                       <Link to="/explore">
-                        <Button className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#00A3FF]/30 shadow-sm">
+                        <Button className="bg-brand-yellow text-foreground hover:bg-brand-yellow/80 border border-border shadow-sm">
                           Explore Organizations
                         </Button>
                       </Link>
@@ -951,24 +953,24 @@ const Dashboard = () => {
                       : truncateText(announcement.content, 300);
 
                     return (
-                      <Card key={announcement.id} className="overflow-hidden border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+                      <Card key={announcement.id} className="overflow-hidden border border-border bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
                         <CardHeader className="pb-3">
                           <div className="flex items-center gap-3">
                             <button
                               onClick={(e) => handleOrgClick(announcement.org_id, e)}
                               className="flex items-center gap-3"
                             >
-                              <Avatar className="h-10 w-10 border border-[#00A3FF]/30">
+                              <Avatar className="h-10 w-10 border border-border">
                                 <AvatarImage src={orgProfilePic || undefined} />
-                                <AvatarFallback className="bg-[#00A3FF]/5 text-[#00A3FF]">
+                                <AvatarFallback className="bg-primary/5 text-primary">
                                   {orgName.charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="text-left">
-                                <CardTitle className="text-base text-[#1A1A2E] hover:text-[#00A3FF] transition-colors">
+                                <CardTitle className="text-base text-foreground hover:text-primary transition-colors">
                                   {orgName}
                                 </CardTitle>
-                                <CardDescription className="text-[#4A5568]">
+                                <CardDescription className="text-muted-foreground">
                                   {format(new Date(announcement.created_at), "MMM d 'at' h:mm a")}
                                 </CardDescription>
                               </div>
@@ -977,10 +979,10 @@ const Dashboard = () => {
                         </CardHeader>
 
                         <CardContent className="space-y-4">
-                          <h3 className="font-semibold text-lg text-[#1A1A2E]">{announcement.title}</h3>
+                          <h3 className="font-semibold text-lg text-foreground">{announcement.title}</h3>
                           
                           {announcement.image_url && (
-                            <div className="rounded-lg overflow-hidden border border-[#00A3FF]/20 bg-[#FCF9F5]">
+                            <div className="rounded-lg overflow-hidden border border-border bg-muted">
                               <img
                                 src={announcement.image_url}
                                 alt={announcement.title}
@@ -990,14 +992,14 @@ const Dashboard = () => {
                           )}
                           
                           <div className="space-y-2">
-                            <p className="text-[#4A5568] whitespace-pre-wrap">
+                            <p className="text-muted-foreground whitespace-pre-wrap">
                               {displayContent}
                             </p>
                             {announcement.content.length > 300 && (
                               <Button
                                 variant="link"
                                 size="sm"
-                                className="h-auto p-0 text-[#00A3FF] hover:text-[#00A3FF]/80"
+                                className="h-auto p-0 text-primary hover:text-primary/80"
                                 onClick={() => toggleDescription(announcement.id)}
                               >
                                 {isExpanded ? (
@@ -1009,20 +1011,20 @@ const Dashboard = () => {
                             )}
                           </div>
 
-                          <div className="flex items-center gap-4 pt-4 border-t border-[#00A3FF]/20">
+                          <div className="flex items-center gap-4 pt-4 border-t border-border">
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className={`gap-2 ${likeData.userLiked ? 'text-[#B43B3B]' : 'text-[#4A5568]'} hover:text-[#B43B3B] hover:bg-[#B43B3B]/5`}
+                              className={`gap-2 ${likeData.userLiked ? 'text-destructive' : 'text-muted-foreground'} hover:text-destructive hover:bg-destructive/5`}
                               onClick={() => toggleLike(announcement.id)}
                             >
-                              <Heart className={`h-4 w-4 ${likeData.userLiked ? 'fill-[#B43B3B]' : ''}`} />
+                              <Heart className={`h-4 w-4 ${likeData.userLiked ? 'fill-destructive' : ''}`} />
                               <span>{likeData.count}</span>
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="gap-2 text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                              className="gap-2 text-muted-foreground hover:text-primary hover:bg-primary/5"
                               onClick={() => toggleComments(announcement.id)}
                             >
                               <MessageCircle className="h-4 w-4" />
@@ -1031,7 +1033,7 @@ const Dashboard = () => {
                           </div>
 
                           {openComments[announcement.id] && (
-                            <div className="border-t border-[#00A3FF]/20 pt-4">
+                            <div className="border-t border-border pt-4">
                               <CommentSection 
                                 announcementId={announcement.id} 
                                 orgId={announcement.org_id}
@@ -1051,28 +1053,28 @@ const Dashboard = () => {
               {/* Sidebar */}
               <div className="lg:col-span-1 space-y-6">
                 {/* User Profile Card */}
-                <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
+                <Card className="border border-border bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full"></div>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-[#1A1A2E]">Profile</CardTitle>
+                    <CardTitle className="text-foreground">Profile</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-3 mb-4">
-                      <Avatar className="h-12 w-12 border border-[#00A3FF]/30">
+                      <Avatar className="h-12 w-12 border border-border">
                         <AvatarImage src={profile?.profile_picture || undefined} />
-                        <AvatarFallback className="bg-[#00A3FF]/5 text-[#00A3FF]">
+                        <AvatarFallback className="bg-primary/5 text-primary">
                           {profile?.name ? getInitials(profile.name) : user?.email?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-semibold text-[#1A1A2E]">{profile?.name || user?.email?.split('@')[0]}</p>
-                        <p className="text-sm text-[#4A5568]">{profile?.email || user?.email}</p>
+                        <p className="font-semibold text-foreground">{profile?.name || user?.email?.split('@')[0]}</p>
+                        <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
                       </div>
                     </div>
 
                     {badges.length > 0 && (
                       <div className="mb-4">
-                        <p className="text-xs font-medium text-[#4A5568] mb-2 flex items-center gap-1">
+                        <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                           <Award className="h-3 w-3" />
                           Achievements
                         </p>
@@ -1085,7 +1087,7 @@ const Dashboard = () => {
                             >
                               {badge.icon}
                               {badge.name}
-                              <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#1A1A2E] text-[#FCF9F5] text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                              <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                                 {badge.description}
                               </span>
                             </div>
@@ -1097,22 +1099,22 @@ const Dashboard = () => {
                 </Card>
 
                 {/* Upcoming Events Card */}
-                <Card className="border border-[#B43B3B]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#B43B3B]/5 to-transparent rounded-bl-full"></div>
+                <Card className="border border-border bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-destructive/5 to-transparent rounded-bl-full"></div>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-[#1A1A2E]">
-                      <Calendar className="h-5 w-5 text-[#B43B3B]" />
+                    <CardTitle className="flex items-center gap-2 text-foreground">
+                      <Calendar className="h-5 w-5 text-destructive" />
                       Upcoming Events
                     </CardTitle>
-                    <CardDescription className="text-[#4A5568]">Events from your organizations</CardDescription>
+                    <CardDescription className="text-muted-foreground">Events from your organizations</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {events.length === 0 ? (
                       <div className="py-6 text-center">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#B43B3B]/5 flex items-center justify-center">
-                          <Calendar className="h-6 w-6 text-[#4A5568]" />
+                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-destructive/5 flex items-center justify-center">
+                          <Calendar className="h-6 w-6 text-muted-foreground" />
                         </div>
-                        <p className="text-sm text-[#4A5568]">No upcoming events</p>
+                        <p className="text-sm text-muted-foreground">No upcoming events</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -1125,29 +1127,29 @@ const Dashboard = () => {
                             <button
                               key={event.id}
                               onClick={() => handleEventClick(event)}
-                              className="w-full text-left group rounded-lg border border-[#B43B3B]/30 p-3 hover:border-[#FFD966] hover:shadow-md transition-all bg-white/50 hover:bg-white"
+                              className="w-full text-left group rounded-lg border border-border p-3 hover:border-brand-yellow hover:shadow-md transition-all bg-card/50 hover:bg-card"
                             >
                               <div className="flex items-start gap-3">
-                                <div className="min-w-12 rounded-lg bg-[#B43B3B]/5 p-2 text-center border border-[#B43B3B]/30">
-                                  <div className="text-sm font-bold text-[#B43B3B]">
+                                <div className="min-w-12 rounded-lg bg-destructive/5 p-2 text-center border border-destructive/30">
+                                  <div className="text-sm font-bold text-destructive">
                                     {format(eventDate, "d")}
                                   </div>
-                                  <div className="text-xs text-[#4A5568]">
+                                  <div className="text-xs text-muted-foreground">
                                     {format(eventDate, "MMM")}
                                   </div>
                                 </div>
                                 
                                 <div className="flex-1 min-w-0">
-                                  <h4 className="font-semibold text-[#1A1A2E] truncate group-hover:text-[#B43B3B] transition-colors">
+                                  <h4 className="font-semibold text-foreground truncate group-hover:text-destructive transition-colors">
                                     {event.name}
                                   </h4>
                                   
-                                  <div className="mt-1 flex items-center gap-1 text-xs text-[#4A5568]">
+                                  <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                                     <Clock className="h-3 w-3" />
                                     {format(eventDate, "h:mm a")}
                                   </div>
                                   
-                                  <p className="mt-2 text-xs text-[#B43B3B] font-medium truncate">
+                                  <p className="mt-2 text-xs text-destructive font-medium truncate">
                                     {orgName}
                                   </p>
                                 </div>
@@ -1161,26 +1163,26 @@ const Dashboard = () => {
                 </Card>
 
                 {/* Quick Links */}
-                <Card className="border border-[#00A3FF]/30 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#00A3FF]/5 to-transparent rounded-bl-full"></div>
+                <Card className="border border-border bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full"></div>
                   <CardHeader>
-                    <CardTitle className="text-[#1A1A2E]">Quick Links</CardTitle>
+                    <CardTitle className="text-foreground">Quick Links</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <Link to="/explore">
-                      <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                      <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary hover:bg-primary/5">
                         <Users className="mr-2 h-4 w-4" />
                         Explore Organizations
                       </Button>
                     </Link>
                     <Link to="/calendar">
-                      <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                      <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary hover:bg-primary/5">
                         <Calendar className="mr-2 h-4 w-4" />
                         Calendar View
                       </Button>
                     </Link>
                     <Link to="/profile">
-                      <Button variant="ghost" className="w-full justify-start text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                      <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary hover:bg-primary/5">
                         <User className="mr-2 h-4 w-4" />
                         Your Profile
                       </Button>
@@ -1188,12 +1190,12 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                <div className="text-center text-xs text-[#4A5568]/60 italic pt-2">
+                <div className="text-center text-xs text-muted-foreground/60 italic pt-2">
                   <p>"You make the world a better place. So show up, okay?"</p>
                   <div className="flex justify-center gap-1 mt-1">
-                    <Waves className="h-3 w-3 text-[#00A3FF]/30" />
-                    <Wind className="h-3 w-3 text-[#B43B3B]/30" />
-                    <Leaf className="h-3 w-3 text-[#FFD966]/30" />
+                    <Waves className="h-3 w-3 text-primary/30" />
+                    <Wind className="h-3 w-3 text-destructive/30" />
+                    <Leaf className="h-3 w-3 text-brand-yellow/30" />
                   </div>
                 </div>
               </div>
@@ -1202,39 +1204,39 @@ const Dashboard = () => {
 
           {/* Event Details Modal with RSVP */}
           <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
-            <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-[#FCF9F5] border border-[#B43B3B]/30 shadow-xl">
+            <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-background border border-border shadow-xl">
               <div className="flex items-center justify-between p-6 pb-2">
-                <DialogTitle className="text-xl font-bold text-[#1A1A2E]">Event Details</DialogTitle>
+                <DialogTitle className="text-xl font-bold text-foreground">Event Details</DialogTitle>
               </div>
 
               {selectedEvent && selectedEvent.organizations && (
                 <>
                   <div 
                     onClick={(e) => handleOrgClick(selectedEvent.org_id, e)}
-                    className="px-6 py-3 bg-[#B43B3B]/5 border-y border-[#B43B3B]/20 hover:bg-[#B43B3B]/10 cursor-pointer transition-colors"
+                    className="px-6 py-3 bg-destructive/5 border-y border-border hover:bg-destructive/10 cursor-pointer transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 border border-[#B43B3B]/30">
+                      <Avatar className="h-10 w-10 border border-border">
                         <AvatarImage src={selectedEvent.organizations.profile_picture || undefined} />
-                        <AvatarFallback className="bg-[#B43B3B]/5 text-[#B43B3B]">
+                        <AvatarFallback className="bg-destructive/5 text-destructive">
                           {getInitials(selectedEvent.organizations.name)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-[#1A1A2E]">{selectedEvent.organizations.name}</p>
-                          <ExternalLink className="h-3 w-3 text-[#4A5568]" />
+                          <p className="font-semibold text-foreground">{selectedEvent.organizations.name}</p>
+                          <ExternalLink className="h-3 w-3 text-muted-foreground" />
                         </div>
-                        <p className="text-xs text-[#4A5568]">Click to view organization</p>
+                        <p className="text-xs text-muted-foreground">Click to view organization</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-6 space-y-6">
                     <div>
-                      <h3 className="text-2xl font-bold text-[#1A1A2E]">{selectedEvent.name}</h3>
+                      <h3 className="text-2xl font-bold text-foreground">{selectedEvent.name}</h3>
                       {isPastEvent(selectedEvent.event_date) && (
-                        <Badge variant="outline" className="mt-2 border-[#B43B3B]/30 text-[#B43B3B]">Past Event</Badge>
+                        <Badge variant="outline" className="mt-2 border-destructive/30 text-destructive">Past Event</Badge>
                       )}
                       <div className="mt-2">
                         <Badge variant="secondary" className="text-xs">
@@ -1245,24 +1247,24 @@ const Dashboard = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Date</p>
-                        <div className="flex items-center gap-2 text-sm text-[#1A1A2E]">
-                          <Calendar className="h-4 w-4 text-[#B43B3B]" />
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p>
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <Calendar className="h-4 w-4 text-destructive" />
                           <span>{format(new Date(selectedEvent.event_date), "EEEE, MMMM d, yyyy")}</span>
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Time</p>
-                        <div className="flex items-center gap-2 text-sm text-[#1A1A2E]">
-                          <Clock className="h-4 w-4 text-[#B43B3B]" />
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p>
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <Clock className="h-4 w-4 text-destructive" />
                           <span>{format(new Date(selectedEvent.event_date), "h:mm a")}</span>
                         </div>
                       </div>
                       {selectedEvent.location && (
                         <div className="col-span-2 space-y-1">
-                          <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Location</p>
-                          <div className="flex items-center gap-2 text-sm text-[#1A1A2E]">
-                            <MapPin className="h-4 w-4 text-[#B43B3B]" />
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
+                          <div className="flex items-center gap-2 text-sm text-foreground">
+                            <MapPin className="h-4 w-4 text-destructive" />
                             <span>{selectedEvent.location}</span>
                           </div>
                         </div>
@@ -1271,9 +1273,9 @@ const Dashboard = () => {
 
                     {selectedEvent.description && (
                       <div className="space-y-2">
-                        <p className="text-xs font-medium text-[#4A5568] uppercase tracking-wider">Description</p>
-                        <div className="bg-[#B43B3B]/5 rounded-lg p-4 border border-[#B43B3B]/20">
-                          <p className="text-sm text-[#1A1A2E] whitespace-pre-wrap leading-relaxed">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</p>
+                        <div className="bg-destructive/5 rounded-lg p-4 border border-border">
+                          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                             {selectedEvent.description}
                           </p>
                         </div>
@@ -1303,7 +1305,7 @@ const Dashboard = () => {
   if (isAdmin) {
     return (
       <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+        <div className="min-h-screen bg-background relative overflow-hidden">
           {/* Floating Japanese Elements */}
           {japaneseElements.map((item, index) => {
             const IconComponent = item.Icon;
@@ -1330,7 +1332,7 @@ const Dashboard = () => {
           })}
 
           {/* Header */}
-          <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#00A3FF]/30 shadow-sm">
+          <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
               <div className="flex items-center gap-3">
                 <Link to="/dashboard" className="flex items-center gap-3">
@@ -1340,53 +1342,54 @@ const Dashboard = () => {
                       alt="logo" 
                       className="h-8 w-auto md:h-10"
                     />
-                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[#FFD966] border border-[#1A1A2E]"></div>
+                    <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-brand-yellow border border-background"></div>
                   </div>
-                  <span className="text-xl font-bold text-[#1A1A2E] hidden sm:inline">iJoin</span>
+                  <span className="text-xl font-bold text-foreground hidden sm:inline">iJoin</span>
                 </Link>
-                <Badge variant="outline" className="ml-2 border-[#B43B3B]/30 text-[#B43B3B]">
+                <Badge variant="outline" className="ml-2 border-destructive/30 text-destructive">
                   <Shield className="h-3 w-3 mr-1" />
                   Admin
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
+                <ThemeToggle />
                 <Link to="/explore">
-                  <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <Search className="h-4 w-4 mr-1"/>
                     Explore
                   </Button>
                 </Link>
                 <Link to="/calendar">
-                  <Button variant="ghost" size="sm" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <Calendar className="h-4 w-4 mr-1" />
                     Calendar
                   </Button>
                 </Link>
                 <Link to="/admin">
-                  <Button variant="ghost" size="sm" className="bg-[#00A3FF]/5 text-[#00A3FF] hover:bg-[#00A3FF]/10">
+                  <Button variant="ghost" size="sm" className="bg-primary/5 text-primary hover:bg-primary/10">
                     <Shield className="h-4 w-4 mr-1" />
                     Admin Panel
                   </Button>
                 </Link>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                    <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary hover:bg-primary/5">
                       <Bell className="h-5 w-5" />
                       {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#B43B3B] text-white text-xs rounded-full flex items-center justify-center shadow-sm">
+                        <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center shadow-sm">
                           {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-96 p-0 border border-[#00A3FF]/30 shadow-lg" align="end">
-                    <div className="flex items-center justify-between p-4 border-b border-[#00A3FF]/20">
-                      <h3 className="font-semibold text-[#1A1A2E]">Notifications</h3>
+                  <PopoverContent className="w-96 p-0 border border-border shadow-lg" align="end">
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                      <h3 className="font-semibold text-foreground">Notifications</h3>
                       {unreadCount > 0 && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 text-xs gap-1 text-[#00A3FF] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+                          className="h-8 text-xs gap-1 text-primary hover:text-primary hover:bg-primary/5"
                           onClick={markAllAsRead}
                         >
                           <CheckCheck className="h-3 w-3" />
@@ -1396,7 +1399,7 @@ const Dashboard = () => {
                     </div>
                     <ScrollArea className="h-[500px]">
                       {notifications.length === 0 ? (
-                        <div className="py-12 text-center text-[#4A5568]">
+                        <div className="py-12 text-center text-muted-foreground">
                           <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                           <p className="text-sm">No notifications yet</p>
                         </div>
@@ -1415,11 +1418,11 @@ const Dashboard = () => {
                   </PopoverContent>
                 </Popover>
                 <Link to="/profile">
-                  <Button variant="ghost" size="icon" title="Profile" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5">
+                  <Button variant="ghost" size="icon" title="Profile" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <User className="h-5 w-5" />
                   </Button>
                 </Link>
-                <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5" />
+                <SignOutButton variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" />
               </div>
             </div>
           </header>
@@ -1449,8 +1452,8 @@ const Dashboard = () => {
     <TooltipProvider>
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#00A3FF] border-t-transparent mx-auto mb-4" />
-          <p className="text-[#4A5568]">Loading dashboard...</p>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     </TooltipProvider>

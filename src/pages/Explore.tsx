@@ -68,41 +68,41 @@ const Explore = () => {
   // Floating Japanese elements - from groupmate's code
   const floatingElements = [
     // Blue theme
-    { Icon: Waves, color: "#0057A3", top: "5%", left: "3%", delay: "0s", size: 28, opacity: 0.2 },
-    { Icon: Fish, color: "#0057A3", top: "15%", right: "4%", delay: "0.8s", size: 26, opacity: 0.2 },
-    { Icon: Mountain, color: "#0057A3", top: "25%", left: "6%", delay: "1.5s", size: 32, opacity: 0.2 },
-    { Icon: Droplets, color: "#0057A3", top: "35%", right: "8%", delay: "2.2s", size: 24, opacity: 0.2 },
-    { Icon: Shell, color: "#0057A3", top: "45%", left: "5%", delay: "2.9s", size: 26, opacity: 0.2 },
-    { Icon: Waves, color: "#0057A3", top: "55%", right: "5%", delay: "3.5s", size: 30, opacity: 0.2 },
-    { Icon: Fish, color: "#0057A3", top: "65%", left: "8%", delay: "4.2s", size: 25, opacity: 0.2 },
-    { Icon: Mountain, color: "#0057A3", top: "75%", right: "6%", delay: "4.9s", size: 28, opacity: 0.2 },
-    { Icon: Droplets, color: "#0057A3", top: "85%", left: "4%", delay: "5.5s", size: 22, opacity: 0.2 },
+    { Icon: Waves, color: "hsl(var(--brand-blue))", top: "5%", left: "3%", delay: "0s", size: 28, opacity: 0.2 },
+    { Icon: Fish, color: "hsl(var(--brand-blue))", top: "15%", right: "4%", delay: "0.8s", size: 26, opacity: 0.2 },
+    { Icon: Mountain, color: "hsl(var(--brand-blue))", top: "25%", left: "6%", delay: "1.5s", size: 32, opacity: 0.2 },
+    { Icon: Droplets, color: "hsl(var(--brand-blue))", top: "35%", right: "8%", delay: "2.2s", size: 24, opacity: 0.2 },
+    { Icon: Shell, color: "hsl(var(--brand-blue))", top: "45%", left: "5%", delay: "2.9s", size: 26, opacity: 0.2 },
+    { Icon: Waves, color: "hsl(var(--brand-blue))", top: "55%", right: "5%", delay: "3.5s", size: 30, opacity: 0.2 },
+    { Icon: Fish, color: "hsl(var(--brand-blue))", top: "65%", left: "8%", delay: "4.2s", size: 25, opacity: 0.2 },
+    { Icon: Mountain, color: "hsl(var(--brand-blue))", top: "75%", right: "6%", delay: "4.9s", size: 28, opacity: 0.2 },
+    { Icon: Droplets, color: "hsl(var(--brand-blue))", top: "85%", left: "4%", delay: "5.5s", size: 22, opacity: 0.2 },
     
     // Red theme
-    { Icon: Wind, color: "#B43B3B", top: "8%", right: "6%", delay: "0.3s", size: 30, opacity: 0.2 },
-    { Icon: Gem, color: "#B43B3B", top: "18%", left: "7%", delay: "1.1s", size: 28, opacity: 0.2 },
-    { Icon: Cloud, color: "#B43B3B", top: "28%", right: "3%", delay: "1.8s", size: 32, opacity: 0.2 },
-    { Icon: Flower, color: "#B43B3B", top: "38%", left: "9%", delay: "2.5s", size: 26, opacity: 0.2 },
-    { Icon: Bird, color: "#B43B3B", top: "48%", right: "7%", delay: "3.2s", size: 24, opacity: 0.2 },
-    { Icon: Wind, color: "#B43B3B", top: "58%", left: "2%", delay: "3.9s", size: 29, opacity: 0.2 },
-    { Icon: Gem, color: "#B43B3B", top: "68%", right: "9%", delay: "4.5s", size: 27, opacity: 0.2 },
-    { Icon: Cloud, color: "#B43B3B", top: "78%", left: "5%", delay: "5.2s", size: 31, opacity: 0.2 },
-    { Icon: Flower, color: "#B43B3B", top: "88%", right: "4%", delay: "5.9s", size: 25, opacity: 0.2 },
+    { Icon: Wind, color: "hsl(var(--brand-red))", top: "8%", right: "6%", delay: "0.3s", size: 30, opacity: 0.2 },
+    { Icon: Gem, color: "hsl(var(--brand-red))", top: "18%", left: "7%", delay: "1.1s", size: 28, opacity: 0.2 },
+    { Icon: Cloud, color: "hsl(var(--brand-red))", top: "28%", right: "3%", delay: "1.8s", size: 32, opacity: 0.2 },
+    { Icon: Flower, color: "hsl(var(--brand-red))", top: "38%", left: "9%", delay: "2.5s", size: 26, opacity: 0.2 },
+    { Icon: Bird, color: "hsl(var(--brand-red))", top: "48%", right: "7%", delay: "3.2s", size: 24, opacity: 0.2 },
+    { Icon: Wind, color: "hsl(var(--brand-red))", top: "58%", left: "2%", delay: "3.9s", size: 29, opacity: 0.2 },
+    { Icon: Gem, color: "hsl(var(--brand-red))", top: "68%", right: "9%", delay: "4.5s", size: 27, opacity: 0.2 },
+    { Icon: Cloud, color: "hsl(var(--brand-red))", top: "78%", left: "5%", delay: "5.2s", size: 31, opacity: 0.2 },
+    { Icon: Flower, color: "hsl(var(--brand-red))", top: "88%", right: "4%", delay: "5.9s", size: 25, opacity: 0.2 },
     
     // Yellow theme
-    { Icon: Leaf, color: "#FFD966", top: "10%", left: "8%", delay: "0.5s", size: 27, opacity: 0.2 },
-    { Icon: Cherry, color: "#FFD966", top: "20%", right: "5%", delay: "1.3s", size: 29, opacity: 0.2 },
-    { Icon: Sun, color: "#FFD966", top: "30%", left: "4%", delay: "2.0s", size: 34, opacity: 0.2 },
-    { Icon: Star, color: "#FFD966", top: "40%", right: "2%", delay: "2.7s", size: 26, opacity: 0.2 },
-    { Icon: Sparkles, color: "#FFD966", top: "50%", left: "6%", delay: "3.4s", size: 28, opacity: 0.2 },
-    { Icon: Leaf, color: "#FFD966", top: "60%", right: "8%", delay: "4.1s", size: 25, opacity: 0.2 },
-    { Icon: Cherry, color: "#FFD966", top: "70%", left: "3%", delay: "4.8s", size: 27, opacity: 0.2 },
-    { Icon: Sun, color: "#FFD966", top: "80%", right: "7%", delay: "5.4s", size: 32, opacity: 0.2 },
-    { Icon: Star, color: "#FFD966", top: "90%", left: "7%", delay: "6.1s", size: 24, opacity: 0.2 },
+    { Icon: Leaf, color: "hsl(var(--brand-yellow))", top: "10%", left: "8%", delay: "0.5s", size: 27, opacity: 0.2 },
+    { Icon: Cherry, color: "hsl(var(--brand-yellow))", top: "20%", right: "5%", delay: "1.3s", size: 29, opacity: 0.2 },
+    { Icon: Sun, color: "hsl(var(--brand-yellow))", top: "30%", left: "4%", delay: "2.0s", size: 34, opacity: 0.2 },
+    { Icon: Star, color: "hsl(var(--brand-yellow))", top: "40%", right: "2%", delay: "2.7s", size: 26, opacity: 0.2 },
+    { Icon: Sparkles, color: "hsl(var(--brand-yellow))", top: "50%", left: "6%", delay: "3.4s", size: 28, opacity: 0.2 },
+    { Icon: Leaf, color: "hsl(var(--brand-yellow))", top: "60%", right: "8%", delay: "4.1s", size: 25, opacity: 0.2 },
+    { Icon: Cherry, color: "hsl(var(--brand-yellow))", top: "70%", left: "3%", delay: "4.8s", size: 27, opacity: 0.2 },
+    { Icon: Sun, color: "hsl(var(--brand-yellow))", top: "80%", right: "7%", delay: "5.4s", size: 32, opacity: 0.2 },
+    { Icon: Star, color: "hsl(var(--brand-yellow))", top: "90%", left: "7%", delay: "6.1s", size: 24, opacity: 0.2 },
     
     // Extra scattered
-    { Icon: TreePine, color: "#0057A3", top: "12%", left: "12%", delay: "1.7s", size: 22, opacity: 0.2 },
-    { Icon: Moon, color: "#B43B3B", top: "32%", right: "12%", delay: "2.8s", size: 24, opacity: 0.2 },
+    { Icon: TreePine, color: "hsl(var(--brand-blue))", top: "12%", left: "12%", delay: "1.7s", size: 22, opacity: 0.2 },
+    { Icon: Moon, color: "hsl(var(--brand-red))", top: "32%", right: "12%", delay: "2.8s", size: 24, opacity: 0.2 },
   ];
 
   // Set default tab based on user role
@@ -393,7 +393,7 @@ const Explore = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+      <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden">
         {/* Floating elements during loading */}
         {floatingElements.map((item, index) => {
           const IconComponent = item.Icon;
@@ -419,13 +419,13 @@ const Explore = () => {
             </div>
           );
         })}
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0057A3] border-t-transparent relative z-10" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent relative z-10" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Floating Japanese Elements - from groupmate's code */}
       {floatingElements.map((item, index) => {
         const IconComponent = item.Icon;
@@ -454,18 +454,18 @@ const Explore = () => {
 
       {/* Subtle side decorations - from groupmate's code */}
       <div className="fixed left-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
-        <div className="absolute top-20 left-10 w-20 h-20 border border-[#0057A3]/20 rounded-full"></div>
-        <div className="absolute bottom-40 left-10 w-32 h-32 border border-[#B43B3B]/20 rounded-full"></div>
-        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-[#0057A3]/20 to-transparent"></div>
+        <div className="absolute top-20 left-10 w-20 h-20 border border-border rounded-full"></div>
+        <div className="absolute bottom-40 left-10 w-32 h-32 border border-destructive/20 rounded-full"></div>
+        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-primary/20 to-transparent"></div>
       </div>
       
       <div className="fixed right-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
-        <div className="absolute top-40 right-10 w-24 h-24 border border-[#FFD966]/20 rounded-full"></div>
-        <div className="absolute bottom-60 right-10 w-40 h-40 border border-[#0057A3]/20 rounded-full"></div>
-        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-[#B43B3B]/20 to-transparent"></div>
+        <div className="absolute top-40 right-10 w-24 h-24 border border-brand-yellow/20 rounded-full"></div>
+        <div className="absolute bottom-60 right-10 w-40 h-40 border border-primary/20 rounded-full"></div>
+        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-destructive/20 to-transparent"></div>
       </div>
 
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -476,34 +476,34 @@ const Explore = () => {
                   alt="logo" 
                   className="h-8 w-auto md:h-10"
                 />
-                <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[#FFD966] border border-[#1A1A2E]"></div>
+                <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-brand-yellow border border-background"></div>
               </div>
-              <span className="text-xl font-bold text-[#1A1A2E] hidden sm:inline">iJoin</span>
+              <span className="text-xl font-bold text-foreground hidden sm:inline">iJoin</span>
             </Link>
           </div>
           
           {user && (
             <div className="flex items-center gap-4">
               {isSHSStudent && (
-                <Badge variant="secondary" className="gap-1 bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30">
+                <Badge variant="secondary" className="gap-1 bg-primary/5 text-primary border-border">
                   <School className="h-3 w-3" />
                   SHS Student
                 </Badge>
               )}
               {isUGStudent && (
-                <Badge variant="outline" className="gap-1 border-[#B43B3B]/30 text-[#B43B3B] bg-transparent">
+                <Badge variant="outline" className="gap-1 border-destructive/30 text-destructive bg-transparent">
                   <GraduationCap className="h-3 w-3" />
                   Undergraduate
                 </Badge>
               )}
               {isAdmin && (
-                <Badge variant="destructive" className="gap-1 bg-[#B43B3B] text-white border-none">
+                <Badge variant="destructive" className="gap-1 bg-destructive text-destructive-foreground border-none">
                   <Shield className="h-3 w-3" />
                   Admin
                 </Badge>
               )}
               {isSAO && (
-                <Badge variant="default" className="gap-1 bg-[#0057A3] text-white border-none">
+                <Badge variant="default" className="gap-1 bg-primary text-primary-foreground border-none">
                   <Shield className="h-3 w-3" />
                   SAO
                 </Badge>
@@ -512,23 +512,23 @@ const Explore = () => {
               {/* Notifications Popover */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5">
+                  <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#B43B3B] text-white text-xs rounded-full flex items-center justify-center shadow-sm">
+                      <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center shadow-sm">
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-96 p-0 border border-[#0057A3]/30 shadow-lg" align="end">
-                  <div className="flex items-center justify-between p-4 border-b border-[#0057A3]/20">
-                    <h3 className="font-semibold text-[#1A1A2E]">Notifications</h3>
+                <PopoverContent className="w-96 p-0 border border-border shadow-lg" align="end">
+                  <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h3 className="font-semibold text-foreground">Notifications</h3>
                     {unreadCount > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 text-xs gap-1 text-[#0057A3] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
+                        className="h-8 text-xs gap-1 text-primary hover:text-primary hover:bg-primary/5"
                         onClick={markAllAsRead}
                       >
                         <CheckCheck className="h-3 w-3" />
@@ -538,7 +538,7 @@ const Explore = () => {
                   </div>
                   <ScrollArea className="h-[500px]">
                     {notifications.length === 0 ? (
-                      <div className="py-12 text-center text-[#4A5568]">
+                      <div className="py-12 text-center text-muted-foreground">
                         <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">No notifications yet</p>
                       </div>
@@ -557,12 +557,12 @@ const Explore = () => {
                 </PopoverContent>
               </Popover>
 
-              <SignOutButton variant="ghost" size="icon" className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5" />
+              <SignOutButton variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" />
             </div>
           )}
           {!user && (
             <Link to="/auth">
-              <Button size="sm" className="bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#0057A3]/30 shadow-sm">
+              <Button size="sm" className="bg-brand-yellow text-foreground hover:bg-brand-yellow/80 border border-border shadow-sm">
                 Sign In
               </Button>
             </Link>
@@ -574,12 +574,12 @@ const Explore = () => {
         {/* Header Section with Propose Org Button */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative">
           <div className="relative">
-            <div className="absolute -top-6 -left-6 w-12 h-12 bg-[#0057A3]/10 rounded-full blur-2xl"></div>
-            <h1 className="mb-2 text-3xl font-bold text-[#1A1A2E] flex items-center gap-2">
-              <Compass className="h-8 w-8 text-[#0057A3]" />
+            <div className="absolute -top-6 -left-6 w-12 h-12 bg-primary/10 rounded-full blur-2xl"></div>
+            <h1 className="mb-2 text-3xl font-bold text-foreground flex items-center gap-2">
+              <Compass className="h-8 w-8 text-primary" />
               Explore Organizations
             </h1>
-            <p className="text-[#4A5568]">
+            <p className="text-muted-foreground">
               {isAdmin || isSAO 
                 ? "Manage and oversee all student organizations"
                 : "Discover student organizations at iAcademy"}
@@ -589,7 +589,7 @@ const Explore = () => {
           {/* Propose Org Button - Always visible when logged in */}
           {user && (
             <Link to="/create-organization">
-              <Button size="lg" className="gap-2 bg-[#FFD966] text-[#1A1A2E] hover:bg-[#FFC107] border border-[#0057A3]/30 shadow-sm hover:shadow-md transition-all">
+              <Button size="lg" className="gap-2 bg-brand-yellow text-foreground hover:bg-brand-yellow/80 border border-border shadow-sm hover:shadow-md transition-all">
                 <PlusCircle className="h-5 w-5" />
                 Request New Organization
               </Button>
@@ -599,19 +599,19 @@ const Explore = () => {
 
         {/* Stats badges with depth */}
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Badge variant="outline" className="border-[#0057A3]/30 text-[#1A1A2E] bg-white/80 backdrop-blur-sm">
+          <Badge variant="outline" className="border-border text-foreground bg-card/80 backdrop-blur-sm">
             {organizations.length} total organizations
           </Badge>
-          <Badge variant="secondary" className="bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30">
+          <Badge variant="secondary" className="bg-primary/5 text-primary border-border">
             <School className="mr-1 h-3 w-3" />
             {organizations.filter(o => o.is_shs_org).length} SHS
           </Badge>
-          <Badge variant="outline" className="border-[#B43B3B]/30 text-[#B43B3B] bg-white/80 backdrop-blur-sm">
+          <Badge variant="outline" className="border-destructive/30 text-destructive bg-card/80 backdrop-blur-sm">
             <GraduationCap className="mr-1 h-3 w-3" />
             {organizations.filter(o => !o.is_shs_org).length} College
           </Badge>
           {isStudent && (
-            <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#0057A3]/30 gap-1 shadow-sm">
+            <Badge variant="default" className="bg-brand-yellow text-foreground border border-border gap-1 shadow-sm">
               <UserCheck className="mr-1 h-3 w-3" />
               {organizations.filter(o => o.membershipStatus === "accepted").length} Joined
             </Badge>
@@ -621,13 +621,13 @@ const Explore = () => {
         {/* Search Bar with depth */}
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4A5568]" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search organizations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm focus-visible:ring-[#FFD966] shadow-sm"
+              className="pl-10 border border-border bg-card/80 backdrop-blur-sm focus-visible:ring-brand-yellow shadow-sm"
             />
           </div>
         </div>
@@ -635,21 +635,21 @@ const Explore = () => {
         {/* Tab Filters with depth */}
         <div className="mb-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabFilter)} className="w-full">
-            <TabsList className={`grid w-full ${isStudent ? 'grid-cols-4' : 'grid-cols-3'} max-w-2xl mx-auto bg-[#E1E8F0]/80 backdrop-blur-sm border border-[#0057A3]/30 p-1`}>
-              <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
+            <TabsList className={`grid w-full ${isStudent ? 'grid-cols-4' : 'grid-cols-3'} max-w-2xl mx-auto bg-muted/80 backdrop-blur-sm border border-border p-1`}>
+              <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">
                 <Users className="h-4 w-4" />
                 All
               </TabsTrigger>
-              <TabsTrigger value="shs" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="shs" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">
                 <School className="h-4 w-4" />
                 SHS
               </TabsTrigger>
-              <TabsTrigger value="college" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="college" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">
                 <GraduationCap className="h-4 w-4" />
                 College
               </TabsTrigger>
               {isStudent && (
-                <TabsTrigger value="myorgs" className="gap-2 data-[state=active]:bg-[#0057A3] data-[state=active]:text-white data-[state=active]:shadow-sm">
+                <TabsTrigger value="myorgs" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">
                   <UserCheck className="h-4 w-4" />
                   My Orgs
                 </TabsTrigger>
@@ -659,29 +659,29 @@ const Explore = () => {
         </div>
 
         {/* Results count */}
-        <div className="mb-4 text-sm text-[#4A5568]">
+        <div className="mb-4 text-sm text-muted-foreground">
           Showing {filteredOrgs.length} {filteredOrgs.length === 1 ? 'organization' : 'organizations'}
         </div>
 
         {/* Organizations Grid */}
         {filteredOrgs.length === 0 ? (
-          <div className="py-12 text-center bg-white/80 backdrop-blur-sm border border-[#0057A3]/30 rounded-lg shadow-sm">
+          <div className="py-12 text-center bg-card/80 backdrop-blur-sm border border-border rounded-lg shadow-sm">
             <div className="mb-4 flex justify-center">
-              <div className="rounded-full bg-[#E1E8F0]/80 p-4 border border-[#0057A3]/30">
-                <Users className="h-8 w-8 text-[#4A5568]" />
+              <div className="rounded-full bg-muted/80 p-4 border border-border">
+                <Users className="h-8 w-8 text-muted-foreground" />
               </div>
             </div>
-            <p className="text-lg font-medium text-[#1A1A2E]">
+            <p className="text-lg font-medium text-foreground">
               {searchQuery
                 ? "No organizations found matching your search"
                 : `No ${activeTab === 'shs' ? 'SHS' : activeTab === 'college' ? 'College' : ''} organizations available yet`}
             </p>
-            <p className="mt-2 text-sm text-[#4A5568]">
+            <p className="mt-2 text-sm text-muted-foreground">
               Check back later for new organizations
             </p>
             {user && (
               <Link to="/create-organization" className="mt-4 inline-block">
-                <Button variant="outline" className="gap-2 border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5">
+                <Button variant="outline" className="gap-2 border border-border text-foreground hover:bg-primary/5">
                   <PlusCircle className="h-4 w-4" />
                   Request a New Organization
                 </Button>
@@ -697,19 +697,19 @@ const Explore = () => {
               const isPending = org.membershipStatus === "pending" && isStudent;
 
               return (
-                <Card key={org.id} className="group transition-all hover:shadow-lg relative flex flex-col h-full border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm hover:bg-white overflow-hidden">
+                <Card key={org.id} className="group transition-all hover:shadow-lg relative flex flex-col h-full border border-border bg-card/80 backdrop-blur-sm hover:bg-card overflow-hidden">
                   {/* Decorative corner accent */}
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-[#0057A3]/5 to-transparent rounded-bl-full"></div>
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full"></div>
                   
                   {/* Level badge */}
                   <div className="absolute top-2 left-2 z-10">
                     {org.is_shs_org ? (
-                      <Badge variant="secondary" className="bg-[#0057A3]/5 text-[#0057A3] border-[#0057A3]/30 gap-1">
+                      <Badge variant="secondary" className="bg-primary/5 text-primary border-border gap-1">
                         <School className="h-3 w-3" />
                         SHS
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="border-[#B43B3B]/30 text-[#B43B3B] bg-white/80 gap-1">
+                      <Badge variant="outline" className="border-destructive/30 text-destructive bg-card/80 gap-1">
                         <GraduationCap className="h-3 w-3" />
                         College
                       </Badge>
@@ -720,17 +720,17 @@ const Explore = () => {
                   {isStudent && (
                     <div className="absolute top-2 right-2 z-10 flex flex-col gap-1 items-end">
                       {isMember && !manage && (
-                        <Badge variant="outline" className="bg-[#FFD966]/10 text-[#1A1A2E] border-[#FFD966]/50">
+                        <Badge variant="outline" className="bg-brand-yellow/10 text-foreground border-brand-yellow/50">
                           Member
                         </Badge>
                       )}
                       {isPending && (
-                        <Badge variant="outline" className="bg-[#B43B3B]/5 text-[#B43B3B] border-[#B43B3B]/30">
+                        <Badge variant="outline" className="bg-destructive/5 text-destructive border-destructive/30">
                           Pending
                         </Badge>
                       )}
                       {manage && (
-                        <Badge variant="default" className="bg-[#FFD966] text-[#1A1A2E] border border-[#0057A3]/30 gap-1 shadow-sm">
+                        <Badge variant="default" className="bg-brand-yellow text-foreground border border-border gap-1 shadow-sm">
                           <Settings className="h-3 w-3" />
                           {org.membershipRole === "leader" ? "Leader" : "Officer"}
                         </Badge>
@@ -745,21 +745,21 @@ const Explore = () => {
                           src={org.profile_picture} 
                           alt={org.name} 
                           size="lg" 
-                          className="border border-[#0057A3]/30 rounded-xl"
+                          className="border border-border rounded-xl"
                         />
                       </div>
                     </div>
-                    <CardTitle className="line-clamp-1 text-center mt-2 text-[#1A1A2E]">
+                    <CardTitle className="line-clamp-1 text-center mt-2 text-foreground">
                       {org.name}
                     </CardTitle>
-                    <CardDescription className="line-clamp-2 text-center text-[#4A5568]">
+                    <CardDescription className="line-clamp-2 text-center text-muted-foreground">
                       {org.description || "No description available"}
                     </CardDescription>
                   </CardHeader>
                   
                   <CardContent className="flex flex-col gap-3 mt-auto pt-2">
                     <Link to={`/org/${org.id}`} className="w-full">
-                      <Button variant="outline" className="w-full border border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5 hover:border-[#0057A3]/50">
+                      <Button variant="outline" className="w-full border border-border text-foreground hover:bg-primary/5 hover:border-primary/50">
                         View Organization
                       </Button>
                     </Link>
@@ -770,7 +770,7 @@ const Explore = () => {
                           <Settings className="h-4 w-4" />
                           Manage
                           {pendingCounts[org.id] > 0 && (
-                            <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                            <span className="absolute -top-2 -right-2 h-5 w-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center animate-pulse">
                               {pendingCounts[org.id] > 9 ? '9+' : pendingCounts[org.id]}
                             </span>
                           )}
@@ -780,7 +780,7 @@ const Explore = () => {
 
                     {isStudent && !manage && !isMember && !isPending && canJoin ? (
                       <Button 
-                        className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90 shadow-sm" 
+                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" 
                         onClick={() => handleJoinOrg(org.id)}
                       >
                         Join Organization
@@ -790,7 +790,7 @@ const Explore = () => {
                     {!user && (
                       <Button 
                         variant="default" 
-                        className="w-full bg-[#0057A3] text-white hover:bg-[#0057A3]/90 shadow-sm"
+                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                         onClick={() => navigate("/auth")}
                       >
                         Sign in to Join
@@ -805,9 +805,9 @@ const Explore = () => {
       </div>
 
       {/* Footer - Dark Navy from Landing Page */}
-      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#0057A3]/20">
+      <footer className="mt-12 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-border">
         <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-[#FCF9F5]/60">
+          <div className="text-center text-sm text-muted-foreground/60">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
         </div>

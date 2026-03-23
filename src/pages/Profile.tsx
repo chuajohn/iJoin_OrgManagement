@@ -340,54 +340,54 @@ const Profile = () => {
     navigate("/dashboard");
   };
 
-  // Floating Japanese elements
+  // Floating Japanese elements - with semantic colors
   const floatingElements = [
     // Blue theme
-    { Icon: Waves, color: "#0057A3", top: "5%", left: "3%", delay: "0s", size: 28 },
-    { Icon: Fish, color: "#0057A3", top: "15%", right: "4%", delay: "0.8s", size: 26 },
-    { Icon: Mountain, color: "#0057A3", top: "25%", left: "6%", delay: "1.5s", size: 32 },
-    { Icon: Droplets, color: "#0057A3", top: "35%", right: "8%", delay: "2.2s", size: 24 },
-    { Icon: Shell, color: "#0057A3", top: "45%", left: "5%", delay: "2.9s", size: 26 },
-    { Icon: Waves, color: "#0057A3", top: "55%", right: "5%", delay: "3.5s", size: 30 },
-    { Icon: Fish, color: "#0057A3", top: "65%", left: "8%", delay: "4.2s", size: 25 },
-    { Icon: Mountain, color: "#0057A3", top: "75%", right: "6%", delay: "4.9s", size: 28 },
-    { Icon: Droplets, color: "#0057A3", top: "85%", left: "4%", delay: "5.5s", size: 22 },
+    { Icon: Waves, color: "hsl(var(--primary))", top: "5%", left: "3%", delay: "0s", size: 28 },
+    { Icon: Fish, color: "hsl(var(--primary))", top: "15%", right: "4%", delay: "0.8s", size: 26 },
+    { Icon: Mountain, color: "hsl(var(--primary))", top: "25%", left: "6%", delay: "1.5s", size: 32 },
+    { Icon: Droplets, color: "hsl(var(--primary))", top: "35%", right: "8%", delay: "2.2s", size: 24 },
+    { Icon: Shell, color: "hsl(var(--primary))", top: "45%", left: "5%", delay: "2.9s", size: 26 },
+    { Icon: Waves, color: "hsl(var(--primary))", top: "55%", right: "5%", delay: "3.5s", size: 30 },
+    { Icon: Fish, color: "hsl(var(--primary))", top: "65%", left: "8%", delay: "4.2s", size: 25 },
+    { Icon: Mountain, color: "hsl(var(--primary))", top: "75%", right: "6%", delay: "4.9s", size: 28 },
+    { Icon: Droplets, color: "hsl(var(--primary))", top: "85%", left: "4%", delay: "5.5s", size: 22 },
     
     // Red theme
-    { Icon: Wind, color: "#B43B3B", top: "8%", right: "6%", delay: "0.3s", size: 30 },
-    { Icon: Gem, color: "#B43B3B", top: "18%", left: "7%", delay: "1.1s", size: 28 },
-    { Icon: Cloud, color: "#B43B3B", top: "28%", right: "3%", delay: "1.8s", size: 32 },
-    { Icon: Flower, color: "#B43B3B", top: "38%", left: "9%", delay: "2.5s", size: 26 },
-    { Icon: Bird, color: "#B43B3B", top: "48%", right: "7%", delay: "3.2s", size: 24 },
-    { Icon: Wind, color: "#B43B3B", top: "58%", left: "2%", delay: "3.9s", size: 29 },
-    { Icon: Gem, color: "#B43B3B", top: "68%", right: "9%", delay: "4.5s", size: 27 },
-    { Icon: Cloud, color: "#B43B3B", top: "78%", left: "5%", delay: "5.2s", size: 31 },
-    { Icon: Flower, color: "#B43B3B", top: "88%", right: "4%", delay: "5.9s", size: 25 },
+    { Icon: Wind, color: "hsl(var(--destructive))", top: "8%", right: "6%", delay: "0.3s", size: 30 },
+    { Icon: Gem, color: "hsl(var(--destructive))", top: "18%", left: "7%", delay: "1.1s", size: 28 },
+    { Icon: Cloud, color: "hsl(var(--destructive))", top: "28%", right: "3%", delay: "1.8s", size: 32 },
+    { Icon: Flower, color: "hsl(var(--destructive))", top: "38%", left: "9%", delay: "2.5s", size: 26 },
+    { Icon: Bird, color: "hsl(var(--destructive))", top: "48%", right: "7%", delay: "3.2s", size: 24 },
+    { Icon: Wind, color: "hsl(var(--destructive))", top: "58%", left: "2%", delay: "3.9s", size: 29 },
+    { Icon: Gem, color: "hsl(var(--destructive))", top: "68%", right: "9%", delay: "4.5s", size: 27 },
+    { Icon: Cloud, color: "hsl(var(--destructive))", top: "78%", left: "5%", delay: "5.2s", size: 31 },
+    { Icon: Flower, color: "hsl(var(--destructive))", top: "88%", right: "4%", delay: "5.9s", size: 25 },
     
     // Yellow theme
-    { Icon: Leaf, color: "#FFD966", top: "10%", left: "8%", delay: "0.5s", size: 27 },
-    { Icon: Cherry, color: "#FFD966", top: "20%", right: "5%", delay: "1.3s", size: 29 },
-    { Icon: Sun, color: "#FFD966", top: "30%", left: "4%", delay: "2.0s", size: 34 },
-    { Icon: Star, color: "#FFD966", top: "40%", right: "2%", delay: "2.7s", size: 26 },
-    { Icon: Sparkles, color: "#FFD966", top: "50%", left: "6%", delay: "3.4s", size: 28 },
-    { Icon: Leaf, color: "#FFD966", top: "60%", right: "8%", delay: "4.1s", size: 25 },
-    { Icon: Cherry, color: "#FFD966", top: "70%", left: "3%", delay: "4.8s", size: 27 },
-    { Icon: Sun, color: "#FFD966", top: "80%", right: "7%", delay: "5.4s", size: 32 },
-    { Icon: Star, color: "#FFD966", top: "90%", left: "7%", delay: "6.1s", size: 24 },
+    { Icon: Leaf, color: "hsl(var(--brand-yellow))", top: "10%", left: "8%", delay: "0.5s", size: 27 },
+    { Icon: Cherry, color: "hsl(var(--brand-yellow))", top: "20%", right: "5%", delay: "1.3s", size: 29 },
+    { Icon: Sun, color: "hsl(var(--brand-yellow))", top: "30%", left: "4%", delay: "2.0s", size: 34 },
+    { Icon: Star, color: "hsl(var(--brand-yellow))", top: "40%", right: "2%", delay: "2.7s", size: 26 },
+    { Icon: Sparkles, color: "hsl(var(--brand-yellow))", top: "50%", left: "6%", delay: "3.4s", size: 28 },
+    { Icon: Leaf, color: "hsl(var(--brand-yellow))", top: "60%", right: "8%", delay: "4.1s", size: 25 },
+    { Icon: Cherry, color: "hsl(var(--brand-yellow))", top: "70%", left: "3%", delay: "4.8s", size: 27 },
+    { Icon: Sun, color: "hsl(var(--brand-yellow))", top: "80%", right: "7%", delay: "5.4s", size: 32 },
+    { Icon: Star, color: "hsl(var(--brand-yellow))", top: "90%", left: "7%", delay: "6.1s", size: 24 },
     
     // Extra scattered
-    { Icon: Rabbit, color: "#0057A3", top: "12%", left: "12%", delay: "1.7s", size: 22 },
-    { Icon: Turtle, color: "#B43B3B", top: "32%", right: "12%", delay: "2.8s", size: 24 },
-    { Icon: TreePine, color: "#FFD966", top: "52%", left: "12%", delay: "3.8s", size: 26 },
-    { Icon: Moon, color: "#0057A3", top: "72%", right: "11%", delay: "4.8s", size: 28 },
+    { Icon: Rabbit, color: "hsl(var(--primary))", top: "12%", left: "12%", delay: "1.7s", size: 22 },
+    { Icon: Turtle, color: "hsl(var(--destructive))", top: "32%", right: "12%", delay: "2.8s", size: 24 },
+    { Icon: TreePine, color: "hsl(var(--brand-yellow))", top: "52%", left: "12%", delay: "3.8s", size: 26 },
+    { Icon: Moon, color: "hsl(var(--primary))", top: "72%", right: "11%", delay: "4.8s", size: 28 },
   ];
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#0057A3] mx-auto mb-4" />
-          <p className="text-[#4A5568]">Loading profile...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading profile...</p>
         </div>
       </div>
     );
@@ -395,12 +395,12 @@ const Profile = () => {
 
   if (!profile || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5">
-        <Card className="w-96 border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm">
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Card className="w-96 border border-border bg-card/80 backdrop-blur-sm">
           <CardContent className="pt-6 text-center">
-            <p className="text-[#4A5568] mb-4">Please sign in to view your profile</p>
+            <p className="text-muted-foreground mb-4">Please sign in to view your profile</p>
             <Button 
-              className="bg-[#0057A3] text-white hover:bg-[#0057A3]/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => navigate("/auth")}
             >
               Go to Sign In
@@ -412,7 +412,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#FCF9F5] to-[#1A1A2E]/5 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       {/* Floating Japanese Elements */}
       {floatingElements.map((item, index) => {
         const IconComponent = item.Icon;
@@ -439,26 +439,26 @@ const Profile = () => {
         );
       })}
 
-      {/* Subtle side decorations */}
+      {/* Subtle side decorations - with semantic colors */}
       <div className="fixed left-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
-        <div className="absolute top-20 left-10 w-20 h-20 border border-[#0057A3]/20 rounded-full"></div>
-        <div className="absolute bottom-40 left-10 w-32 h-32 border border-[#B43B3B]/20 rounded-full"></div>
-        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-[#0057A3]/20 to-transparent"></div>
+        <div className="absolute top-20 left-10 w-20 h-20 border border-border rounded-full"></div>
+        <div className="absolute bottom-40 left-10 w-32 h-32 border border-destructive/20 rounded-full"></div>
+        <div className="absolute top-1/3 left-0 w-px h-40 bg-gradient-to-b from-transparent via-primary/20 to-transparent"></div>
       </div>
       
       <div className="fixed right-0 top-0 bottom-0 w-32 pointer-events-none opacity-30 z-0">
-        <div className="absolute top-40 right-10 w-24 h-24 border border-[#FFD966]/20 rounded-full"></div>
-        <div className="absolute bottom-60 right-10 w-40 h-40 border border-[#0057A3]/20 rounded-full"></div>
-        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-[#B43B3B]/20 to-transparent"></div>
+        <div className="absolute top-40 right-10 w-24 h-24 border border-brand-yellow/20 rounded-full"></div>
+        <div className="absolute bottom-60 right-10 w-40 h-40 border border-primary/20 rounded-full"></div>
+        <div className="absolute top-2/3 right-0 w-px h-40 bg-gradient-to-b from-transparent via-destructive/20 to-transparent"></div>
       </div>
 
-      <header className="sticky top-0 z-50 bg-[#FCF9F5]/95 backdrop-blur-sm border-b border-[#0057A3]/30 shadow-sm flex-shrink-0">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm flex-shrink-0">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={handleBackToDashboard}
-            className="text-[#4A5568] hover:text-[#0057A3] hover:bg-[#0057A3]/5"
+            className="text-muted-foreground hover:text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
@@ -471,23 +471,23 @@ const Profile = () => {
         <div className="container mx-auto px-4 py-8 relative z-10">
           <div className="mx-auto max-w-2xl space-y-6">
             {/* Profile Card */}
-            <Card className="border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm overflow-hidden relative">
-              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#0057A3]/50 to-transparent"></div>
+            <Card className="border border-border bg-card/80 backdrop-blur-sm overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
               
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-[#1A1A2E]">
-                  <User className="h-5 w-5 text-[#0057A3]" />
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <User className="h-5 w-5 text-primary" />
                   My Profile
                 </CardTitle>
-                <CardDescription className="text-[#4A5568]">Manage your account information</CardDescription>
+                <CardDescription className="text-muted-foreground">Manage your account information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Avatar Section with Medals */}
                 <div className="flex items-start gap-6">
                   <div className="relative">
-                    <Avatar className="h-24 w-24 ring-4 ring-white border-2 border-[#0057A3]/30 flex-shrink-0">
+                    <Avatar className="h-24 w-24 ring-4 ring-background border-2 border-border flex-shrink-0">
                       <AvatarImage src={previewUrl || undefined} alt={profile.name} />
-                      <AvatarFallback className="bg-gradient-to-br from-[#0057A3] to-[#0057A3]/70 text-white text-2xl">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-2xl">
                         {getInitials(profile.name)}
                       </AvatarFallback>
                     </Avatar>
@@ -524,7 +524,7 @@ const Profile = () => {
                           placeholder="Your name"
                         />
                       ) : (
-                        <h2 className="text-2xl font-bold text-[#1A1A2E] break-words">
+                        <h2 className="text-2xl font-bold text-foreground break-words">
                           {profile.name}
                         </h2>
                       )}
@@ -553,8 +553,8 @@ const Profile = () => {
                       )}
                     </div>
                     
-                    <p className="text-[#4A5568]">{profile.email}</p>
-                    <p className="text-sm text-[#4A5568] mt-1">
+                    <p className="text-muted-foreground">{profile.email}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Member since {format(new Date(profile.created_at), "MMMM yyyy")}
                     </p>
                   </div>
@@ -668,9 +668,9 @@ const Profile = () => {
                 </Dialog>
 
                 {editing ? (
-                  <div className="space-y-4 pt-4 border-t border-[#0057A3]/20">
+                  <div className="space-y-4 pt-4 border-t border-border">
                     <div className="flex gap-2">
-                      <Button onClick={handleSaveProfile} disabled={saving || uploading} className="bg-[#0057A3] text-white hover:bg-[#0057A3]/90 flex-1">
+                      <Button onClick={handleSaveProfile} disabled={saving || uploading} className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1">
                         {saving || uploading ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -683,18 +683,18 @@ const Profile = () => {
                           </>
                         )}
                       </Button>
-                      <Button variant="outline" onClick={handleCancel} disabled={saving || uploading} className="border-[#0057A3]/30 text-[#1A1A2E] hover:bg-[#0057A3]/5">
+                      <Button variant="outline" onClick={handleCancel} disabled={saving || uploading} className="border-border text-foreground hover:bg-primary/5">
                         Cancel
                       </Button>
                     </div>
                   </div>
                 ) : (
-                  <div className="pt-4 border-t border-[#0057A3]/20">
+                  <div className="pt-4 border-t border-border">
                     <Button onClick={() => {
                       setEditName(profile.name);
                       setPreviewUrl(profile.profile_picture);
                       setEditing(true);
-                    }} className="bg-[#0057A3] text-white hover:bg-[#0057A3]/90">
+                    }} className="bg-primary text-primary-foreground hover:bg-primary/90">
                       Edit Profile
                     </Button>
                   </div>
@@ -703,21 +703,21 @@ const Profile = () => {
             </Card>
 
             {/* Organizations Card */}
-            <Card className="border border-[#0057A3]/30 bg-white/80 backdrop-blur-sm overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#B43B3B]/50 to-transparent"></div>
+            <Card className="border border-border bg-card/80 backdrop-blur-sm overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-destructive/50 to-transparent"></div>
               
               <CardHeader>
-                <CardTitle className="text-[#1A1A2E]">My Organizations</CardTitle>
-                <CardDescription className="text-[#4A5568]">Organizations you're a member of</CardDescription>
+                <CardTitle className="text-foreground">My Organizations</CardTitle>
+                <CardDescription className="text-muted-foreground">Organizations you're a member of</CardDescription>
               </CardHeader>
               <CardContent>
                 {memberships.length === 0 ? (
-                  <div className="py-8 text-center text-[#4A5568]">
+                  <div className="py-8 text-center text-muted-foreground">
                     <p>You haven't joined any organizations yet</p>
                     <Button 
                       variant="link" 
                       size="sm" 
-                      className="text-[#0057A3]"
+                      className="text-primary"
                       onClick={() => navigate("/explore")}
                     >
                       Explore organizations
@@ -730,22 +730,22 @@ const Profile = () => {
                         <div
                           key={membership.id}
                           onClick={() => navigate(`/org/${membership.organizations.id}`)}
-                          className="flex items-center gap-4 rounded-lg border border-[#0057A3]/30 p-4 transition-all hover:shadow-sm hover:border-[#0057A3]/50 hover:bg-white cursor-pointer"
+                          className="flex items-center gap-4 rounded-lg border border-border p-4 transition-all hover:shadow-sm hover:border-primary/50 hover:bg-card cursor-pointer"
                         >
-                          <Avatar className="h-12 w-12 border border-[#0057A3]/30 flex-shrink-0">
+                          <Avatar className="h-12 w-12 border border-border flex-shrink-0">
                             <AvatarImage
                               src={membership.organizations.profile_picture || undefined}
                               alt={membership.organizations.name}
                             />
-                            <AvatarFallback className="bg-gradient-to-br from-[#0057A3] to-[#0057A3]/70 text-white">
+                            <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
                               {membership.organizations.name.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-[#1A1A2E] truncate">
+                            <p className="font-medium text-foreground truncate">
                               {membership.organizations.name}
                             </p>
-                            <p className="text-sm text-[#4A5568] capitalize">
+                            <p className="text-sm text-muted-foreground capitalize">
                               {membership.role} • Joined {format(new Date(membership.joined_at), "MMM yyyy")}
                             </p>
                           </div>
@@ -761,9 +761,9 @@ const Profile = () => {
       </div>
 
       {/* Footer - Now properly positioned at bottom */}
-      <footer className="flex-shrink-0 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-[#0057A3]/20 mt-auto">
+      <footer className="flex-shrink-0 bg-gradient-to-b from-[#1A1A2E] to-[#1A1A2E] border-t border-border mt-auto">
         <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-[#FCF9F5]/60">
+          <div className="text-center text-sm text-muted-foreground/60">
             <p>© 2026 iJoin - iACADEMY Student Platform. All rights reserved.</p>
           </div>
         </div>

@@ -351,21 +351,21 @@ export default function Admin() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Simple Header */}
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+      <header className="sticky top-0 z-40 bg-background border-b border-border shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => navigate("/dashboard")}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <h1 className="text-2xl font-bold text-gray-900">Admin Management Panel</h1>
+            <h1 className="text-2xl font-bold text-foreground">Admin Management Panel</h1>
           </div>
           <SignOutButton variant="ghost" size="sm" />
         </div>
@@ -376,15 +376,15 @@ export default function Admin() {
         {/* Collapsible Sidebar */}
         <aside 
           className={cn(
-            "bg-white border-r border-gray-200 transition-all duration-300 sticky top-[73px] h-[calc(100vh-73px)] overflow-hidden flex flex-col",
+            "bg-background border-r border-border transition-all duration-300 sticky top-[73px] h-[calc(100vh-73px)] overflow-hidden flex flex-col",
             sidebarCollapsed ? "w-16" : "w-64"
           )}
         >
           <div className="flex-1 overflow-y-auto">
             {/* Sidebar Header with Toggle */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between p-4 border-b border-border">
               {!sidebarCollapsed && (
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Menu</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menu</span>
               )}
               <Button
                 variant="ghost"
@@ -405,26 +405,26 @@ export default function Admin() {
               {/* Quick Stats */}
               {!sidebarCollapsed ? (
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Overview</h3>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Overview</h3>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted">
                       <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm text-gray-700">Users</span>
+                        <Users className="h-4 w-4 text-primary" />
+                        <span className="text-sm text-foreground">Users</span>
                       </div>
                       <span className="text-sm font-semibold">{stats.users.toLocaleString()}</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted">
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-indigo-500" />
-                        <span className="text-sm text-gray-700">Orgs</span>
+                        <Building2 className="h-4 w-4 text-primary" />
+                        <span className="text-sm text-foreground">Orgs</span>
                       </div>
                       <span className="text-sm font-semibold">{stats.organizations}</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-green-500" />
-                        <span className="text-sm text-gray-700">Events</span>
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span className="text-sm text-foreground">Events</span>
                       </div>
                       <span className="text-sm font-semibold">{stats.events}</span>
                     </div>
@@ -433,15 +433,15 @@ export default function Admin() {
               ) : (
                 <div className="space-y-4">
                   <div className="flex flex-col items-center gap-3">
-                    <Users className="h-5 w-5 text-blue-500" />
+                    <Users className="h-5 w-5 text-primary" />
                     <span className="text-xs font-semibold">{stats.users}</span>
                   </div>
                   <div className="flex flex-col items-center gap-3">
-                    <Building2 className="h-5 w-5 text-indigo-500" />
+                    <Building2 className="h-5 w-5 text-primary" />
                     <span className="text-xs font-semibold">{stats.organizations}</span>
                   </div>
                   <div className="flex flex-col items-center gap-3">
-                    <Calendar className="h-5 w-5 text-green-500" />
+                    <Calendar className="h-5 w-5 text-primary" />
                     <span className="text-xs font-semibold">{stats.events}</span>
                   </div>
                 </div>
@@ -453,24 +453,24 @@ export default function Admin() {
                   <Separator />
                   {!sidebarCollapsed ? (
                     <div>
-                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Pending</h3>
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pending</h3>
                       <div className="space-y-2">
                         {stats.pendingOrgs > 0 && (
-                          <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
+                          <div className="flex items-center justify-between p-2 rounded-lg bg-destructive/10">
                             <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-amber-600" />
-                              <span className="text-sm text-amber-700">Orgs</span>
+                              <Building2 className="h-4 w-4 text-destructive" />
+                              <span className="text-sm text-destructive">Orgs</span>
                             </div>
-                            <Badge className="bg-amber-100 text-amber-700 border-0">{stats.pendingOrgs}</Badge>
+                            <Badge className="bg-destructive/20 text-destructive border-0">{stats.pendingOrgs}</Badge>
                           </div>
                         )}
                         {stats.pendingEvents > 0 && (
-                          <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
+                          <div className="flex items-center justify-between p-2 rounded-lg bg-destructive/10">
                             <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-amber-600" />
-                              <span className="text-sm text-amber-700">Events</span>
+                              <Calendar className="h-4 w-4 text-destructive" />
+                              <span className="text-sm text-destructive">Events</span>
                             </div>
-                            <Badge className="bg-amber-100 text-amber-700 border-0">{stats.pendingEvents}</Badge>
+                            <Badge className="bg-destructive/20 text-destructive border-0">{stats.pendingEvents}</Badge>
                           </div>
                         )}
                       </div>
@@ -479,14 +479,14 @@ export default function Admin() {
                     <div className="space-y-4">
                       {stats.pendingOrgs > 0 && (
                         <div className="flex flex-col items-center gap-2">
-                          <Building2 className="h-5 w-5 text-amber-600" />
-                          <Badge className="bg-amber-100 text-amber-700 border-0">{stats.pendingOrgs}</Badge>
+                          <Building2 className="h-5 w-5 text-destructive" />
+                          <Badge className="bg-destructive/20 text-destructive border-0">{stats.pendingOrgs}</Badge>
                         </div>
                       )}
                       {stats.pendingEvents > 0 && (
                         <div className="flex flex-col items-center gap-2">
-                          <Calendar className="h-5 w-5 text-amber-600" />
-                          <Badge className="bg-amber-100 text-amber-700 border-0">{stats.pendingEvents}</Badge>
+                          <Calendar className="h-5 w-5 text-destructive" />
+                          <Badge className="bg-destructive/20 text-destructive border-0">{stats.pendingEvents}</Badge>
                         </div>
                       )}
                     </div>
@@ -499,7 +499,7 @@ export default function Admin() {
               {/* Navigation */}
               {!sidebarCollapsed ? (
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Sections</h3>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Sections</h3>
                   <div className="space-y-1">
                     {sections.map((section) => (
                       <button
@@ -508,22 +508,22 @@ export default function Admin() {
                         className={cn(
                           "w-full flex items-center justify-between p-2 rounded-lg transition-colors",
                           activeTab === section.id 
-                            ? "bg-indigo-50 text-indigo-700" 
-                            : "hover:bg-gray-50 text-gray-700",
-                          activeBookmark === section.id && "ring-2 ring-indigo-300 ring-offset-2"
+                            ? "bg-primary/10 text-primary" 
+                            : "hover:bg-muted text-foreground",
+                          activeBookmark === section.id && "ring-2 ring-primary ring-offset-2"
                         )}
                       >
                         <div className="flex items-center gap-2">
                           <div className={cn(
                             "h-5 w-5 rounded flex items-center justify-center",
-                            activeTab === section.id ? "text-indigo-600" : "text-gray-500"
+                            activeTab === section.id ? "text-primary" : "text-muted-foreground"
                           )}>
                             {section.icon}
                           </div>
                           <span className="text-sm font-medium">{section.title}</span>
                         </div>
                         {section.pendingCount ? (
-                          <Badge className="bg-amber-100 text-amber-700 border-0 text-xs px-1.5">
+                          <Badge className="bg-destructive/20 text-destructive border-0 text-xs px-1.5">
                             {section.pendingCount}
                           </Badge>
                         ) : null}
@@ -540,15 +540,15 @@ export default function Admin() {
                       className={cn(
                         "w-full flex flex-col items-center gap-1 p-2 rounded-lg transition-colors",
                         activeTab === section.id 
-                          ? "bg-indigo-50 text-indigo-700" 
-                          : "hover:bg-gray-50 text-gray-700",
-                        activeBookmark === section.id && "ring-2 ring-indigo-300 ring-offset-2"
+                          ? "bg-primary/10 text-primary" 
+                          : "hover:bg-muted text-foreground",
+                        activeBookmark === section.id && "ring-2 ring-primary ring-offset-2"
                       )}
                       title={section.title}
                     >
                       <div className="h-5 w-5">{section.icon}</div>
                       {section.pendingCount ? (
-                        <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px] px-1">
+                        <Badge className="bg-destructive/20 text-destructive border-0 text-[10px] px-1">
                           {section.pendingCount}
                         </Badge>
                       ) : null}
@@ -560,11 +560,11 @@ export default function Admin() {
           </div>
 
           {/* Export Button - Bottom Left */}
-          <div className="border-t border-gray-200 p-3">
+          <div className="border-t border-border p-3">
             {!sidebarCollapsed ? (
               <Button
                 variant="outline"
-                className="w-full justify-start gap-2 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
+                className="w-full justify-start gap-2 border-border hover:bg-primary/10 hover:text-primary hover:border-primary/50"
                 onClick={() => setExportDialogOpen(true)}
               >
                 <Download className="h-4 w-4" />
@@ -596,50 +596,50 @@ export default function Admin() {
               >
                 <div
                   className={cn(
-                    "bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all",
-                    activeBookmark === section.id && "ring-2 ring-indigo-300 ring-offset-2"
+                    "bg-card rounded-xl border border-border shadow-sm overflow-hidden transition-all",
+                    activeBookmark === section.id && "ring-2 ring-primary ring-offset-2"
                   )}
                 >
                   {/* Section Header */}
                   <div
-                    className="flex items-center justify-between p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between p-5 cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => toggleSection(section.id)}
                   >
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         "h-10 w-10 rounded-lg flex items-center justify-center",
-                        section.id === 'users' && "bg-blue-100 text-blue-600",
-                        section.id === 'organizations' && "bg-indigo-100 text-indigo-600",
-                        section.id === 'events' && "bg-green-100 text-green-600"
+                        section.id === 'users' && "bg-primary/10 text-primary",
+                        section.id === 'organizations' && "bg-primary/10 text-primary",
+                        section.id === 'events' && "bg-primary/10 text-primary"
                       )}>
                         {section.icon}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h2 className="text-lg font-semibold text-gray-900">
+                          <h2 className="text-lg font-semibold text-foreground">
                             {section.title}
                           </h2>
                           {section.pendingCount ? (
-                            <Badge className="bg-amber-100 text-amber-700 border-0">
+                            <Badge className="bg-destructive/20 text-destructive border-0">
                               {section.pendingCount} pending
                             </Badge>
                           ) : null}
                         </div>
-                        <p className="text-sm text-gray-500">{section.description}</p>
+                        <p className="text-sm text-muted-foreground">{section.description}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {expandedSections.has(section.id) ? (
-                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
                       ) : (
-                        <ChevronRight className="h-5 w-5 text-gray-500" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
                       )}
                     </div>
                   </div>
 
                   {/* Section Content */}
                   {expandedSections.has(section.id) && (
-                    <div className="border-t border-gray-200 p-5">
+                    <div className="border-t border-border p-5">
                       {section.id === 'users' && <UserRoleManagement />}
                       {section.id === 'organizations' && <OrganizationManagement />}
                       {section.id === 'events' && <EventManagement />}
@@ -658,9 +658,9 @@ export default function Admin() {
           <Button 
             variant="default" 
             size="icon" 
-            className="fixed bottom-4 right-4 h-12 w-12 rounded-full bg-indigo-600 hover:bg-indigo-700 shadow-lg md:hidden"
+            className="fixed bottom-4 right-4 h-12 w-12 rounded-full bg-primary hover:bg-primary/90 shadow-lg md:hidden"
           >
-            <Menu className="h-5 w-5 text-white" />
+            <Menu className="h-5 w-5 text-primary-foreground" />
           </Button>
         </SheetTrigger>
         <SheetContent side="bottom" className="h-[70vh] rounded-t-xl">
@@ -686,17 +686,17 @@ export default function Admin() {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-2 p-2">
-              <div className="text-center p-2 rounded-lg bg-gray-50">
-                <p className="text-xs text-gray-500">Users</p>
-                <p className="text-lg font-bold text-gray-900">{stats.users}</p>
+              <div className="text-center p-2 rounded-lg bg-muted">
+                <p className="text-xs text-muted-foreground">Users</p>
+                <p className="text-lg font-bold text-foreground">{stats.users}</p>
               </div>
-              <div className="text-center p-2 rounded-lg bg-gray-50">
-                <p className="text-xs text-gray-500">Orgs</p>
-                <p className="text-lg font-bold text-gray-900">{stats.organizations}</p>
+              <div className="text-center p-2 rounded-lg bg-muted">
+                <p className="text-xs text-muted-foreground">Orgs</p>
+                <p className="text-lg font-bold text-foreground">{stats.organizations}</p>
               </div>
-              <div className="text-center p-2 rounded-lg bg-gray-50">
-                <p className="text-xs text-gray-500">Events</p>
-                <p className="text-lg font-bold text-gray-900">{stats.events}</p>
+              <div className="text-center p-2 rounded-lg bg-muted">
+                <p className="text-xs text-muted-foreground">Events</p>
+                <p className="text-lg font-bold text-foreground">{stats.events}</p>
               </div>
             </div>
 
@@ -717,18 +717,18 @@ export default function Admin() {
                 >
                   <div className={cn(
                     "h-8 w-8 rounded-lg flex items-center justify-center",
-                    section.id === 'users' && "bg-blue-100 text-blue-600",
-                    section.id === 'organizations' && "bg-indigo-100 text-indigo-600",
-                    section.id === 'events' && "bg-green-100 text-green-600"
+                    section.id === 'users' && "bg-primary/10 text-primary",
+                    section.id === 'organizations' && "bg-primary/10 text-primary",
+                    section.id === 'events' && "bg-primary/10 text-primary"
                   )}>
                     {section.icon}
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="font-medium text-gray-900">{section.title}</p>
-                    <p className="text-xs text-gray-500">{section.description}</p>
+                    <p className="font-medium text-foreground">{section.title}</p>
+                    <p className="text-xs text-muted-foreground">{section.description}</p>
                   </div>
                   {section.pendingCount ? (
-                    <Badge className="bg-amber-100 text-amber-700 border-0">
+                    <Badge className="bg-destructive/20 text-destructive border-0">
                       {section.pendingCount}
                     </Badge>
                   ) : null}
@@ -774,7 +774,7 @@ export default function Admin() {
               </div>
               
               <div className="space-y-2">
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted">
                   <Checkbox
                     id="export-users"
                     checked={exportOptions.users}
@@ -782,15 +782,15 @@ export default function Admin() {
                   />
                   <Label htmlFor="export-users" className="flex-1 cursor-pointer">
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-blue-500" />
+                      <Users className="h-4 w-4 text-primary" />
                       <span>Users</span>
                     </div>
-                    <p className="text-xs text-gray-500">User profiles, names, emails, join dates</p>
+                    <p className="text-xs text-muted-foreground">User profiles, names, emails, join dates</p>
                   </Label>
                   <Badge variant="outline">{stats.users} records</Badge>
                 </div>
 
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted">
                   <Checkbox
                     id="export-organizations"
                     checked={exportOptions.organizations}
@@ -798,15 +798,15 @@ export default function Admin() {
                   />
                   <Label htmlFor="export-organizations" className="flex-1 cursor-pointer">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-indigo-500" />
+                      <Building2 className="h-4 w-4 text-primary" />
                       <span>Organizations</span>
                     </div>
-                    <p className="text-xs text-gray-500">Org details, status, type, creation date</p>
+                    <p className="text-xs text-muted-foreground">Org details, status, type, creation date</p>
                   </Label>
                   <Badge variant="outline">{stats.organizations} records</Badge>
                 </div>
 
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted">
                   <Checkbox
                     id="export-memberships"
                     checked={exportOptions.memberships}
@@ -814,10 +814,10 @@ export default function Admin() {
                   />
                   <Label htmlFor="export-memberships" className="flex-1 cursor-pointer">
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-purple-500" />
+                      <Users className="h-4 w-4 text-primary" />
                       <span>Memberships</span>
                     </div>
-                    <p className="text-xs text-gray-500">Member-organization relationships, roles, join dates</p>
+                    <p className="text-xs text-muted-foreground">Member-organization relationships, roles, join dates</p>
                   </Label>
                   <Badge variant="outline">All memberships</Badge>
                 </div>

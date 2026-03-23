@@ -6,7 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronDown, ChevronRight, CheckCircle, XCircle, School, GraduationCap, ExternalLink, Calendar, Users, Building2, User, Clock, Filter, Search, MoreHorizontal, Eye, Copy } from "lucide-react";
+import { 
+  ChevronDown, ChevronRight, CheckCircle, XCircle, School, GraduationCap, 
+  ExternalLink, Calendar, Users, Building2, User, Clock, Filter, Search, 
+  MoreHorizontal, Eye, Copy, Trash2, Loader2 
+} from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
@@ -21,6 +25,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -64,6 +78,11 @@ export function OrganizationManagement() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+  
+  // Member deletion state
+  const [memberToDelete, setMemberToDelete] = useState<{ member: Member; orgId: string; orgName: string } | null>(null);
+  const [deletingMember, setDeletingMember] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
 
   useEffect(() => {
     fetchOrganizations();
@@ -72,7 +91,6 @@ export function OrganizationManagement() {
   useEffect(() => {
     let filtered = [...organizations];
 
-    // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(org => 
         org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,12 +99,10 @@ export function OrganizationManagement() {
       );
     }
 
-    // Apply status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter(org => org.status === statusFilter);
     }
 
-    // Apply type filter
     if (typeFilter !== "all") {
       filtered = filtered.filter(org => 
         typeFilter === "shs" ? org.is_shs_org : !org.is_shs_org
@@ -154,7 +170,6 @@ export function OrganizationManagement() {
 
   const approveOrganization = async (org: Organization) => {
     try {
-      // Update organization status to active
       const { error: orgError } = await supabase
         .from("organizations")
         .update({ status: "active" })
@@ -162,7 +177,6 @@ export function OrganizationManagement() {
 
       if (orgError) throw orgError;
 
-      // Check if creator already has a membership
       const { data: existingMember } = await supabase
         .from("memberships")
         .select("id")
@@ -171,7 +185,6 @@ export function OrganizationManagement() {
         .maybeSingle();
 
       if (existingMember) {
-        // Update existing membership to leader
         const { error: updateError } = await supabase
           .from("memberships")
           .update({ role: "leader", status: "accepted" })
@@ -179,7 +192,6 @@ export function OrganizationManagement() {
 
         if (updateError) throw updateError;
       } else {
-        // Add creator as leader
         const { error: memberError } = await supabase
           .from("memberships")
           .insert({
@@ -250,7 +262,6 @@ export function OrganizationManagement() {
 
       toast.success(`${memberName} is now a ${role}`);
       
-      // Refresh members for this org
       const { data } = await supabase
         .from("memberships")
         .select(`
@@ -273,6 +284,33 @@ export function OrganizationManagement() {
       toast.error("Failed to update member role");
     } finally {
       setUpdatingRole(null);
+    }
+  };
+
+  const handleDeleteMember = async () => {
+    if (!memberToDelete) return;
+    
+    setDeletingMember(true);
+    try {
+      const { error } = await supabase
+        .from("memberships")
+        .delete()
+        .eq("id", memberToDelete.member.id);
+
+      if (error) throw error;
+
+      toast.success(`${memberToDelete.member.profiles.name} has been removed from ${memberToDelete.orgName}`);
+      
+      // Refresh members list
+      await fetchMembers(memberToDelete.orgId);
+      
+      setMemberToDelete(null);
+      setConfirmText("");
+    } catch (error: any) {
+      console.error("Error deleting member:", error);
+      toast.error(error.message || "Failed to remove member");
+    } finally {
+      setDeletingMember(false);
     }
   };
 
@@ -352,7 +390,6 @@ export function OrganizationManagement() {
               </CardDescription>
             </div>
             
-            {/* Filters */}
             <div className="flex items-center gap-2">
               <div className="relative w-[200px]">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -390,7 +427,6 @@ export function OrganizationManagement() {
             </div>
           </div>
 
-          {/* Results summary */}
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="outline" className="text-xs">
               Total: {filteredOrgs.length}
@@ -398,11 +434,6 @@ export function OrganizationManagement() {
             {pendingOrgs.length > 0 && (
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 border-yellow-200 text-xs">
                 {pendingOrgs.length} pending
-              </Badge>
-            )}
-            {statusFilter !== "all" && (
-              <Badge variant="outline" className="text-xs">
-                Filtered by: {statusFilter}
               </Badge>
             )}
           </div>
@@ -522,6 +553,7 @@ export function OrganizationManagement() {
                                 <TableHead>Email</TableHead>
                                 <TableHead>Role</TableHead>
                                 <TableHead>Joined</TableHead>
+                                <TableHead></TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -567,6 +599,34 @@ export function OrganizationManagement() {
                                   </TableCell>
                                   <TableCell className="text-sm text-muted-foreground">
                                     {formatDistanceToNow(new Date(member.joined_at), { addSuffix: true })}
+                                  </TableCell>
+                                  <TableCell>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => window.open(`/profile/${member.user_id}`, '_blank')}>
+                                          <Eye className="h-4 w-4 mr-2" />
+                                          View Profile
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          className="text-red-600"
+                                          onClick={() => {
+                                            setMemberToDelete({
+                                              member,
+                                              orgId: org.id,
+                                              orgName: org.name
+                                            });
+                                          }}
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Remove Member
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -683,6 +743,7 @@ export function OrganizationManagement() {
                                 <TableHead>Email</TableHead>
                                 <TableHead>Role</TableHead>
                                 <TableHead>Joined</TableHead>
+                                <TableHead></TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -728,6 +789,34 @@ export function OrganizationManagement() {
                                   </TableCell>
                                   <TableCell className="text-sm text-muted-foreground">
                                     {formatDistanceToNow(new Date(member.joined_at), { addSuffix: true })}
+                                  </TableCell>
+                                  <TableCell>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => window.open(`/profile/${member.user_id}`, '_blank')}>
+                                          <Eye className="h-4 w-4 mr-2" />
+                                          View Profile
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          className="text-red-600"
+                                          onClick={() => {
+                                            setMemberToDelete({
+                                              member,
+                                              orgId: org.id,
+                                              orgName: org.name
+                                            });
+                                          }}
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Remove Member
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -791,6 +880,79 @@ export function OrganizationManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Member Confirmation Dialog */}
+      <AlertDialog open={!!memberToDelete} onOpenChange={() => {
+        setMemberToDelete(null);
+        setConfirmText("");
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">
+              Remove Member
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-4">
+                <p>
+                  Are you sure you want to remove <strong>{memberToDelete?.member.profiles.name}</strong> from <strong>{memberToDelete?.orgName}</strong>?
+                </p>
+                
+                <div className="rounded-lg bg-destructive/10 p-4">
+                  <p className="text-sm font-medium text-destructive">
+                    ⚠️ This action cannot be undone. This member will:
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-destructive/80">
+                    <li>• Lose access to all organization content</li>
+                    <li>• Be removed from all organization events</li>
+                    <li>• Need to re-apply if they want to join again</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <p className="text-sm">
+                    Type <span className="font-mono font-bold">REMOVE</span> to confirm:
+                  </p>
+                  <Input
+                    placeholder="Type REMOVE here"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    className="font-mono"
+                  />
+                  {confirmText && confirmText !== "REMOVE" && (
+                    <p className="text-sm text-destructive">
+                      ❌ Text doesn't match. Please type "REMOVE" exactly.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setMemberToDelete(null);
+                setConfirmText("");
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteMember}
+              disabled={confirmText !== "REMOVE" || deletingMember}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingMember ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Removing...
+                </>
+              ) : (
+                "Remove Member"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 }
