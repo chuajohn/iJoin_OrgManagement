@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { HelpModal } from "@/components/HelpModal";
 import { 
   Dialog, 
   DialogContent, 
@@ -836,6 +837,9 @@ const Dashboard = () => {
                     Request Org
                   </Button>
                 </Link>
+
+                <HelpModal />
+
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary hover:bg-primary/5">
