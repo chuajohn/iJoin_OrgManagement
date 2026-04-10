@@ -19,16 +19,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, MapPin, Clock, Search, X, ChevronDown, ChevronUp, CheckCheck, Award, Crown, Star, Medal, Gem, Sparkles, Waves, Wind, Leaf, Fish } from "lucide-react";
+import { Bell, Calendar, Users, Shield, Plus, User, ExternalLink, Heart, MessageCircle, MapPin, Clock, Search, X, ChevronDown, ChevronUp, CheckCheck, Award, Crown, Star, Medal, Gem, Sparkles, Waves, Wind, Leaf, Fish, MoreHorizontal, Moon, Sun } from "lucide-react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Switch } from "@/components/ui/switch";
 import { SignOutButton } from "@/components/SignOutButton";
 import { CommentSection } from "@/components/CommentSection";
 import { NotificationItem } from "@/components/NotificationItem";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { RSVPButton } from "@/components/RSVPButton";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -105,12 +106,13 @@ interface Membership {
   organizations: {
     id: string;
     name: string;
-  };
+  } | null;
 }
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const { isAdmin, isSAO, isSHSStudent, isUGStudent } = useUserRole();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -121,6 +123,8 @@ const Dashboard = () => {
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
   const [likes, setLikes] = useState<Record<string, LikeState>>({});
   const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
+  const [visibleAnnouncementsCount, setVisibleAnnouncementsCount] = useState(5);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [memberships, setMemberships] = useState<Membership[]>([]);
   
   // Admin dashboard state
@@ -156,6 +160,23 @@ const Dashboard = () => {
       setupNotificationsSubscription();
     }
   }, [user, isAdminOrSAO]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    setVisibleAnnouncementsCount(5);
+  }, [announcements.length]);
 
   const fetchAdminDashboardData = async () => {
     try {
@@ -393,7 +414,7 @@ const Dashboard = () => {
         .eq("status", "accepted");
 
       if (error) throw error;
-      setMemberships(data || []);
+      setMemberships((data || []).filter(m => m.organizations !== null));
     } catch (error) {
       console.error("Error fetching memberships:", error);
     }
@@ -419,7 +440,7 @@ const Dashboard = () => {
         name: `Leader ${leaderOrgs.length > 1 ? `(×${leaderOrgs.length})` : ''}`,
         icon: <Crown className="h-3 w-3" />,
         color: 'bg-destructive text-destructive-foreground border-border',
-        description: leaderOrgs.map(o => o.organizations.name).join(', ')
+        description: leaderOrgs.map(o => o.organizations?.name).filter(Boolean).join(', ')
       });
     }
 
@@ -429,7 +450,7 @@ const Dashboard = () => {
         name: `Officer ${officerOrgs.length > 1 ? `(×${officerOrgs.length})` : ''}`,
         icon: <Star className="h-3 w-3" />,
         color: 'bg-primary text-primary-foreground border-border',
-        description: officerOrgs.map(o => o.organizations.name).join(', ')
+        description: officerOrgs.map(o => o.organizations?.name).filter(Boolean).join(', ')
       });
     }
 
@@ -725,6 +746,14 @@ const Dashboard = () => {
     }));
   };
 
+  const loadMoreAnnouncements = () => {
+    setVisibleAnnouncementsCount((prev) => prev + 5);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
     setIsEventModalOpen(true);
@@ -818,7 +847,6 @@ const Dashboard = () => {
                 </Link>
               </div>
               <div className="flex items-center gap-2">
-                <ThemeToggle />
                 <Link to="/explore">
                   <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <Search className="h-4 w-4 mr-1"/>
@@ -832,13 +860,11 @@ const Dashboard = () => {
                   </Button>
                 </Link>
                 <Link to="/create-organization">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <Plus className="h-4 w-4 mr-1" />
                     Request Org
                   </Button>
                 </Link>
-
-                <HelpModal />
 
                 <Popover>
                   <PopoverTrigger asChild>
@@ -891,7 +917,49 @@ const Dashboard = () => {
                     <User className="h-5 w-5" />
                   </Button>
                 </Link>
-                <SignOutButton variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" aria-label="Open navigation tools">
+                      <MoreHorizontal className="h-5 w-5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-44 p-1.5 border border-border shadow-lg" align="end">
+                    <div className="space-y-0.5">
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={toggleTheme}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            toggleTheme();
+                          }
+                        }}
+                        className="flex h-8 w-full items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2">
+                          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                          {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                        </span>
+                        <Switch
+                          checked={theme === "dark"}
+                          onCheckedChange={toggleTheme}
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label="Toggle dark mode"
+                        />
+                      </div>
+                      <HelpModal
+                        className="h-8 w-full justify-start rounded-md px-2 py-1.5 text-sm font-medium text-foreground hover:bg-muted hover:text-foreground"
+                      />
+                      <SignOutButton
+                        variant="ghost"
+                        size="sm"
+                        showText
+                        className="h-8 w-full justify-start rounded-md px-2 py-1.5 text-sm font-medium text-destructive hover:text-destructive hover:bg-destructive/10"
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </header>
@@ -946,7 +1014,8 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  announcements.map((announcement) => {
+                  <>
+                    {announcements.slice(0, visibleAnnouncementsCount).map((announcement) => {
                     const org = announcement.organizations;
                     const orgName = org?.name || 'Unknown Organization';
                     const orgProfilePic = org?.profile_picture || null;
@@ -956,7 +1025,7 @@ const Dashboard = () => {
                       ? announcement.content 
                       : truncateText(announcement.content, 300);
 
-                    return (
+                      return (
                       <Card key={announcement.id} className="overflow-hidden border border-border bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
                         <CardHeader className="pb-3">
                           <div className="flex items-center gap-3">
@@ -1049,8 +1118,21 @@ const Dashboard = () => {
                           )}
                         </CardContent>
                       </Card>
-                    );
-                  })
+                      );
+                    })}
+
+                    {visibleAnnouncementsCount < announcements.length && (
+                      <div className="pt-2">
+                        <Button
+                          variant="outline"
+                          className="w-full border-border text-muted-foreground hover:text-primary hover:bg-primary/5"
+                          onClick={loadMoreAnnouncements}
+                        >
+                          View more announcements
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -1300,6 +1382,17 @@ const Dashboard = () => {
               )}
             </DialogContent>
           </Dialog>
+
+          {showScrollToTop && (
+            <Button
+              size="icon"
+              onClick={scrollToTop}
+              className="fixed bottom-6 left-6 z-50 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+              aria-label="Scroll to top"
+            >
+              <ChevronUp className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </TooltipProvider>
     );
@@ -1356,7 +1449,6 @@ const Dashboard = () => {
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
-                <ThemeToggle />
                 <Link to="/explore">
                   <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
                     <Search className="h-4 w-4 mr-1"/>
@@ -1426,7 +1518,49 @@ const Dashboard = () => {
                     <User className="h-5 w-5" />
                   </Button>
                 </Link>
-                <SignOutButton variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" aria-label="Open navigation tools">
+                      <MoreHorizontal className="h-5 w-5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-44 p-1.5 border border-border shadow-lg" align="end">
+                    <div className="space-y-0.5">
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={toggleTheme}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            toggleTheme();
+                          }
+                        }}
+                        className="flex h-8 w-full items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2">
+                          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                          {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                        </span>
+                        <Switch
+                          checked={theme === "dark"}
+                          onCheckedChange={toggleTheme}
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label="Toggle dark mode"
+                        />
+                      </div>
+                      <HelpModal
+                        className="h-8 w-full justify-start rounded-md px-2 py-1.5 text-sm font-medium text-foreground hover:bg-muted hover:text-foreground"
+                      />
+                      <SignOutButton
+                        variant="ghost"
+                        size="sm"
+                        showText
+                        className="h-8 w-full justify-start rounded-md px-2 py-1.5 text-sm font-medium text-destructive hover:text-destructive hover:bg-destructive/10"
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </header>
@@ -1441,6 +1575,17 @@ const Dashboard = () => {
             profile={profile}
             user={user}
           />
+
+          {showScrollToTop && (
+            <Button
+              size="icon"
+              onClick={scrollToTop}
+              className="fixed bottom-6 left-6 z-50 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+              aria-label="Scroll to top"
+            >
+              <ChevronUp className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </TooltipProvider>
     );

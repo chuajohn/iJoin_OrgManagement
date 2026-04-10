@@ -37,7 +37,21 @@ interface HelpSection {
   content: React.ReactNode;
 }
 
-export function HelpModal() {
+interface HelpModalProps {
+  className?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
+  showIcon?: boolean;
+  text?: string;
+}
+
+export function HelpModal({
+  className,
+  variant = "ghost",
+  size = "sm",
+  showIcon = true,
+  text = "Help",
+}: HelpModalProps) {
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("getting-started");
 
@@ -353,20 +367,23 @@ export function HelpModal() {
   return (
     <>
       <Button
-        variant="ghost"
-        size="sm"
+        variant={variant}
+        size={size}
         onClick={() => setOpen(true)}
-        className="text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5"
+        className={cn(
+          "text-[#4A5568] hover:text-[#00A3FF] hover:bg-[#00A3FF]/5",
+          className
+        )}
       >
-        <HelpCircle className="h-4 w-4 mr-1" />
-        Help
+        {showIcon && <HelpCircle className="h-4 w-4 mr-1" />}
+        {text}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-4xl p-0 gap-0 overflow-hidden bg-[#FCF9F5] border border-[#00A3FF]/30">
-          <div className="flex h-[70vh]">
+        <DialogContent className="sm:max-w-4xl p-0 gap-0 overflow-hidden bg-[#FCF9F5] border border-[#00A3FF]/30 max-h-[75vh]">
+          <div className="flex min-h-0">
             {/* Sidebar */}
-            <div className="w-64 border-r border-[#00A3FF]/20 bg-white/50 backdrop-blur-sm overflow-y-auto">
+            <div className="w-64 border-r border-[#00A3FF]/20 bg-white/50 backdrop-blur-sm overflow-y-auto max-h-[75vh]">
               <div className="p-4 border-b border-[#00A3FF]/20">
                 <DialogHeader>
                   <DialogTitle className="text-xl font-bold text-[#1A1A2E] flex items-center gap-2">
@@ -404,7 +421,7 @@ export function HelpModal() {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto p-6 bg-white/30">
+            <div className="flex-1 overflow-y-auto p-6 bg-white/30 max-h-[75vh]">
               {sections.find(s => s.id === activeSection)?.content}
             </div>
           </div>

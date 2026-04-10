@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   ArrowRight,
   Users,
@@ -66,14 +67,17 @@ const Landing = () => {
             </div>
           </div>
 
-          <Link to="/auth">
-            <Button
-              size="sm"
-              className="bg-brand-yellow text-foreground hover:bg-brand-yellow/80 border border-border shadow-sm hover:shadow transition-all duration-300 font-semibold"
-            >
-              Sign In
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link to="/auth">
+              <Button
+                size="sm"
+                className="bg-brand-yellow text-foreground hover:bg-brand-yellow/80 border border-border shadow-sm hover:shadow transition-all duration-300 font-semibold"
+              >
+                Sign In
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 

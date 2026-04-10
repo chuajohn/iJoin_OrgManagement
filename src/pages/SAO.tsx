@@ -1,6 +1,7 @@
 // src/pages/SAO.tsx
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -28,6 +30,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { 
   Calendar, 
   Users, 
@@ -49,6 +52,9 @@ import {
   ChevronUp,
   Shield,
   Bell,
+  MoreHorizontal,
+  Moon,
+  Sun,
   RefreshCw,
   Eye,
   CheckCircle,
@@ -71,7 +77,10 @@ import {
   Waves,
   Wind,
   Leaf,
-  Fish
+  Fish,
+  UserCheck,
+  Download,
+  Loader2
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
@@ -79,6 +88,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "@/components/SignOutButton";
 import { NotificationItem } from "@/components/NotificationItem";
+import { HelpModal } from "@/components/HelpModal";
 
 interface Announcement {
   id: string;
@@ -151,9 +161,22 @@ interface PhotoItem {
   created_at: string;
 }
 
+interface RSVPMember {
+  id: string;
+  user_id: string;
+  status: string;
+  registered_at: string;
+  profiles: {
+    name: string;
+    email: string;
+    profile_picture: string | null;
+  };
+}
+
 const SAO = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -177,10 +200,19 @@ const SAO = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoItem | null>(null);
   const [photoView, setPhotoView] = useState<'grid' | 'list'>('grid');
   
+  // Event modal state
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [eventRSVPs, setEventRSVPs] = useState<RSVPMember[]>([]);
+  const [loadingRSVPs, setLoadingRSVPs] = useState(false);
+  
+  // Announcement modal state
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
+  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
+  
   // Event approval state
   const [processingEvent, setProcessingEvent] = useState<string | null>(null);
 
-  // Japanese floating elements - with semantic colors
   const japaneseElements = [
     { Icon: Waves, color: "hsl(var(--primary))", top: "15%", right: "5%", delay: "0s", size: 24, opacity: 0.1 },
     { Icon: Wind, color: "hsl(var(--destructive))", top: "40%", right: "8%", delay: "2s", size: 28, opacity: 0.1 },
@@ -188,6 +220,77 @@ const SAO = () => {
     { Icon: Fish, color: "hsl(var(--primary))", bottom: "60%", right: "12%", delay: "3s", size: 22, opacity: 0.1 },
     { Icon: Gem, color: "hsl(var(--destructive))", top: "70%", right: "15%", delay: "1.5s", size: 24, opacity: 0.1 },
   ];
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'registered':
+        return <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-200">Registered</Badge>;
+      case 'attended':
+        return <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-200">Attended</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline" className="bg-gray-100 text-gray-700 dark:bg-muted dark:text-muted-foreground">Cancelled</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  const fetchEventRSVPs = async (eventId: string) => {
+    setLoadingRSVPs(true);
+    try {
+      const { data, error } = await supabase
+        .from("rsvp")
+        .select(`
+          *,
+          profiles:user_id (
+            name,
+            email,
+            profile_picture
+          )
+        `)
+        .eq("event_id", eventId)
+        .order("registered_at", { ascending: false });
+
+      if (error) throw error;
+      
+      const transformedData: RSVPMember[] = (data || []).map((item: any) => ({
+        id: item.id,
+        user_id: item.user_id,
+        status: item.status,
+        registered_at: item.registered_at,
+        profiles: {
+          name: item.profiles.name,
+          email: item.profiles.email,
+          profile_picture: item.profiles.profile_picture
+        }
+      }));
+      
+      setEventRSVPs(transformedData);
+    } catch (error) {
+      console.error("Error fetching RSVPs:", error);
+    } finally {
+      setLoadingRSVPs(false);
+    }
+  };
+
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsEventModalOpen(true);
+    fetchEventRSVPs(event.id);
+  };
+
+  const handleAnnouncementClick = (announcement: Announcement) => {
+    setSelectedAnnouncement(announcement);
+    setIsAnnouncementModalOpen(true);
+  };
 
   useEffect(() => {
     fetchSAOData();
@@ -417,15 +520,6 @@ const SAO = () => {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const filteredAnnouncements = announcements.filter(a => {
     if (selectedOrg !== 'all' && a.org_id !== selectedOrg) return false;
     
@@ -579,7 +673,47 @@ const SAO = () => {
                 <User className="h-5 w-5" />
               </Button>
             </Link>
-            <SignOutButton variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5">
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-0 border border-border shadow-lg" align="end">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start rounded-none px-4 py-3 h-auto font-normal border-b border-border hover:bg-accent"
+                  onClick={toggleTheme}
+                >
+                  <div className="flex items-center justify-between w-full cursor-pointer">
+                    <span className="flex items-center gap-2">
+                      {theme === "dark" ? (
+                        <Sun className="h-4 w-4" />
+                      ) : (
+                        <Moon className="h-4 w-4" />
+                      )}
+                      {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                    </span>
+                    <Switch
+                      checked={theme === "dark"}
+                      className="ml-2 pointer-events-none"
+                    />
+                  </div>
+                </Button>
+                <HelpModal
+                  variant="ghost"
+                  className="w-full justify-start rounded-none px-4 py-3 h-auto font-normal border-b border-border hover:bg-accent"
+                  showIcon={true}
+                  text="Help"
+                />
+                <SignOutButton
+                  variant="ghost"
+                  className="w-full justify-start rounded-none px-4 py-3 h-auto font-normal text-destructive hover:bg-red-50/50 dark:hover:bg-red-950/20"
+                  showIcon={true}
+                  text="Sign Out"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </header>
@@ -817,10 +951,10 @@ const SAO = () => {
                           const org = organizations.find(o => o.id === announcement.org_id);
                           const hasImage = announcement.image_url !== null;
                           return (
-                            <Link
+                            <div
                               key={announcement.id}
-                              to={`/org/${announcement.org_id}`}
-                              className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors group"
+                              onClick={() => handleAnnouncementClick(announcement)}
+                              className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors group cursor-pointer"
                             >
                               <Avatar className="h-10 w-10">
                                 <AvatarImage src={announcement.organizations?.profile_picture || undefined} />
@@ -848,7 +982,7 @@ const SAO = () => {
                                   )}
                                 </div>
                               </div>
-                            </Link>
+                            </div>
                           );
                         })}
                       </div>
@@ -952,10 +1086,10 @@ const SAO = () => {
                   ) : (
                     <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${expandedEvents ? 'max-h-[500px] overflow-y-auto pr-2' : ''}`}>
                       {displayedEvents.map((event) => (
-                        <Link
+                        <div
                           key={event.id}
-                          to={`/org/${event.org_id}`}
-                          className="flex items-start gap-3 p-4 rounded-lg border border-border hover:border-primary/30 hover:shadow-md transition-all group"
+                          onClick={() => handleEventClick(event)}
+                          className="flex items-start gap-3 p-4 rounded-lg border border-border hover:border-primary/30 hover:shadow-md transition-all group cursor-pointer"
                         >
                           <div className="min-w-12 h-12 rounded bg-primary/10 flex flex-col items-center justify-center border border-primary/20">
                             <span className="text-sm font-bold text-primary">
@@ -977,7 +1111,7 @@ const SAO = () => {
                               {new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -1045,10 +1179,10 @@ const SAO = () => {
                         const org = organizations.find(o => o.id === announcement.org_id);
                         const hasImage = announcement.image_url !== null;
                         return (
-                          <Link
+                          <div
                             key={announcement.id}
-                            to={`/org/${announcement.org_id}`}
-                            className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted transition-colors group border border-transparent hover:border-border"
+                            onClick={() => handleAnnouncementClick(announcement)}
+                            className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted transition-colors group border border-transparent hover:border-border cursor-pointer"
                           >
                             <Avatar className="h-12 w-12">
                               <AvatarImage src={announcement.organizations?.profile_picture || undefined} />
@@ -1084,7 +1218,7 @@ const SAO = () => {
                                 <span>{new Date(announcement.created_at).toLocaleTimeString()}</span>
                               </div>
                             </div>
-                          </Link>
+                          </div>
                         );
                       })
                     )}
@@ -1129,10 +1263,10 @@ const SAO = () => {
                       <p className="text-sm text-muted-foreground py-10 text-center col-span-2">No events found</p>
                     ) : (
                       events.map((event) => (
-                        <Link
+                        <div
                           key={event.id}
-                          to={`/org/${event.org_id}`}
-                          className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted transition-colors group border border-transparent hover:border-border"
+                          onClick={() => handleEventClick(event)}
+                          className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted transition-colors group border border-transparent hover:border-border cursor-pointer"
                         >
                           <div className="min-w-14 h-14 rounded bg-primary/10 flex flex-col items-center justify-center border border-primary/20">
                             <span className="text-base font-bold text-primary">
@@ -1167,7 +1301,7 @@ const SAO = () => {
                               )}
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       ))
                     )}
                   </div>
@@ -1380,6 +1514,127 @@ const SAO = () => {
                 </div>
               </div>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Event Details Modal */}
+      <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
+        <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-background">
+          {selectedEvent && selectedEvent.organizations && (
+            <>
+              <DialogHeader className="p-6 pb-2">
+                <DialogTitle className="text-xl font-bold">Event Details</DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {selectedEvent.name} • {format(new Date(selectedEvent.event_date), "MMMM d, yyyy")}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="px-6 pb-6">
+                {/* Organization Header */}
+                <div className="mb-6">
+                  <Link to={`/org/${selectedEvent.org_id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/20 transition-colors">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={selectedEvent.organizations.profile_picture || undefined} />
+                      <AvatarFallback className="bg-primary/10">{getInitials(selectedEvent.organizations.name)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{selectedEvent.organizations.name}</p>
+                      <p className="text-xs text-muted-foreground">Host Organization</p>
+                    </div>
+                    <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
+                  </Link>
+                </div>
+
+                {/* Event Info Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div><p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p><div className="flex items-center gap-2 text-sm mt-1"><Calendar className="h-4 w-4 text-primary" />{format(new Date(selectedEvent.event_date), "EEEE, MMMM d, yyyy")}</div></div>
+                  <div><p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p><div className="flex items-center gap-2 text-sm mt-1"><Clock className="h-4 w-4 text-primary" />{format(new Date(selectedEvent.event_date), "h:mm a")}</div></div>
+                  {selectedEvent.location && (<div className="col-span-2"><p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p><div className="flex items-center gap-2 text-sm mt-1"><MapPin className="h-4 w-4 text-primary" />{selectedEvent.location}</div></div>)}
+                </div>
+
+                {/* Description */}
+                {selectedEvent.description && (<div className="mb-6"><p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Description</p><div className="bg-muted/50 rounded-lg p-4"><p className="text-sm whitespace-pre-wrap leading-relaxed">{selectedEvent.description}</p></div></div>)}
+
+                {/* RSVP List */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold flex items-center gap-2"><UserCheck className="h-4 w-4" /> Registered Participants ({eventRSVPs.length})</h3>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={() => { const csv = eventRSVPs.map(r => `${r.profiles.name},${r.profiles.email},${r.status},${format(new Date(r.registered_at), "MMM d, h:mm a")}`).join('\n'); const blob = new Blob([`Name,Email,Status,Registered\n${csv}`], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${selectedEvent.name.replace(/[^a-z0-9]/gi, '_')}_registrations.csv`; a.click(); URL.revokeObjectURL(url); }}>
+                      <Download className="h-4 w-4" /> Export
+                    </Button>
+                  </div>
+                  {loadingRSVPs ? (
+                    <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+                  ) : eventRSVPs.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground"><Users className="h-12 w-12 mx-auto mb-3 opacity-50" /><p>No registrations yet</p></div>
+                  ) : (
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      {eventRSVPs.map((rsvp) => (
+                        <div key={rsvp.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8"><AvatarImage src={rsvp.profiles.profile_picture || undefined} /><AvatarFallback className="text-xs">{getInitials(rsvp.profiles.name)}</AvatarFallback></Avatar>
+                            <div><p className="font-medium text-sm">{rsvp.profiles.name}</p><p className="text-xs text-muted-foreground">{rsvp.profiles.email}</p></div>
+                          </div>
+                          <div className="text-right">
+                            {getStatusBadge(rsvp.status)}
+                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(rsvp.registered_at), "MMM d, h:mm a")}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Announcement Details Modal */}
+      <Dialog open={isAnnouncementModalOpen} onOpenChange={setIsAnnouncementModalOpen}>
+        <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden bg-background">
+          {selectedAnnouncement && selectedAnnouncement.organizations && (
+            <>
+              <DialogHeader className="p-6 pb-2">
+                <DialogTitle className="text-xl font-bold">Announcement Details</DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {format(new Date(selectedAnnouncement.created_at), "MMMM d, yyyy 'at' h:mm a")}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="px-6 pb-6">
+                {/* Organization Header */}
+                <div className="mb-6">
+                  <Link to={`/org/${selectedAnnouncement.org_id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/20 transition-colors">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={selectedAnnouncement.organizations.profile_picture || undefined} />
+                      <AvatarFallback className="bg-primary/10">{getInitials(selectedAnnouncement.organizations.name)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{selectedAnnouncement.organizations.name}</p>
+                      <p className="text-xs text-muted-foreground">Posted by organization</p>
+                    </div>
+                    <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
+                  </Link>
+                </div>
+
+                {/* Announcement Title */}
+                <h2 className="text-2xl font-bold mb-4">{selectedAnnouncement.title}</h2>
+
+                {/* Announcement Image */}
+                {selectedAnnouncement.image_url && (
+                  <div className="mb-6 rounded-lg overflow-hidden border">
+                    <img src={selectedAnnouncement.image_url} alt={selectedAnnouncement.title} className="w-full h-auto max-h-[400px] object-contain" />
+                  </div>
+                )}
+
+                {/* Announcement Content */}
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{selectedAnnouncement.content}</p>
+                </div>
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>

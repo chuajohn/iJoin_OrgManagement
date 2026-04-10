@@ -7,16 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Search, ArrowLeft, Bell, Settings, School, GraduationCap, Sparkles, UserCheck, Shield, CheckCheck, PlusCircle, Compass, Waves, Wind, Leaf, Fish, Gem, Cherry, Mountain, Cloud, Sun, Moon, Star, Droplets, Flower, Bird, TreePine, Shell } from "lucide-react";
+import { Users, Search, ArrowLeft, Bell, Settings, School, GraduationCap, Sparkles, UserCheck, Shield, CheckCheck, PlusCircle, Compass, Waves, Wind, Leaf, Fish, Gem, Cherry, Mountain, Cloud, Sun, Moon, Star, Droplets, Flower, Bird, TreePine, Shell, MoreHorizontal } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import OrgLogo from "@/components/OrgLogo";
 import { SignOutButton } from "@/components/SignOutButton";
 import { NotificationItem } from "@/components/NotificationItem";
 import { usePendingRequests } from "@/hooks/usePendingRequests";
+import { useTheme } from "@/contexts/ThemeContext";
+import { HelpModal } from "@/components/HelpModal";
 import { format } from "date-fns";
 
 interface Organization {
@@ -51,6 +54,7 @@ type TabFilter = 'all' | 'shs' | 'college' | 'myorgs';
 const Explore = () => {
   const { user } = useAuth();
   const { isSHSStudent, isUGStudent, isAdmin, isSAO } = useUserRole();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [filteredOrgs, setFilteredOrgs] = useState<Organization[]>([]);
@@ -65,7 +69,6 @@ const Explore = () => {
 
   const { pendingCounts } = usePendingRequests();
 
-  // Floating Japanese elements - from groupmate's code
   const floatingElements = [
     // Blue theme
     { Icon: Waves, color: "hsl(var(--brand-blue))", top: "5%", left: "3%", delay: "0s", size: 28, opacity: 0.2 },
@@ -557,7 +560,49 @@ const Explore = () => {
                 </PopoverContent>
               </Popover>
 
-              <SignOutButton variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5" aria-label="Open navigation tools">
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-44 p-1.5 border border-border shadow-lg" align="end">
+                  <div className="space-y-0.5">
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={toggleTheme}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          toggleTheme();
+                        }
+                      }}
+                      className="flex h-8 w-full items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                        {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                      </span>
+                      <Switch
+                        checked={theme === "dark"}
+                        onCheckedChange={toggleTheme}
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label="Toggle dark mode"
+                      />
+                    </div>
+                    <HelpModal
+                      className="h-8 w-full justify-start rounded-md px-2 py-1.5 text-sm font-medium text-foreground hover:bg-muted hover:text-foreground"
+                    />
+                    <SignOutButton
+                      variant="ghost"
+                      size="sm"
+                      showText
+                      className="h-8 w-full justify-start rounded-md px-2 py-1.5 text-sm font-medium text-destructive hover:text-destructive hover:bg-destructive/10"
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           )}
           {!user && (

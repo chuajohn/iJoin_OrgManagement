@@ -46,6 +46,8 @@ interface FilterOption {
   bgColor: string;
   hoverColor: string;
   borderColor: string;
+  darkActiveClass: string;
+  darkBadgeClass: string;
   count?: number;
 }
 
@@ -282,6 +284,8 @@ export function UserRoleManagement() {
       bgColor: 'bg-gray-100',
       hoverColor: 'hover:bg-gray-200',
       borderColor: 'border-gray-300',
+      darkActiveClass: 'dark:bg-muted dark:text-foreground dark:border-border',
+      darkBadgeClass: 'dark:bg-muted dark:text-foreground',
       count: users.length
     },
     { 
@@ -292,6 +296,8 @@ export function UserRoleManagement() {
       bgColor: 'bg-blue-50',
       hoverColor: 'hover:bg-blue-100',
       borderColor: 'border-blue-300',
+      darkActiveClass: 'dark:bg-blue-950/40 dark:text-blue-200 dark:border-blue-800',
+      darkBadgeClass: 'dark:bg-blue-950/40 dark:text-blue-200',
       count: users.filter(u => u.role === 'senior_highschool_student').length
     },
     { 
@@ -302,6 +308,8 @@ export function UserRoleManagement() {
       bgColor: 'bg-green-50',
       hoverColor: 'hover:bg-green-100',
       borderColor: 'border-green-300',
+      darkActiveClass: 'dark:bg-green-950/40 dark:text-green-200 dark:border-green-800',
+      darkBadgeClass: 'dark:bg-green-950/40 dark:text-green-200',
       count: users.filter(u => u.role === 'undergraduate_student').length
     },
     { 
@@ -312,6 +320,8 @@ export function UserRoleManagement() {
       bgColor: 'bg-purple-50',
       hoverColor: 'hover:bg-purple-100',
       borderColor: 'border-purple-300',
+      darkActiveClass: 'dark:bg-purple-950/40 dark:text-purple-200 dark:border-purple-800',
+      darkBadgeClass: 'dark:bg-purple-950/40 dark:text-purple-200',
       count: users.filter(u => u.role === 'sao').length
     },
     { 
@@ -322,6 +332,8 @@ export function UserRoleManagement() {
       bgColor: 'bg-red-50',
       hoverColor: 'hover:bg-red-100',
       borderColor: 'border-red-300',
+      darkActiveClass: 'dark:bg-red-950/40 dark:text-red-200 dark:border-red-800',
+      darkBadgeClass: 'dark:bg-red-950/40 dark:text-red-200',
       count: users.filter(u => u.role === 'admin').length
     },
   ];
@@ -385,9 +397,9 @@ export function UserRoleManagement() {
                 className={cn(
                   "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
                   "border",
-                  activeFilter === option.id 
-                    ? `${option.bgColor} ${option.color} ${option.borderColor} shadow-sm` 
-                    : "bg-white text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                  activeFilter === option.id
+                    ? `${option.bgColor} ${option.color} ${option.borderColor} ${option.darkActiveClass} shadow-sm`
+                    : "bg-background text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground dark:bg-muted/30 dark:hover:bg-muted/60 dark:text-muted-foreground"
                 )}
               >
                 <span className={activeFilter === option.id ? option.color : "text-muted-foreground"}>
@@ -399,9 +411,9 @@ export function UserRoleManagement() {
                     variant="outline" 
                     className={cn(
                       "ml-1 px-1.5 py-0 text-xs",
-                      activeFilter === option.id 
-                        ? `${option.bgColor} ${option.color} border-0` 
-                        : "bg-muted text-muted-foreground"
+                      activeFilter === option.id
+                        ? `${option.bgColor} ${option.color} ${option.darkBadgeClass} border-0`
+                        : "bg-muted text-muted-foreground dark:bg-muted/70 dark:text-foreground/80"
                     )}
                   >
                     {option.count}

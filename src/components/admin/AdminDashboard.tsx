@@ -293,13 +293,13 @@ export function AdminDashboard({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-background [&_.bg-white]:dark:bg-card [&_.text-gray-900]:dark:text-foreground [&_.text-gray-700]:dark:text-foreground [&_.text-gray-600]:dark:text-muted-foreground [&_.text-gray-500]:dark:text-muted-foreground [&_.text-gray-400]:dark:text-muted-foreground [&_.border-gray-200]:dark:border-border [&_.border-gray-100]:dark:border-border [&_.bg-gray-50]:dark:bg-muted/40 [&_.bg-gray-100]:dark:bg-muted">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white px-8 py-6">
+      <div className="border-b border-border bg-background/95 px-8 py-6 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-base text-gray-500 mt-2">
+            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-base text-muted-foreground mt-2">
               Welcome back, {profile?.name?.split(' ')[0] || 'Admin'} • Here's what's happening
             </p>
           </div>
@@ -312,7 +312,7 @@ export function AdminDashboard({
           <div className="lg:col-span-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Stats Cards (unchanged) */}
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-white hover:shadow-md transition-shadow">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-background hover:shadow-md transition-shadow dark:from-blue-950/20 dark:to-card">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
@@ -334,7 +334,7 @@ export function AdminDashboard({
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-white hover:shadow-md transition-shadow">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-background hover:shadow-md transition-shadow dark:from-emerald-950/20 dark:to-card">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
@@ -352,7 +352,7 @@ export function AdminDashboard({
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-white hover:shadow-md transition-shadow">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-background hover:shadow-md transition-shadow dark:from-amber-950/20 dark:to-card">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
@@ -370,7 +370,7 @@ export function AdminDashboard({
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-rose-50 to-white hover:shadow-md transition-shadow">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-rose-50 to-background hover:shadow-md transition-shadow dark:from-rose-950/20 dark:to-card">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
@@ -395,7 +395,7 @@ export function AdminDashboard({
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="border border-gray-200 bg-white h-full hover:shadow-md transition-shadow">
+            <Card className="border border-border bg-card h-full hover:shadow-md transition-shadow">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="h-8 w-8 rounded bg-amber-100 flex items-center justify-center">
@@ -426,7 +426,7 @@ export function AdminDashboard({
       {/* Pending Items */}
       <div className="px-8 py-3">
         {pendingItems.length > 0 && (
-          <Card className="border border-amber-200 bg-amber-50/50">
+          <Card className="border border-amber-200 bg-amber-50/50 dark:border-amber-900/60 dark:bg-amber-950/20">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -448,7 +448,7 @@ export function AdminDashboard({
                   <Link
                     key={`${item.type}-${item.id}`}
                     to={item.type === 'organization' ? `/admin?tab=organizations` : `/admin?tab=events`}
-                    className="flex-1 min-w-[220px] bg-white rounded-lg border border-amber-200 p-4 hover:shadow-md hover:border-amber-300 transition-all group"
+                    className="flex-1 min-w-[220px] bg-white rounded-lg border border-amber-200 p-4 hover:shadow-md hover:border-amber-300 transition-all group dark:bg-card dark:border-amber-900/50"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`h-10 w-10 rounded-full flex items-center justify-center ${item.type === 'organization' ? 'bg-blue-100' : 'bg-emerald-100'}`}>
@@ -476,7 +476,7 @@ export function AdminDashboard({
       <div className="px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex items-center justify-between mb-6">
-            <TabsList className="bg-gray-100/80 p-1">
+            <TabsList className="bg-gray-100/80 p-1 dark:bg-muted/70">
               <TabsTrigger value="overview" className="gap-2 text-sm py-2 px-4">
                 <BarChart3 className="h-4 w-4" />
                 Overview
