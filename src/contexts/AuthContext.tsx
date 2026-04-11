@@ -180,7 +180,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        const errorMessage = error.message?.toLowerCase() ?? "";
+        const isDuplicateEmail =
+          errorMessage.includes("already registered") ||
+          errorMessage.includes("already exists") ||
+          errorMessage.includes("duplicate");
+
+        if (isDuplicateEmail) {
+          throw new Error("This email is already registered. Please sign in instead.");
+        }
+
+        throw error;
+      }
       
       // No need to create profile or role - TRIGGER DOES IT!
       toast.success("Account created! Please check your email to verify.");
@@ -212,8 +224,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+
+      if (error) {
+        const errorMessage = error.message?.toLowerCase() ?? "";
+        const isMissingSessionError =
+          errorMessage.includes("auth session missing") ||
+          errorMessage.includes("session missing") ||
+          errorMessage.includes("session not found");
+
+        if (!isMissingSessionError) {
+          throw error;
+        }
+      }
       
+      setSession(null);
+      setUser(null);
       setProfile(null);
       setUserRole(null);
       toast.success("Signed out successfully");

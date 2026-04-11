@@ -29,6 +29,19 @@ const signUpSchema = signInSchema.extend({
 type SignInForm = z.infer<typeof signInSchema>;
 type SignUpForm = z.infer<typeof signUpSchema>;
 
+const isDuplicateEmailError = (error: unknown) => {
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String((error as { message?: unknown }).message ?? "").toLowerCase()
+      : "";
+
+  return (
+    message.includes("already registered") ||
+    message.includes("already exists") ||
+    message.includes("duplicate")
+  );
+};
+
 const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -142,6 +155,7 @@ const Auth = () => {
 
   const handleSignUp = async (data: SignUpForm) => {
     setIsLoading(true);
+    signUpForm.clearErrors("email");
     try {
       await signUp(data.email, data.password, data.name, data.userType);
       setVerifiedEmail(data.email);
@@ -154,6 +168,16 @@ const Auth = () => {
       // No redirect! Stay on auth page.
       
     } catch (error: any) {
+      if (isDuplicateEmailError(error)) {
+        const message = "This email is already registered. Please sign in instead.";
+        signUpForm.setError("email", {
+          type: "manual",
+          message,
+        });
+        toast.error(message);
+        return;
+      }
+
       toast.error(error.message);
     } finally {
       setIsLoading(false);
@@ -443,7 +467,9 @@ const Auth = () => {
                       id="signup-email"
                       type="email"
                       placeholder="student@iacademy.edu"
-                      {...signUpForm.register("email")}
+                      {...signUpForm.register("email", {
+                        onChange: () => signUpForm.clearErrors("email"),
+                      })}
                       disabled={isLoading}
                       className="border-border focus-visible:ring-brand-yellow/50"
                     />
